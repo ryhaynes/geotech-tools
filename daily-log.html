@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#1b4f8a">
+<meta name="theme-color" content="#00353e">
 <title>Daily Log of Subsurface Exploration</title>
 <link rel="manifest" href="manifest.json">
 <!-- P1-4: fonts self-hosted (no runtime CDN dependency) -->
@@ -11,8 +11,8 @@
 <style>
 :root{
   --bg:#f0f2f5;--surface:#fff;--border:#d0d5de;--border2:#b8bfcc;
-  --accent:#1b4f8a;--accent-lt:#e8eef7;--accent-dk:#163f6e;
-  --green:#1a7a5e;--green-lt:#e6f4ef;
+  --accent:#00353e;--accent-lt:#e8edee;--accent-dk:#002b32;
+  --green:#008768;--green-lt:#e6f3f0;
   --text:#1a1f2e;--muted:#6b7490;
   --sb-w:272px;
   --sans:'IBM Plex Sans',sans-serif;--cond:'IBM Plex Sans Condensed',sans-serif;--mono:'IBM Plex Mono',monospace;
@@ -45,7 +45,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .sb-section{padding:14px 14px 0}
 .sb-label{font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .sb-input{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:6px 10px;font-family:var(--sans);font-size:13px;color:var(--text);width:100%;margin-bottom:8px;transition:border-color .15s,box-shadow .15s}
-.sb-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,79,138,.12);background:white}
+.sb-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0, 53, 62,.12);background:white}
 .sb-divider{height:1px;background:var(--border);margin:10px 0}
 
 /* ── TASK TEMPLATE VIEW ── */
@@ -115,7 +115,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .fg{display:flex;flex-direction:column;gap:4px}
 .flabel{font-family:var(--cond);font-weight:600;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
 .finput{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-family:var(--sans);font-size:13px;color:var(--text);width:100%;transition:border-color .15s,box-shadow .15s}
-.finput:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,79,138,.12);background:white}
+.finput:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0, 53, 62,.12);background:white}
 .finput[readonly]{background:var(--accent-lt);color:var(--accent);font-weight:500;border-color:#c8d8ee;cursor:default}
 textarea.finput{resize:vertical;min-height:72px;line-height:1.5}
 textarea.finput.tall{min-height:100px}
@@ -167,14 +167,14 @@ textarea.finput.tall{min-height:100px}
 .wrem{width:96px}
 .rem-hdr{text-align:center!important}
 .rem-cell{text-align:center;font-family:var(--mono);font-size:12px;font-weight:600;padding:4px 8px!important;white-space:nowrap;border:1px solid var(--border)}
-.rem-cell.under{background:#e6f4ef;color:#1a7a5e}
+.rem-cell.under{background:#e6f3f0;color:#008768}
 .rem-cell.over{background:#fdecea;color:#c0392b}
 .rem-cell.exact{background:#f6f7f9;color:var(--muted);font-weight:400}
 .rem-cell.none{color:var(--border2);font-weight:400;background:transparent}
 
 /* ── SUMMARY COST/REMAINING ── */
 .summary-table td.cost{text-align:right;font-family:var(--mono);font-size:12px}
-.summary-table td.rem-pos{text-align:center;font-family:var(--mono);font-size:12px;color:var(--green);background:#e6f4ef}
+.summary-table td.rem-pos{text-align:center;font-family:var(--mono);font-size:12px;color:var(--green);background:#e6f3f0}
 .summary-table td.rem-neg{text-align:center;font-family:var(--mono);font-size:12px;color:#c0392b;background:#fdecea}
 .summary-table td.rem-zero{text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted);background:#f6f7f9}
 .summary-table tfoot td{background:var(--accent-lt)!important;font-family:var(--cond);font-weight:700;font-size:12px;color:var(--accent);border:1px solid var(--border);padding:8px 10px}
@@ -233,7 +233,7 @@ textarea.finput.tall{min-height:100px}
 .modal-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .modal-filter label{font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 .modal-filter input[type=date]{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-family:var(--sans);font-size:12px;color:var(--text);transition:border-color .15s,box-shadow .15s}
-.modal-filter input[type=date]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,79,138,.12)}
+.modal-filter input[type=date]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0, 53, 62,.12)}
 .btn-filter-reset{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--cond);font-weight:600;font-size:10px;letter-spacing:.6px;text-transform:uppercase;padding:5px 10px;border-radius:4px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-filter-reset:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-lt)}
 .btn-print-summary{background:var(--accent);color:white;border:none;font-family:var(--cond);font-weight:700;font-size:11px;letter-spacing:.7px;text-transform:uppercase;padding:6px 14px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s;white-space:nowrap;flex-shrink:0}
@@ -1232,7 +1232,7 @@ function printSummaryFiltered(){
       const costToDate=unitRate!==null?qtyToDate*unitRate:null;
       if(costToDate!==null) totalSpend+=costToDate;
       const initCell=initQty!==null?`<td>${fmtNum(initQty)}</td>`:'<td style="color:#ccc">—</td>';
-      let remCell; if(initQty!==null){ const rem=initQty-qtyToDate; const s=rem>0?'color:#1a7a5e':rem<0?'color:#c0392b':'color:#999'; remCell=`<td style="${s}">${fmtNum(rem)}</td>`; } else remCell='<td style="color:#ccc">—</td>';
+      let remCell; if(initQty!==null){ const rem=initQty-qtyToDate; const s=rem>0?'color:#008768':rem<0?'color:#c0392b':'color:#999'; remCell=`<td style="${s}">${fmtNum(rem)}</td>`; } else remCell='<td style="color:#ccc">—</td>';
       return `<tr><td>${esc(k)}</td><td>${esc(item.description)||'—'}</td><td>${esc(item.unit)||'—'}</td>${qc}<td class="tot">${fmtNum(qtyToDate)}</td>${initCell}${remCell}<td class="tot" style="text-align:right">${fmtCost(costToDate)}</td></tr>`;
     } else {
       const qtyInRange=filteredLogs.reduce((s,l)=>s+(item.byLog[l.id]||0),0);
@@ -1243,7 +1243,7 @@ function printSummaryFiltered(){
   }).join('') : `<tr><td colspan="100" style="text-align:center;color:#999;padding:20px">No task items logged yet.</td></tr>`;
   const spendLabel=isFiltered?'Total Spend for Period':'Total Spend to Date';
   const spendColspan=isFiltered?3+filteredLogs.length+1:3+filteredLogs.length+3;
-  const spendRow=totalSpend>0?`<tr><td colspan="${spendColspan}" style="text-align:right;font-weight:700">${spendLabel}</td><td style="text-align:right;font-weight:700;color:#1a7a5e;background:#e6f4ef">${fmtCost(totalSpend)}</td></tr>`:'';
+  const spendRow=totalSpend>0?`<tr><td colspan="${spendColspan}" style="text-align:right;font-weight:700">${spendLabel}</td><td style="text-align:right;font-weight:700;color:#008768;background:#e6f3f0">${fmtCost(totalSpend)}</td></tr>`:'';
   const extraTH=isFiltered?`<th style="width:80px">Qty in Period</th><th style="width:110px;text-align:right">Cost in Period</th>`:`<th style="width:80px">Qty to Date</th><th style="width:70px">Init. Qty</th><th style="width:80px">Remaining</th><th style="width:110px;text-align:right">Cost to Date</th>`;
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Project Summary – ${projLabel}</title>
   <style>
@@ -1251,12 +1251,12 @@ function printSummaryFiltered(){
     h1{font-size:16px;font-weight:700;letter-spacing:.5px;margin:0 0 2px}
     .sub{font-size:11px;color:#6b7490;margin-bottom:16px}
     table{width:100%;border-collapse:collapse;margin-top:8px}
-    th{background:#e8eef7;color:#1b4f8a;font-size:10px;letter-spacing:.7px;text-transform:uppercase;padding:7px 10px;border:1px solid #d0d5de;text-align:left;white-space:nowrap}
+    th{background:#e8edee;color:#00353e;font-size:10px;letter-spacing:.7px;text-transform:uppercase;padding:7px 10px;border:1px solid #d0d5de;text-align:left;white-space:nowrap}
     td{border:1px solid #d0d5de;padding:6px 10px;vertical-align:middle}
     td:nth-child(n+4){text-align:center;font-family:monospace}
-    .tot{text-align:center;font-weight:700;color:#1b4f8a;background:#e8eef7;font-family:monospace}
+    .tot{text-align:center;font-weight:700;color:#00353e;background:#e8edee;font-family:monospace}
     tr:nth-child(even) td{background:#fafbfc}
-    tr:nth-child(even) .tot{background:#e8eef7}
+    tr:nth-child(even) .tot{background:#e8edee}
     @media print{body{padding:0} button{display:none}}
   </style></head><body>
   <h1>${projLabel}</h1>${contractor}

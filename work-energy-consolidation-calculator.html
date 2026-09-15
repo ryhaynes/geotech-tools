@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <style>
 :root{
-  --navy:#00353e;--navy2:#024b58;--blue:#008768;--blue2:#00a884;
+  --navy:#00353e;--navy2:#024b58;--blue:#008768;--blue2:#aecc53;
   --steel:#4a7daa;--amber:#d97706;--green:#166534;--red:#991b1b;
   --bg:#f0f4f8;--bg2:#ffffff;--border:#c8d6e5;--text:#1a2b3c;--muted:#5a738a;
   --mono:'Courier New',Courier,monospace;
@@ -53,7 +53,7 @@ body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--tex
 .proj-field{display:flex;flex-direction:column;gap:4px}
 .proj-field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
 .proj-field input{padding:8px 10px;border:1px solid var(--border);border-radius:3px;font-size:13px;font-family:var(--sans);color:var(--text);background:#fff;width:100%}
-.proj-field input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(0, 168, 132,.12)}
+.proj-field input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(174, 204, 83,.12)}
 .proj-field input::placeholder{color:#b0bec5}
 
 /* ── FORM ── */
@@ -61,7 +61,7 @@ body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--tex
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
 select,input[type=number],input[type=text]{padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-size:13px;font-family:var(--sans);color:var(--text);background:#fff}
-select:focus,input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(0, 168, 132,.12)}
+select:focus,input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(174, 204, 83,.12)}
 
 /* ── BUTTONS ── */
 .btn-calc{display:inline-flex;align-items:center;gap:6px;padding:9px 22px;background:var(--blue);color:#fff;border:none;border-radius:3px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:background .12s}
@@ -1319,7 +1319,7 @@ function printWrap(body){
     .sum-tbl td.ctr{text-align:center;color:#5a738a;font-style:italic}
     .ppills{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 10px}
     .ppill{padding:3px 8px;border:1px solid #c0d8f0;border-radius:3px;font-size:10.5px;font-family:monospace;background:#f0f6ff;color:#024b58}
-    .ppill.hi{background:#e8f0fb;border-color:#00a884;font-weight:700;color:#008768;font-size:12px}
+    .ppill.hi{background:#e8f0fb;border-color:#aecc53;font-weight:700;color:#008768;font-size:12px}
     .clbl{font-size:9px;font-weight:700;color:#5a738a;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
     .nd{color:#5a738a;font-style:italic}.pg{page-break-after:always}
     @media print{@page{margin:.5in}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}

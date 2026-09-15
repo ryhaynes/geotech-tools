@@ -11,7 +11,7 @@
   --navy:   #00353e;
   --navy2:  #024b58;
   --blue:   #008768;
-  --blue2:  #00a884;
+  --blue2:  #aecc53;
   --steel:  #4a7daa;
   --amber:  #d97706;
   --green:  #166534;
@@ -71,7 +71,7 @@ body { font-family: var(--sans); font-size: 13px; background: var(--bg); color: 
   width: 100%; transition: border-color .15s, box-shadow .15s;
 }
 .field input:focus, .field select:focus, .field textarea:focus {
-  outline: none; border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(0, 168, 132,0.12);
+  outline: none; border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(174, 204, 83,0.12);
 }
 .field textarea { resize: vertical; min-height: 52px; font-size: 12px; }
 
@@ -129,7 +129,7 @@ body { font-family: var(--sans); font-size: 13px; background: var(--bg); color: 
   position: relative;
 }
 .loc-tab:hover { background: rgba(255,255,255,0.07); color: #b8d4f0; }
-.loc-tab.active { background: rgba(0, 168, 132,0.25); color: #fff; }
+.loc-tab.active { background: rgba(174, 204, 83,0.25); color: #fff; }
 .loc-tab.active::after {
   content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
   height: 2px; background: var(--blue2);
@@ -149,7 +149,7 @@ body { font-family: var(--sans); font-size: 13px; background: var(--bg); color: 
   transition: background .12s, color .12s; flex-shrink: 0; position: relative;
 }
 .sum-tab:hover { background: rgba(255,255,255,0.07); color: #b8d4f0; }
-.sum-tab.active { background: rgba(0, 168, 132,0.25); color: #fff; }
+.sum-tab.active { background: rgba(174, 204, 83,0.25); color: #fff; }
 .sum-tab.active::after {
   content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
   height: 2px; background: var(--blue2);
@@ -198,7 +198,7 @@ body { font-family: var(--sans); font-size: 13px; background: var(--bg); color: 
   color: var(--navy); background: #fff; text-align: center;
   transition: border-color .15s, box-shadow .15s;
 }
-.size-input-wrap input:focus { outline: none; border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(0, 168, 132,0.12); }
+.size-input-wrap input:focus { outline: none; border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(174, 204, 83,0.12); }
 .size-unit { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--muted2); pointer-events: none; }
 
 .btn-add {
@@ -1319,9 +1319,9 @@ function buildReportHTML(locs, includeSummary = false) {
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #1a2b3c; background: #f0f4f8; }
   .page { max-width: 960px; margin: 0 auto; padding: 32px 28px 60px; background: #fff; }
-  .rpt-header { border-bottom: 3px solid #00a884; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .rpt-header { border-bottom: 3px solid #aecc53; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; }
   .rpt-title { font-size: 18px; font-weight: 700; color: #00353e; }
-  .rpt-title span { color: #00a884; }
+  .rpt-title span { color: #aecc53; }
   .rpt-meta { font-size: 10px; color: #8ba3bb; font-family: 'Courier New', monospace; text-align: right; line-height: 1.6; }
   .proj-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
   .proj-table td { padding: 5px 10px; border: 1px solid #d8e4ee; }

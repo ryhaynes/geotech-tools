@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1b4f8a">
+<meta name="theme-color" content="#00353e">
 <title>FieldLog v2</title>
 <link rel="manifest" href="manifest.json">
 <!-- P1-4: fonts self-hosted (no runtime CDN dependency) -->
@@ -17,10 +17,10 @@
   --card:      #ffffff;
   --border:    #d0d5de;
   --border2:   #b8bfcc;
-  --accent:    #1b4f8a;
-  --accent-lt: #e8eef7;
-  --accent2:   #1a7a5e;
-  --accent2-lt:#e6f4ef;
+  --accent:    #00353e;
+  --accent-lt: #e8edee;
+  --accent2:   #008768;
+  --accent2-lt:#e6f3f0;
   --warn:      #c0392b;
   --warn-lt:   #fdecea;
   --amber:     #b45309;
@@ -128,7 +128,7 @@ header {
 }
 .field input:focus, .field select:focus, .field textarea:focus {
   outline:none; border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(27,79,138,.12);
+  box-shadow: 0 0 0 3px rgba(0, 53, 62,.12);
 }
 .field select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7490'/%3E%3C/svg%3E");
@@ -213,7 +213,7 @@ header {
   padding:9px 3px; border:1.5px solid var(--border); border-radius:5px;
   background:var(--bg); color:var(--text); -webkit-appearance:none;
 }
-.blow-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(27,79,138,.12); }
+.blow-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(0, 53, 62,.12); }
 .blow-sep { color:var(--muted); font-family:var(--mono); font-size:16px; user-select:none; }
 .n-display {
   font-family:var(--mono); font-size:21px; font-weight:500;
@@ -350,7 +350,7 @@ header {
   transition:border-color .15s, box-shadow .15s; cursor:pointer;
   -webkit-appearance:none; appearance:none;
 }
-.ss-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(27,79,138,.12); }
+.ss-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(0, 53, 62,.12); }
 .ss-caret {
   position:absolute; right:11px; top:50%; transform:translateY(-50%);
   pointer-events:none; width:10px; height:6px;

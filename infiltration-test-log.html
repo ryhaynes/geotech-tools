@@ -8,7 +8,7 @@
 <link href="fonts/fonts.css" rel="stylesheet"><!-- P1-4: self-hosted IBM Plex (was Google Fonts CDN) -->
 <style>
 :root {
-  --navy:#00353e; --navy2:#024b58; --blue:#008768; --blue2:#00a884; --blue-lt:#e8f0fb;
+  --navy:#00353e; --navy2:#024b58; --blue:#008768; --blue2:#aecc53; --blue-lt:#e8f0fb;
   --steel:#4a7daa; --amber:#b45309; --amber-lt:#fffbeb; --amber-mid:#fde68a;
   --green:#166534; --green-lt:#ecfdf5; --green-mid:#bbf7d0;
   --red:#991b1b; --red-lt:#fef2f2;
@@ -44,12 +44,12 @@ body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--tex
 .sb-field{margin-bottom:7px}
 .sb-field label{display:block;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:3px}
 .sb-field input{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:3px;font-size:12px;font-family:var(--sans);color:var(--text);background:#fff}
-.sb-field input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(0, 168, 132,.12)}
+.sb-field input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(174, 204, 83,.12)}
 
 /* sidebar test items */
 .si{display:flex;align-items:center;gap:6px;padding:8px 9px;border-radius:3px;cursor:pointer;border:1px solid transparent;margin-bottom:5px;background:#fff;transition:all .1s}
 .si:hover{border-color:var(--border);box-shadow:0 1px 2px rgba(0,0,0,.06)}
-.si.si-active{border-color:#4a7daa;background:#eaf2fc;box-shadow:0 1px 3px rgba(0, 168, 132,.12)}
+.si.si-active{border-color:#4a7daa;background:#eaf2fc;box-shadow:0 1px 3px rgba(174, 204, 83,.12)}
 .si-main{flex:1;min-width:0}
 .si-id{font-size:12px;font-weight:600;color:var(--navy2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .si.si-active .si-id{color:var(--blue)}
@@ -92,7 +92,7 @@ body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--tex
 .field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);line-height:1.2}
 .field label .sub{font-size:9px;font-weight:400;text-transform:none;color:var(--muted2);letter-spacing:0;margin-left:3px}
 input[type=text],input[type=number],input[type=date],select{padding:6px 8px;border:1px solid var(--border);border-radius:3px;font-size:12.5px;font-family:var(--sans);color:var(--text);background:#fff;transition:border-color .12s,box-shadow .12s}
-input:focus,select:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(0, 168, 132,.13)}
+input:focus,select:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(174, 204, 83,.13)}
 
 /* ── TOGGLE ── */
 .toggle-wrap{display:inline-flex;border:1px solid var(--border);border-radius:3px;overflow:hidden}
@@ -134,7 +134,7 @@ table.readings tbody tr.water-row td{background:#fffdf4}
 table.readings tbody tr.water-row:hover td{background:#fffae8}
 
 table.readings input[type=text],table.readings input[type=number]{padding:4px 5px;font-size:11.5px;border:1px solid var(--border);border-radius:2px;background:#fff;color:var(--text)}
-table.readings input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(0, 168, 132,.13)}
+table.readings input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(174, 204, 83,.13)}
 .inp-dt{width:86px;font-family:var(--mono);font-size:10.5px;text-align:center}
 .inp-tm{width:68px;font-family:var(--mono);font-size:10.5px;text-align:center}
 .inp-td{width:68px;font-family:var(--mono);text-align:right}
