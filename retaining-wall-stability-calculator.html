@@ -8,7 +8,7 @@
 <link href="fonts/fonts.css" rel="stylesheet">
 <style>
 :root {
-  --navy:#0c1f35;--navy2:#152d4a;--blue:#1d5fa8;--blue2:#2471c9;
+  --navy:#00353e;--navy2:#024b58;--blue:#008768;--blue2:#00a884;
   --steel:#4a7daa;--green:#166534;--red:#991b1b;--orange:#c2410c;
   --bg:#f0f4f8;--bg2:#ffffff;--border:#c8d6e5;--text:#1a2b3c;--muted:#5a738a;
   --mono:'IBM Plex Mono','Courier New',monospace;
@@ -67,7 +67,7 @@ body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--tex
 .field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
 .field label em{font-style:italic;text-transform:none;letter-spacing:0;font-weight:400}
 select,input[type=number],input[type=text]{padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-size:13px;font-family:var(--sans);color:var(--text);background:#fff}
-select:focus,input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(36,113,201,.12)}
+select:focus,input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(0, 168, 132,.12)}
 input[type=number]{width:106px}
 input::placeholder{color:#b0c4d8}
 
@@ -1081,7 +1081,7 @@ function renderSVG(){
   s+=`<text x="${arrowX1-4}" y="${arrowY+4}" font-size="9" fill="#c2410c" text-anchor="end" font-family="monospace">Pa</text>`;
 
   // ── DIMENSION ANNOTATIONS ──────────────────────────────────────────────────
-  const dimClr='#1d5fa8', dimFnt='font-size="9" font-family="monospace" fill="'+dimClr+'" text-anchor="middle"';
+  const dimClr='#008768', dimFnt='font-size="9" font-family="monospace" fill="'+dimClr+'" text-anchor="middle"';
   const tickH=4;
 
   // Helper: horizontal dim line

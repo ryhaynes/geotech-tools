@@ -8,10 +8,10 @@
 <link href="fonts/fonts.css" rel="stylesheet"><!-- P1-4: self-hosted IBM Plex (was Google Fonts CDN) -->
 <style>
 :root {
-  --navy:   #0c1f35;
-  --navy2:  #152d4a;
-  --blue:   #1d5fa8;
-  --blue2:  #2471c9;
+  --navy:   #00353e;
+  --navy2:  #024b58;
+  --blue:   #008768;
+  --blue2:  #00a884;
   --steel:  #4a7daa;
   --amber:  #d97706;
   --green:  #166534;
@@ -71,7 +71,7 @@ body { font-family: var(--sans); font-size: 13px; background: var(--bg); color: 
   width: 100%; transition: border-color .15s, box-shadow .15s;
 }
 .field input:focus, .field select:focus, .field textarea:focus {
-  outline: none; border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(36,113,201,0.12);
+  outline: none; border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(0, 168, 132,0.12);
 }
 .field textarea { resize: vertical; min-height: 52px; font-size: 12px; }
 
@@ -129,7 +129,7 @@ body { font-family: var(--sans); font-size: 13px; background: var(--bg); color: 
   position: relative;
 }
 .loc-tab:hover { background: rgba(255,255,255,0.07); color: #b8d4f0; }
-.loc-tab.active { background: rgba(36,113,201,0.25); color: #fff; }
+.loc-tab.active { background: rgba(0, 168, 132,0.25); color: #fff; }
 .loc-tab.active::after {
   content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
   height: 2px; background: var(--blue2);
@@ -149,7 +149,7 @@ body { font-family: var(--sans); font-size: 13px; background: var(--bg); color: 
   transition: background .12s, color .12s; flex-shrink: 0; position: relative;
 }
 .sum-tab:hover { background: rgba(255,255,255,0.07); color: #b8d4f0; }
-.sum-tab.active { background: rgba(36,113,201,0.25); color: #fff; }
+.sum-tab.active { background: rgba(0, 168, 132,0.25); color: #fff; }
 .sum-tab.active::after {
   content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
   height: 2px; background: var(--blue2);
@@ -198,7 +198,7 @@ body { font-family: var(--sans); font-size: 13px; background: var(--bg); color: 
   color: var(--navy); background: #fff; text-align: center;
   transition: border-color .15s, box-shadow .15s;
 }
-.size-input-wrap input:focus { outline: none; border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(36,113,201,0.12); }
+.size-input-wrap input:focus { outline: none; border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(0, 168, 132,0.12); }
 .size-unit { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--muted2); pointer-events: none; }
 
 .btn-add {
@@ -1044,7 +1044,7 @@ function drawChart(sorted, d50, d84, d95) {
   if (!sorted.length) return;
 
   // D-line markers
-  [[d50,'D50','#1d5fa8'],[d84,'D84','#166534'],[d95,'D95','#d97706']].forEach(([d,lbl,color]) => {
+  [[d50,'D50','#008768'],[d84,'D84','#166534'],[d95,'D95','#d97706']].forEach(([d,lbl,color]) => {
     if (d === null) return;
     const p = lbl === 'D50' ? 50 : lbl === 'D84' ? 84 : 95;
     const x = xS(d), y = yS(p);
@@ -1060,7 +1060,7 @@ function drawChart(sorted, d50, d84, d95) {
 
   // CDF curve
   if (sorted.length < 2) return;
-  ctx.strokeStyle = '#0c1f35'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#00353e'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
   ctx.beginPath();
   sorted.forEach((v, i) => {
     const x = xS(v), y = yS(((i + 1) / sorted.length) * 100);
@@ -1152,7 +1152,7 @@ function buildReportHTML(locs, includeSummary = false) {
     const rows = locs.map(i => {
       const { d50, d84, d95, cls, n } = embedData[i];
       return `<tr>
-        <td style="font-family:monospace;font-weight:700;color:#1d5fa8">LOC ${i}</td>
+        <td style="font-family:monospace;font-weight:700;color:#008768">LOC ${i}</td>
         <td>${LOC_NAMES[i]}</td>
         <td style="font-family:monospace;font-weight:${n>=100?'700':'400'};color:${n>=100?'#15803d':'#991b1b'}">${n}${n<100?' ⚠':''}</td>
         <td style="font-family:monospace;font-weight:700">${fmtMM(d50)}</td>
@@ -1282,11 +1282,11 @@ function buildReportHTML(locs, includeSummary = false) {
     ctx.lineTo(xS(sorted[sorted.length-1]), PAD.top+cH);
     ctx.lineTo(xS(sorted[0]), PAD.top+cH);
     ctx.closePath();
-    ctx.fillStyle='rgba(29,95,168,0.07)'; ctx.fill();
+    ctx.fillStyle='rgba(0, 135, 104,0.07)'; ctx.fill();
     ctx.beginPath();
     sorted.forEach(function(v,i){ var x=xS(v), y=yS((i+1)/sorted.length*100); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
-    ctx.strokeStyle='#0c1f35'; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
-    [[d50,'D50',50,'#1d5fa8'],[d84,'D84',84,'#166534'],[d95,'D95',95,'#d97706']].forEach(function(arr){
+    ctx.strokeStyle='#00353e'; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
+    [[d50,'D50',50,'#008768'],[d84,'D84',84,'#166534'],[d95,'D95',95,'#d97706']].forEach(function(arr){
       var d=arr[0], lbl=arr[1], perc=arr[2], color=arr[3];
       if(d===null) return;
       var x=xS(d), y=yS(perc);
@@ -1319,29 +1319,29 @@ function buildReportHTML(locs, includeSummary = false) {
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #1a2b3c; background: #f0f4f8; }
   .page { max-width: 960px; margin: 0 auto; padding: 32px 28px 60px; background: #fff; }
-  .rpt-header { border-bottom: 3px solid #2471c9; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; }
-  .rpt-title { font-size: 18px; font-weight: 700; color: #0c1f35; }
-  .rpt-title span { color: #2471c9; }
+  .rpt-header { border-bottom: 3px solid #00a884; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .rpt-title { font-size: 18px; font-weight: 700; color: #00353e; }
+  .rpt-title span { color: #00a884; }
   .rpt-meta { font-size: 10px; color: #8ba3bb; font-family: 'Courier New', monospace; text-align: right; line-height: 1.6; }
   .proj-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
   .proj-table td { padding: 5px 10px; border: 1px solid #d8e4ee; }
   .proj-table td:nth-child(odd) { font-weight: 600; background: #f4f8fc; color: #5a738a; width: 14%; white-space: nowrap; }
   .sum-section { margin-bottom: 28px; }
-  .sum-head { background: #0c1f35; color: #fff; padding: 7px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 10px; }
+  .sum-head { background: #00353e; color: #fff; padding: 7px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 10px; }
   .loc-section { margin-bottom: 32px; page-break-inside: avoid; }
-  .loc-head { background: #152d4a; color: #fff; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+  .loc-head { background: #024b58; color: #fff; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
   .loc-n { font-weight: 400; color: #7a9fc0; font-size: 11px; }
   .two-col { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: start; }
   .sub-head { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #5a738a; margin-bottom: 6px; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 11.5px; }
-  th { background: #dce8f4; color: #0c1f35; padding: 5px 8px; text-align: left; border: 1px solid #c8d6e5; font-size: 10.5px; font-weight: 700; }
+  th { background: #dce8f4; color: #00353e; padding: 5px 8px; text-align: left; border: 1px solid #c8d6e5; font-size: 10.5px; font-weight: 700; }
   td { padding: 4px 8px; border: 1px solid #d8e4ee; }
   tr.d50-row td { background: #eaf4ff; }
   .note { font-size: 11px; color: #5a738a; background: #f4f8fc; border-left: 3px solid #4a7daa; padding: 7px 10px; margin: 6px 0 0; line-height: 1.55; }
   .psd-canvas { display: block; width: 100%; border: 1px solid #c8d6e5; background: #fff; border-radius: 2px; }
   .chart-legend { display: flex; gap: 16px; margin-top: 6px; font-size: 10px; color: #5a738a; }
   .leg { display: flex; align-items: center; gap: 4px; }
-  .leg.d50 { color: #1d5fa8; } .leg.d84 { color: #166534; } .leg.d95 { color: #d97706; }
+  .leg.d50 { color: #008768; } .leg.d84 { color: #166534; } .leg.d95 { color: #d97706; }
   .rpt-footer { font-size: 10px; color: #8ba3bb; margin-top: 28px; border-top: 1px solid #c8d6e5; padding-top: 10px; line-height: 1.7; }
   @media print {
     body { background: #fff; }

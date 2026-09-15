@@ -8,7 +8,7 @@
 <link href="fonts/fonts.css" rel="stylesheet"><!-- P1-4: self-hosted IBM Plex (was Google Fonts CDN) -->
 <style>
 :root {
-  --navy:#0c1f35;--navy2:#152d4a;--blue:#1d5fa8;--blue2:#2471c9;
+  --navy:#00353e;--navy2:#024b58;--blue:#008768;--blue2:#00a884;
   --amber:#d97706;--green:#166534;--red:#991b1b;--teal:#0a7063;--teal2:#0d9488;
   --bg:#f0f4f8;--bg2:#ffffff;--border:#c8d6e5;--text:#1a2b3c;
   --muted:#5a738a;--muted2:#8ba3bb;
@@ -58,7 +58,7 @@ body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--tex
 .field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
 input[type=number],select{padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-size:13px;font-family:var(--sans);color:var(--text);background:#fff;transition:border-color .1s}
 input[type=number]{width:106px}
-input:focus,select:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(36,113,201,.12)}
+input:focus,select:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(0, 168, 132,.12)}
 
 /* METRIC CARDS */
 .mcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px;margin-bottom:12px}
@@ -805,7 +805,7 @@ function drawSSChart() {
       {
         label: `σ₃ = ${sig3a} ksf`,
         data: curveData(sig3a),
-        borderColor:'#1d5fa8', backgroundColor:'rgba(29,95,168,0.07)',
+        borderColor:'#008768', backgroundColor:'rgba(0, 135, 104,0.07)',
         borderWidth:2, fill:true, tension:0.3, pointRadius:0
       },
       {

@@ -8,7 +8,7 @@
 <link href="fonts/fonts.css" rel="stylesheet"><!-- P1-4: self-hosted IBM Plex (was Google Fonts CDN) -->
 <style>
 :root {
-  --navy:#0c1f35; --navy2:#152d4a; --blue:#1d5fa8; --blue2:#2471c9; --blue-lt:#e8f0fb;
+  --navy:#00353e; --navy2:#024b58; --blue:#008768; --blue2:#00a884; --blue-lt:#e8f0fb;
   --steel:#4a7daa; --amber:#b45309; --amber-lt:#fffbeb; --amber-mid:#fde68a;
   --green:#166534; --green-lt:#ecfdf5; --green-mid:#bbf7d0;
   --red:#991b1b; --red-lt:#fef2f2;
@@ -44,12 +44,12 @@ body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--tex
 .sb-field{margin-bottom:7px}
 .sb-field label{display:block;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:3px}
 .sb-field input{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:3px;font-size:12px;font-family:var(--sans);color:var(--text);background:#fff}
-.sb-field input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(36,113,201,.12)}
+.sb-field input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(0, 168, 132,.12)}
 
 /* sidebar test items */
 .si{display:flex;align-items:center;gap:6px;padding:8px 9px;border-radius:3px;cursor:pointer;border:1px solid transparent;margin-bottom:5px;background:#fff;transition:all .1s}
 .si:hover{border-color:var(--border);box-shadow:0 1px 2px rgba(0,0,0,.06)}
-.si.si-active{border-color:#4a7daa;background:#eaf2fc;box-shadow:0 1px 3px rgba(36,113,201,.12)}
+.si.si-active{border-color:#4a7daa;background:#eaf2fc;box-shadow:0 1px 3px rgba(0, 168, 132,.12)}
 .si-main{flex:1;min-width:0}
 .si-id{font-size:12px;font-weight:600;color:var(--navy2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .si.si-active .si-id{color:var(--blue)}
@@ -92,7 +92,7 @@ body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--tex
 .field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);line-height:1.2}
 .field label .sub{font-size:9px;font-weight:400;text-transform:none;color:var(--muted2);letter-spacing:0;margin-left:3px}
 input[type=text],input[type=number],input[type=date],select{padding:6px 8px;border:1px solid var(--border);border-radius:3px;font-size:12.5px;font-family:var(--sans);color:var(--text);background:#fff;transition:border-color .12s,box-shadow .12s}
-input:focus,select:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(36,113,201,.13)}
+input:focus,select:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(0, 168, 132,.13)}
 
 /* ── TOGGLE ── */
 .toggle-wrap{display:inline-flex;border:1px solid var(--border);border-radius:3px;overflow:hidden}
@@ -134,7 +134,7 @@ table.readings tbody tr.water-row td{background:#fffdf4}
 table.readings tbody tr.water-row:hover td{background:#fffae8}
 
 table.readings input[type=text],table.readings input[type=number]{padding:4px 5px;font-size:11.5px;border:1px solid var(--border);border-radius:2px;background:#fff;color:var(--text)}
-table.readings input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(36,113,201,.13)}
+table.readings input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 2px rgba(0, 168, 132,.13)}
 .inp-dt{width:86px;font-family:var(--mono);font-size:10.5px;text-align:center}
 .inp-tm{width:68px;font-family:var(--mono);font-size:10.5px;text-align:center}
 .inp-td{width:68px;font-family:var(--mono);text-align:right}
@@ -206,23 +206,23 @@ table.sum-tbl .warn-icon{color:var(--amber);font-size:12px}
   #printContent{display:block!important}
   body{background:white;font-size:10px;font-family:'IBM Plex Sans',sans-serif}
   .p-doc{max-width:100%;padding:0}
-  .p-hdr{border-bottom:2px solid #1d5fa8;padding-bottom:8px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-end}
-  .p-hdr-title{font-size:15px;font-weight:700;color:#0c1f35}
-  .p-hdr-title span{color:#1d5fa8}
+  .p-hdr{border-bottom:2px solid #008768;padding-bottom:8px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-end}
+  .p-hdr-title{font-size:15px;font-weight:700;color:#00353e}
+  .p-hdr-title span{color:#008768}
   .p-hdr-meta{font-size:9.5px;color:#5a738a;font-family:'IBM Plex Mono',monospace;text-align:right}
   .p-section{margin-bottom:20px}
-  .p-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;background:#f0f4f8;border-left:3px solid #1d5fa8;padding:4px 8px;margin-bottom:7px;color:#0c1f35}
+  .p-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;background:#f0f4f8;border-left:3px solid #008768;padding:4px 8px;margin-bottom:7px;color:#00353e}
   .p-info-grid{display:flex;gap:0;flex-wrap:wrap;border:1px solid #c8d6e5;margin-bottom:10px}
   .p-info-cell{padding:5px 10px;border-right:1px solid #c8d6e5;flex:1;min-width:120px}
   .p-info-cell:last-child{border-right:none}
   .p-info-lbl{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#5a738a}
-  .p-info-val{font-size:11px;font-weight:600;color:#0c1f35}
+  .p-info-val{font-size:11px;font-weight:600;color:#00353e}
   .p-page{page-break-before:always;padding-top:12px}
   .p-page:first-child{page-break-before:auto}
-  .p-sub-title{font-size:13px;font-weight:700;color:#0c1f35;margin-bottom:10px;border-bottom:1px solid #c8d6e5;padding-bottom:4px}
-  .p-sub-title span{color:#1d5fa8}
+  .p-sub-title{font-size:13px;font-weight:700;color:#00353e;margin-bottom:10px;border-bottom:1px solid #c8d6e5;padding-bottom:4px}
+  .p-sub-title span{color:#008768}
   table{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:10px}
-  table th{background:#152d4a;color:#fff;padding:4px 6px;font-size:8.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;text-align:center}
+  table th{background:#024b58;color:#fff;padding:4px 6px;font-size:8.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;text-align:center}
   table th:first-child{text-align:left}
   table td{padding:3px 6px;border:1px solid #c8d6e5;font-size:9.5px}
   table td:first-child{text-align:left}
@@ -230,7 +230,7 @@ table.sum-tbl .warn-icon{color:var(--amber);font-size:12px}
   .p-rates-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
   .p-rate-box{border:1px solid #c8d6e5;padding:6px 10px;min-width:130px}
   .p-rate-lbl{font-size:8.5px;font-weight:700;text-transform:uppercase;color:#5a738a;letter-spacing:.5px}
-  .p-rate-val{font-size:16px;font-weight:700;color:#1d5fa8;font-family:'IBM Plex Mono',monospace}
+  .p-rate-val{font-size:16px;font-weight:700;color:#008768;font-family:'IBM Plex Mono',monospace}
   .p-rate-unit{font-size:9px;color:#5a738a;font-family:'IBM Plex Mono',monospace}
   .p-rates-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 }
