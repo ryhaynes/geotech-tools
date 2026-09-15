@@ -8,10 +8,10 @@
 <link href="fonts/fonts.css" rel="stylesheet"><!-- P1-4: self-hosted IBM Plex (was Google Fonts CDN) -->
 <style>
 :root {
-  --navy:   #0c1f35;
-  --navy2:  #152d4a;
-  --blue:   #1d5fa8;
-  --blue2:  #2471c9;
+  --navy:   #00353e;
+  --navy2:  #024b58;
+  --blue:   #008768;
+  --blue2:  #00a884;
   --bg:     #f0f4f8;
   --bg2:    #ffffff;
   --border: #c8d6e5;
@@ -38,8 +38,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); min-
   font-family: var(--cond); font-weight: 700; font-size: 16px;
   color: #fff; letter-spacing: 0.5px;
 }
-.topbar-brand span { color: #6db3f5; font-weight: 300; }
-.topbar-sub { font-family: var(--mono); font-size: 10px; color: #7a9fc0; }
+.topbar-brand span { color: #5fe0c0; font-weight: 300; }
+.topbar-sub { font-family: var(--mono); font-size: 10px; color: #6fb5aa; }
 
 /* ── HERO ── */
 header {
@@ -56,7 +56,7 @@ header {
 .rkk-dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--blue2);
-  box-shadow: 0 0 6px rgba(36, 113, 201, 0.5);
+  box-shadow: 0 0 6px rgba(0, 168, 132, 0.5);
   animation: pulse 2.5s infinite;
 }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
@@ -71,6 +71,20 @@ h1 em { font-style: normal; color: var(--blue); }
   font-size: 13.5px; color: var(--muted); font-family: var(--mono);
   max-width: 480px; line-height: 1.65;
 }
+
+/* ── DISCLAIMER BANNER ── */
+.disclaimer {
+  max-width: 1040px; margin: 0 auto 8px; padding: 0 40px;
+}
+.disclaimer-inner {
+  border: 1px solid #e8c34a; background: #fdf6e3; border-radius: 8px;
+  padding: 14px 18px; display: flex; gap: 12px; align-items: flex-start;
+}
+.disclaimer-icon { font-size: 16px; line-height: 1.4; flex-shrink: 0; }
+.disclaimer-text {
+  font-size: 12px; line-height: 1.65; color: #6b5410;
+}
+.disclaimer-text strong { color: #4a3a0b; }
 
 /* ── MAIN ── */
 main { max-width: 1040px; margin: 0 auto; padding: 0 40px 64px; }
@@ -160,6 +174,7 @@ footer {
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {
   .topbar-inner, header, main, footer { padding-left: 18px; padding-right: 18px; }
+  .disclaimer { padding-left: 18px; padding-right: 18px; }
   header { padding-top: 32px; }
   .tool-grid { grid-template-columns: 1fr; }
   .topbar-sub { display: none; }
@@ -172,7 +187,7 @@ footer {
 <div class="topbar">
   <div class="topbar-inner">
     <div class="topbar-brand">Geotech <span>Tools</span></div>
-    <div class="topbar-sub">Internal Tools</div>
+    <div class="topbar-sub">Personal / Unofficial</div>
   </div>
 </div>
 
@@ -180,11 +195,21 @@ footer {
 <header>
   <div class="rkk-badge">
     <span class="rkk-dot"></span>
-    Geotechnical Internal Tools
+    Geotechnical Field &amp; Engineering Tools
   </div>
   <h1>Geotech<br><em>Tools</em></h1>
-  <p class="tagline">// Internal field &amp; engineering tools.<br>Offline-capable.</p>
+  <p class="tagline">// A personal collection of field &amp; engineering calculators.<br>Offline-capable.</p>
 </header>
+
+<!-- ── DISCLAIMER ── -->
+<div class="disclaimer">
+  <div class="disclaimer-inner">
+    <span class="disclaimer-icon">⚠️</span>
+    <div class="disclaimer-text">
+      <strong>Use at your own risk.</strong> These are personal, unofficial tools — not affiliated with, reviewed by, or endorsed by any employer. All calculations, correlations, and outputs should be independently reviewed for accuracy and suitability against current design standards (AASHTO, FHWA, applicable state DOT specifications, and project-specific criteria) and verified by a qualified engineer before use in design, construction, or reporting. Provided as-is, with no warranty of accuracy or fitness for any particular purpose.
+    </div>
+  </div>
+</div>
 
 <!-- ── TOOLS ── -->
 <main>
@@ -283,7 +308,116 @@ footer {
 
   </div>
 
-  <div class="section-label">Engineering Calculators</div>
+  <div class="section-label">Foundations &amp; Capacity</div>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="drilled-shaft-capacity-calculator.html" style="--card-accent: #0e7490">
+      <div class="card-icon">🕳️</div>
+      <div class="card-tag">Deep Foundations · Capacity</div>
+      <div class="card-name">Drilled Shaft Capacity Calculator</div>
+      <div class="card-desc">Estimates axial compression capacity of drilled shafts from side and tip resistance per AASHTO LRFD methods, across multi-layer soil/rock profiles.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">AASHTO LRFD</span>
+          <span class="chip">Side + Tip</span>
+          <span class="chip">JSON Snapshot</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="micropile-capacity-calculator.html" style="--card-accent: #0891b2">
+      <div class="card-icon">🔩</div>
+      <div class="card-tag">Deep Foundations · Capacity</div>
+      <div class="card-name">Micropile Capacity Calculator</div>
+      <div class="card-desc">Estimates axial compression and tension capacity of micropiles using bond zone length, grout-to-ground interface parameters, and pile geometry. Supports Type A–D grouting categories per FHWA guidelines.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Type A–D</span>
+          <span class="chip">Bond Zone</span>
+          <span class="chip">Compression / Tension</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="downdrag-neutral-plane-calculator.html" style="--card-accent: #6d28d9">
+      <div class="card-icon">⬇️</div>
+      <div class="card-tag">Deep Foundations · Downdrag</div>
+      <div class="card-name">Downdrag / Neutral Plane Calculator</div>
+      <div class="card-desc">Locates the neutral plane and computes downdrag load on deep foundations from consolidating fill or settling soil, using fully mobilized negative skin friction (Nordlund / AASHTO methods) balanced against tip and positive shaft resistance.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Neutral Plane</span>
+          <span class="chip">Nordlund</span>
+          <span class="chip">AASHTO LRFD</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="spread-footing-calculator.html" style="--card-accent: #dc2626">
+      <div class="card-icon">🧱</div>
+      <div class="card-tag">Shallow Foundations · Bearing</div>
+      <div class="card-name">Spread Footing Bearing Resistance</div>
+      <div class="card-desc">Computes bearing resistance of shallow spread footings using Meyerhof/Vesic bearing capacity theory per AASHTO LRFD, including shape, depth, and load inclination factors.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Meyerhof / Vesic</span>
+          <span class="chip">AASHTO LRFD</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="earth-pressure-calculator.html" style="--card-accent: #1d4ed8">
+      <div class="card-icon">⬛</div>
+      <div class="card-tag">Lateral Earth Pressure</div>
+      <div class="card-name">Earth Pressure Calculator</div>
+      <div class="card-desc">Computes lateral earth pressure coefficients (K₀, Kₐ, K_p) using Rankine, Coulomb, and log-spiral methods. Supports wall friction, sloped backfill, and cohesive soils. Includes force resultant diagrams.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Rankine / Coulomb</span>
+          <span class="chip">K₀ · Kₐ · K_p</span>
+          <span class="chip">Wall Friction</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="retaining-wall-stability-calculator.html" style="--card-accent: #ca8a04">
+      <div class="card-icon">🏗️</div>
+      <div class="card-tag">Retaining Walls · External Stability</div>
+      <div class="card-name">Retaining Wall Stability</div>
+      <div class="card-desc">Cantilever retaining wall external stability — overturning, sliding, and bearing resistance checks per AASHTO LRFD using Meyerhof bearing distribution.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Overturning</span>
+          <span class="chip">Sliding</span>
+          <span class="chip">Bearing</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="pile-corrosion-calculator.html" style="--card-accent: #be123c">
+      <div class="card-icon">⚙️</div>
+      <div class="card-tag">Structural · Steel</div>
+      <div class="card-name">Pile Corrosion Loss Calculator</div>
+      <div class="card-desc">Calculates residual section properties of steel H-piles and pipe piles after uniform corrosion loss. Mode A evaluates a known section; Mode B finds equivalent replacement sections.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">H-Pile</span>
+          <span class="chip">Pipe Pile</span>
+          <span class="chip">JSON Snapshot</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-label">Soil Properties &amp; Settlement</div>
   <div class="tool-grid">
 
     <a class="tool-card" href="shear-strength-correlation-calculator.html" style="--card-accent: #c2410c">
@@ -315,50 +449,15 @@ footer {
       </div>
     </a>
 
-    <!-- ===== TEMPORARILY HIDDEN: Earth Pressure Calculator — restore by deleting this opening comment line and the closing comment line below =====
-    <a class="tool-card" href="earth-pressure-calculator.html" style="--card-accent: #0369a1">
-      <div class="card-icon">⬛</div>
-      <div class="card-tag">Lateral Earth Pressure</div>
-      <div class="card-name">Earth Pressure Calculator</div>
-      <div class="card-desc">Computes lateral earth pressure coefficients (K₀, Kₐ, K_p) using Rankine, Coulomb, and log-spiral methods. Supports wall friction, sloped backfill, and cohesive soils. Includes force resultant diagrams.</div>
+    <a class="tool-card" href="work-energy-consolidation-calculator.html" style="--card-accent: #0f766e">
+      <div class="card-icon">🔬</div>
+      <div class="card-tag">Settlement · Consolidation</div>
+      <div class="card-name">Work-Energy Consolidation Calculator</div>
+      <div class="card-desc">Analyzes one-dimensional consolidation behavior using a work-energy approach to derive compression parameters and settlement from lab test data.</div>
       <div class="card-footer">
         <div class="card-chips">
-          <span class="chip">Rankine / Coulomb</span>
-          <span class="chip">K₀ · Kₐ · K_p</span>
-          <span class="chip">Wall Friction</span>
-        </div>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-    ===== END TEMPORARILY HIDDEN: Earth Pressure Calculator ===== -->
-
-    <!-- ===== TEMPORARILY HIDDEN: Micropile Capacity Calculator — restore by deleting this opening comment line and the closing comment line below =====
-    <a class="tool-card" href="micropile-capacity-calculator.html" style="--card-accent: #0891b2">
-      <div class="card-icon">🔩</div>
-      <div class="card-tag">Deep Foundations · Capacity</div>
-      <div class="card-name">Micropile Capacity Calculator</div>
-      <div class="card-desc">Estimates axial compression and tension capacity of micropiles using bond zone length, grout-to-ground interface parameters, and pile geometry. Supports Type A–D grouting categories per FHWA guidelines.</div>
-      <div class="card-footer">
-        <div class="card-chips">
-          <span class="chip">Type A–D</span>
-          <span class="chip">Bond Zone</span>
-          <span class="chip">Compression / Tension</span>
-        </div>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-    ===== END TEMPORARILY HIDDEN: Micropile Capacity Calculator ===== -->
-
-    <a class="tool-card" href="pile-corrosion-calculator.html" style="--card-accent: #be123c">
-      <div class="card-icon">⚙️</div>
-      <div class="card-tag">Structural · Steel</div>
-      <div class="card-name">Pile Corrosion Loss Calculator</div>
-      <div class="card-desc">Calculates residual section properties of steel H-piles and pipe piles after uniform corrosion loss. Mode A evaluates a known section; Mode B finds equivalent replacement sections.</div>
-      <div class="card-footer">
-        <div class="card-chips">
-          <span class="chip">H-Pile</span>
-          <span class="chip">Pipe Pile</span>
-          <span class="chip">JSON Snapshot</span>
+          <span class="chip">1-D Consolidation</span>
+          <span class="chip">Lab Data</span>
         </div>
         <span class="card-arrow">→</span>
       </div>
@@ -366,11 +465,30 @@ footer {
 
   </div>
 
-  <!-- ===== TEMPORARILY HIDDEN: FE Modeling & Constitutive Models section (HS Model Parameter Calculator was the only tile) — restore by deleting this opening comment line and the closing comment line below =====
+  <div class="section-label">Pavement &amp; Materials</div>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="esal-pavement-calculator-v2a__Inc__VDOT_.html" style="--card-accent: #475569">
+      <div class="card-icon">🛣️</div>
+      <div class="card-tag">Pavement · Design</div>
+      <div class="card-name">ESAL &amp; Pavement Design Calculator</div>
+      <div class="card-desc">Computes Equivalent Single Axle Loads (ESALs) and supports flexible/rigid pavement design workflows, including VDOT-specific inputs.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">ESAL</span>
+          <span class="chip">VDOT</span>
+          <span class="chip">AASHTO</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
   <div class="section-label">FE Modeling &amp; Constitutive Models</div>
   <div class="tool-grid">
 
-    <a class="tool-card" href="hs-model-calculator.html" style="--card-accent: #0d9488">
+    <a class="tool-card" href="hs-model-calculator.html" style="--card-accent: #6366f1">
       <div class="card-icon">🧮</div>
       <div class="card-tag">FE Modeling · Constitutive</div>
       <div class="card-name">HS Model Parameter Calculator</div>
@@ -386,12 +504,11 @@ footer {
     </a>
 
   </div>
-  ===== END TEMPORARILY HIDDEN: FE Modeling & Constitutive Models section ===== -->
 </main>
 
 <footer>
   <div class="footer-left">
-    <strong>Geotech Tools</strong> · Internal Use Only
+    <strong>Geotech Tools</strong> · Personal Project · Use At Your Own Risk
   </div>
   <div class="footer-right"></div>
 </footer>
