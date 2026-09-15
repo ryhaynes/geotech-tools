@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1b4f8a">
+<title>Daily Log of Subsurface Exploration</title>
+<link rel="manifest" href="manifest.json">
+<!-- P1-4: fonts self-hosted (no runtime CDN dependency) -->
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --bg:#f0f2f5;--surface:#fff;--border:#d0d5de;--border2:#b8bfcc;
+  --accent:#1b4f8a;--accent-lt:#e8eef7;--accent-dk:#163f6e;
+  --green:#1a7a5e;--green-lt:#e6f4ef;
+  --text:#1a1f2e;--muted:#6b7490;
+  --sb-w:272px;
+  --sans:'IBM Plex Sans',sans-serif;--cond:'IBM Plex Sans Condensed',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --shadow:0 1px 3px rgba(0,0,0,.10),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.05);
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--accent);color:white;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:fixed;top:0;left:0;right:0;z-index:300;box-shadow:var(--shadow-md)}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.menu-btn{background:none;border:none;color:white;cursor:pointer;padding:4px;opacity:.8;display:none}
+.topbar-title{font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:.8px;text-transform:uppercase}
+.topbar-sub{font-family:var(--mono);font-size:9px;opacity:.55;letter-spacing:.3px;margin-top:1px}
+.topbar-right{display:flex;gap:6px;align-items:center}
+.breadcrumb{position:fixed;top:48px;left:0;right:0;z-index:299;padding:5px 16px;font-size:11px;font-family:var(--mono);color:var(--muted);background:var(--surface);border-bottom:1px solid var(--border)}.breadcrumb a{color:var(--accent);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.btn-top{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);color:white;font-family:var(--cond);font-weight:600;font-size:11px;letter-spacing:.7px;text-transform:uppercase;padding:5px 11px;border-radius:5px;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-top:hover{background:rgba(255,255,255,.24)}
+.btn-top.hi{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.45)}
+.autosave-status{font-family:var(--mono);font-size:9px;opacity:.6;letter-spacing:.3px;white-space:nowrap;padding:0 4px}
+
+/* ── LAYOUT ── */
+.app-body{display:flex;margin-top:75px;min-height:calc(100vh - 75px)}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sb-w);min-width:var(--sb-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:75px;left:0;bottom:0;overflow-y:auto;z-index:200;transition:transform .25s ease}
+.sidebar.hidden{transform:translateX(-100%)}
+.sb-section{padding:14px 14px 0}
+.sb-label{font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.sb-input{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:6px 10px;font-family:var(--sans);font-size:13px;color:var(--text);width:100%;margin-bottom:8px;transition:border-color .15s,box-shadow .15s}
+.sb-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,79,138,.12);background:white}
+.sb-divider{height:1px;background:var(--border);margin:10px 0}
+
+/* ── TASK TEMPLATE VIEW ── */
+.btn-sb.template{background:var(--accent-lt);color:var(--accent);border:1px solid #c8d8ee}
+.btn-sb.template:hover{background:#d8e6f5}
+.btn-sb.template.active{background:var(--accent);color:white;border-color:var(--accent)}
+.tmpl-view-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
+.tmpl-view-title{font-family:var(--cond);font-weight:700;font-size:20px;letter-spacing:.5px;color:var(--text)}
+.tmpl-view-sub{font-size:13px;color:var(--muted);margin-top:4px;max-width:560px;line-height:1.5}
+.tmpl-view-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.btn-tmpl-back{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--cond);font-weight:600;font-size:11px;letter-spacing:.7px;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+.btn-tmpl-back:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-lt)}
+.btn-tmpl-save{background:var(--green);color:white;border:none;font-family:var(--cond);font-weight:700;font-size:11px;letter-spacing:.7px;text-transform:uppercase;padding:7px 16px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s}
+.btn-tmpl-save:hover{background:#155e47}
+.tmpl-del{width:36px;text-align:center}
+.tmpl-del button{background:none;border:none;color:var(--border2);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;border-radius:3px;transition:color .12s,background .12s}
+.tmpl-del button:hover{color:#c0392b;background:#fdecea}
+
+/* ── LOG LIST ── */
+.logs-header{display:flex;align-items:center;justify-content:space-between;padding:0 14px;margin-bottom:4px}
+.logs-label{font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.log-count{background:var(--accent);color:white;font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:10px}
+.log-list{flex:1;overflow-y:auto;padding:0 8px}
+.log-item{padding:8px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .12s;margin-bottom:2px;border:1px solid transparent}
+.log-item:hover{background:var(--accent-lt)}
+.log-item.active{background:var(--accent-lt);border-color:var(--accent)}
+.log-item-date{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
+.log-item-sub{font-size:10px;color:var(--muted);margin-top:1px;font-family:var(--cond)}
+.log-item-del{background:none;border:none;cursor:pointer;color:var(--muted);padding:2px 4px;border-radius:3px;font-size:14px;opacity:0;transition:opacity .15s,color .15s}
+.log-item:hover .log-item-del{opacity:1}
+.log-item-del:hover{color:#c0392b}
+.empty-logs{padding:20px 14px;text-align:center;color:var(--muted);font-size:12px;font-family:var(--cond)}
+
+/* ── SIDEBAR FOOTER ── */
+.sb-footer{padding:10px 8px 14px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);margin-top:auto}
+.btn-sb{width:100%;padding:8px 12px;border-radius:6px;cursor:pointer;font-family:var(--cond);font-weight:700;font-size:11px;letter-spacing:.8px;text-transform:uppercase;display:flex;align-items:center;gap:7px;transition:all .15s;border:none}
+.btn-sb.new-log{background:var(--accent);color:white}
+.btn-sb.new-log:hover{background:var(--accent-dk)}
+.btn-sb.summary{background:var(--accent-lt);color:var(--accent);border:1px solid #c8d8ee}
+.btn-sb.summary:hover{background:#d8e6f5}
+.btn-sb.io{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.btn-sb.io:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-lt)}
+.btn-sb-row{display:flex;gap:6px}
+.btn-sb-row .btn-sb{flex:1}
+
+/* ── MAIN CONTENT ── */
+.main-content{margin-left:var(--sb-w);flex:1;padding:20px 20px 100px;min-width:0}
+
+/* ── EMPTY STATE ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:12px;text-align:center;color:var(--muted)}
+.empty-state svg{opacity:.25}
+.empty-state h2{font-family:var(--cond);font-weight:700;font-size:18px;color:var(--text);margin-top:8px}
+.empty-state p{font-size:13px;max-width:300px;line-height:1.5}
+.btn-empty{background:var(--accent);color:white;border:none;font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:.8px;text-transform:uppercase;padding:10px 24px;border-radius:7px;cursor:pointer;margin-top:8px;display:flex;align-items:center;gap:7px;transition:background .15s}
+.btn-empty:hover{background:var(--accent-dk)}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.card-hdr{background:var(--accent);color:white;padding:8px 14px;font-family:var(--cond);font-weight:700;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.card-hdr svg{opacity:.75;flex-shrink:0}
+.card-hdr .sub{font-weight:300;opacity:.65;font-size:10px;margin-left:4px;letter-spacing:.4px;text-transform:none}
+
+/* ── FIELDS ── */
+.card-body{padding:14px}
+.fgrid{display:grid;gap:10px}
+.f2{grid-template-columns:1fr 1fr}.f3{grid-template-columns:1fr 1fr 1fr}.f21{grid-template-columns:2fr 1fr}
+.fg{display:flex;flex-direction:column;gap:4px}
+.flabel{font-family:var(--cond);font-weight:600;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.finput{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-family:var(--sans);font-size:13px;color:var(--text);width:100%;transition:border-color .15s,box-shadow .15s}
+.finput:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,79,138,.12);background:white}
+.finput[readonly]{background:var(--accent-lt);color:var(--accent);font-weight:500;border-color:#c8d8ee;cursor:default}
+textarea.finput{resize:vertical;min-height:72px;line-height:1.5}
+textarea.finput.tall{min-height:100px}
+.inline{display:flex;gap:10px;align-items:flex-end}
+.inline .fg{flex:1}
+.inline .fg.narrow{flex:0 0 130px}
+.sig-row{display:flex;gap:16px;padding:14px;border-top:1px solid var(--border);background:#fafbfc;flex-wrap:wrap}
+.sig-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:200px}
+
+/* ── SIGNATURE PAD ── */
+.sigpad-wrap{position:relative;border:1px solid var(--border);border-radius:6px;background:white;overflow:hidden}
+.sigpad-wrap canvas{display:block;width:100%;height:90px;cursor:crosshair;touch-action:none}
+.sigpad-controls{position:absolute;top:5px;right:6px}
+.btn-sig-clear{background:rgba(240,242,245,.9);border:1px solid var(--border);color:var(--muted);font-family:var(--cond);font-weight:600;font-size:9px;letter-spacing:.6px;text-transform:uppercase;padding:3px 7px;border-radius:4px;cursor:pointer}
+.btn-sig-clear:hover{background:white;color:var(--accent);border-color:var(--accent)}
+.sigpad-hint{position:absolute;bottom:0;left:0;right:0;font-family:var(--mono);font-size:9px;color:var(--border2);text-align:center;pointer-events:none;padding:4px;transition:opacity .2s}
+.sigpad-wrap.has-sig .sigpad-hint{opacity:0}
+
+/* ── DATA TABLE ── */
+.dtable{width:100%;border-collapse:collapse}
+.dtable th{background:var(--accent-lt);color:var(--accent);font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:.8px;text-transform:uppercase;padding:7px 10px;border:1px solid var(--border);text-align:left;white-space:nowrap}
+.dtable td{border:1px solid var(--border);padding:3px 4px;vertical-align:middle}
+.dtable td input,.dtable td select{background:transparent;border:none;width:100%;font-family:var(--sans);font-size:13px;color:var(--text);padding:4px 6px;border-radius:3px}
+.dtable td input:focus,.dtable td select:focus{outline:none;background:var(--accent-lt)}
+.dtable .rn{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;user-select:none;width:36px}
+.dtable .wno{width:60px}.dtable .wqty{width:70px}.dtable .wunit{width:110px}.dtable .wnr{width:70px}
+.total-cell{text-align:center;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);width:70px;padding:4px 8px!important}
+.total-cell.zero{color:var(--muted);font-weight:400}
+.unit-wrap{display:flex;gap:3px;align-items:center}
+/* ── LS CLAIMED ROW ── */
+.row-claimed td{background:#f6f7f9!important}
+.row-claimed input,.row-claimed select{color:var(--muted)!important;pointer-events:none}
+.row-claimed .qty-input{background:#eef0f3!important;border-radius:3px;color:var(--muted)!important;cursor:not-allowed}
+.claimed-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--green);background:var(--green-lt);border:1px solid #b2d8cc;padding:2px 7px;border-radius:10px;white-space:nowrap}
+.claimed-badge svg{flex-shrink:0}
+.unit-custom{display:none;background:transparent;border:none;border-bottom:1px solid var(--border2);font-family:var(--sans);font-size:12px;color:var(--text);width:72px;padding:2px 4px}
+.unit-custom:focus{outline:none;border-bottom-color:var(--accent)}
+
+/* ── TEMPLATE COST COLUMNS ── */
+.tmpl-rate{width:108px}.tmpl-qty-col{width:80px}
+.tmpl-cost-cell{background:#f0f7f4!important;color:var(--green);font-family:var(--mono);font-size:12px;font-weight:600;text-align:right;padding:5px 10px!important;white-space:nowrap;pointer-events:none;border:1px solid var(--border)}
+.tmpl-cost-cell.zero{background:#fafbfc!important;color:var(--muted);font-weight:400}
+.tmpl-total-row td{border-top:2px solid var(--border2)!important;background:var(--accent-lt)!important;font-family:var(--cond);font-weight:700;font-size:11px;letter-spacing:.4px;color:var(--accent)}
+.tmpl-total-row .tmpl-cost-cell{background:var(--accent-lt)!important;color:var(--accent);font-size:13px}
+.rate-input{background:transparent;border:none;width:100%;font-family:var(--mono);font-size:12px;color:var(--text);padding:4px 6px;border-radius:3px;text-align:right}
+.rate-input:focus{outline:none;background:var(--accent-lt)}
+
+/* ── REMAINING CELL (daily log tasks) ── */
+.wrem{width:96px}
+.rem-hdr{text-align:center!important}
+.rem-cell{text-align:center;font-family:var(--mono);font-size:12px;font-weight:600;padding:4px 8px!important;white-space:nowrap;border:1px solid var(--border)}
+.rem-cell.under{background:#e6f4ef;color:#1a7a5e}
+.rem-cell.over{background:#fdecea;color:#c0392b}
+.rem-cell.exact{background:#f6f7f9;color:var(--muted);font-weight:400}
+.rem-cell.none{color:var(--border2);font-weight:400;background:transparent}
+
+/* ── SUMMARY COST/REMAINING ── */
+.summary-table td.cost{text-align:right;font-family:var(--mono);font-size:12px}
+.summary-table td.rem-pos{text-align:center;font-family:var(--mono);font-size:12px;color:var(--green);background:#e6f4ef}
+.summary-table td.rem-neg{text-align:center;font-family:var(--mono);font-size:12px;color:#c0392b;background:#fdecea}
+.summary-table td.rem-zero{text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted);background:#f6f7f9}
+.summary-table tfoot td{background:var(--accent-lt)!important;font-family:var(--cond);font-weight:700;font-size:12px;color:var(--accent);border:1px solid var(--border);padding:8px 10px}
+.summary-table tfoot td.spend{text-align:right;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)}
+.btn-add{display:flex;align-items:center;gap:5px;justify-content:center;background:none;border:1px dashed var(--border2);color:var(--muted);font-family:var(--cond);font-weight:600;font-size:11px;letter-spacing:.6px;text-transform:uppercase;padding:6px 12px;border-radius:5px;cursor:pointer;margin-top:8px;transition:all .15s;width:100%}
+.btn-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-lt)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.two-col .card{margin-bottom:0}
+
+/* ── LOG SAVE BAR (sticky bottom) ── */
+.log-save-bar{position:fixed;bottom:0;left:var(--sb-w);right:0;background:white;border-top:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:150;box-shadow:0 -2px 8px rgba(0,0,0,.06);transition:transform .25s}
+.log-save-bar.hidden{transform:translateY(100%)}
+.save-bar-status{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.save-bar-status.saved{color:var(--green)}
+.save-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.btn-save-log{background:var(--green);color:white;border:none;font-family:var(--cond);font-weight:700;font-size:12px;letter-spacing:.8px;text-transform:uppercase;padding:8px 20px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s}
+.btn-save-log:hover{background:#155e47}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:64px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--text);color:white;font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.6px;padding:8px 18px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:600;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--green)}
+.toast.warn{background:#b45309}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,20,50,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:white;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.25);max-width:940px;width:100%;max-height:88vh;display:flex;flex-direction:column;transform:translateY(12px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-hdr{background:var(--accent);color:white;padding:12px 18px;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;flex-shrink:0}
+.modal-close{background:none;border:none;color:white;cursor:pointer;font-size:20px;opacity:.7;line-height:1}
+.modal-close:hover{opacity:1}
+.modal-body{overflow:auto;padding:18px}
+.summary-table{width:100%;border-collapse:collapse;font-size:13px}
+.summary-table th{background:var(--accent-lt);color:var(--accent);font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:.8px;text-transform:uppercase;padding:8px 10px;border:1px solid var(--border);text-align:center;white-space:nowrap;position:sticky;top:0}
+.summary-table th.left{text-align:left}
+.summary-table td{border:1px solid var(--border);padding:7px 10px;vertical-align:middle}
+.summary-table td.num{text-align:center;font-family:var(--mono);font-size:12px}
+.summary-table td.tot{text-align:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);background:var(--accent-lt)}
+.summary-table tr:nth-child(even) td{background:#fafbfc}
+.summary-table tr:nth-child(even) td.tot{background:var(--accent-lt)}
+.no-items{text-align:center;color:var(--muted);padding:24px;font-size:13px;font-family:var(--cond)}
+
+/* ── PRINT ── */
+@media print{
+  .topbar .btn-top,.btn-add,.sigpad-controls,.sigpad-hint,.sidebar,.modal-overlay,.log-save-bar,.toast{display:none!important}
+  .main-content{margin-left:0!important;padding:0!important}
+  body{background:white}
+  .card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid;margin-bottom:8px}
+  .finput,.dtable td input,.dtable td select{background:transparent!important}
+  .print-empty{display:none!important}
+}
+
+/* ── SUMMARY MODAL TOOLBAR ── */
+.modal-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid var(--border);background:#fafbfc;gap:12px;flex-shrink:0;flex-wrap:wrap}
+.modal-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.modal-filter label{font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.modal-filter input[type=date]{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-family:var(--sans);font-size:12px;color:var(--text);transition:border-color .15s,box-shadow .15s}
+.modal-filter input[type=date]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,79,138,.12)}
+.btn-filter-reset{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--cond);font-weight:600;font-size:10px;letter-spacing:.6px;text-transform:uppercase;padding:5px 10px;border-radius:4px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-filter-reset:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-lt)}
+.btn-print-summary{background:var(--accent);color:white;border:none;font-family:var(--cond);font-weight:700;font-size:11px;letter-spacing:.7px;text-transform:uppercase;padding:6px 14px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s;white-space:nowrap;flex-shrink:0}
+.btn-print-summary:hover{background:var(--accent-dk)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .menu-btn{display:block}
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0}
+  .log-save-bar{left:0}
+  .topbar-sub,.btn-top span{display:none}
+  .two-col,.f2,.f3,.f21{grid-template-columns:1fr}
+  .sig-row{flex-direction:column}
+  .autosave-status{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="menu-btn" onclick="toggleSidebar()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div>
+      <div class="topbar-title">Daily Log</div>
+      <div class="topbar-sub" id="topbar-context">No project loaded</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="autosave-status" id="autosave-status">—</span>
+    <input type="file" id="json-file-input" accept=".json" style="display:none" onchange="loadProjectJSON(event)">
+    <button class="btn-top" onclick="document.getElementById('json-file-input').click()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Load</span>
+    </button>
+    <button class="btn-top hi" onclick="saveProjectJSON()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Save JSON</span>
+    </button>
+    <button class="btn-top" onclick="window.print()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <span>Print</span>
+    </button>
+  </div>
+</div>
+
+<div class="breadcrumb">
+  <a href="index.html">← Geotech Tools</a> &nbsp;/&nbsp; Daily Log
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- PROJECT INFO -->
+    <div class="sb-section">
+      <div class="sb-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Project
+      </div>
+      <input id="sb-proj-name"   class="sb-input" type="text" placeholder="Project name"         oninput="onProjectInfoChange()">
+      <input id="sb-proj-no"     class="sb-input" type="text" placeholder="Project No."           oninput="onProjectInfoChange()">
+      <input id="sb-contractor"  class="sb-input" type="text" placeholder="Drilling Contractor"   oninput="onProjectInfoChange()">
+    </div>
+
+    <div style="padding:0 14px"><div class="sb-divider"></div></div>
+
+    <div style="padding:0 8px 4px">
+      <button class="btn-sb template" id="btn-tmpl-sb" onclick="openTemplateView()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Task Template
+      </button>
+    </div>
+
+    <div style="padding:0 14px"><div class="sb-divider"></div></div>
+
+    <!-- LOG LIST -->
+    <div class="logs-header">
+      <span class="logs-label">Daily Logs</span>
+      <span class="log-count" id="log-count">0</span>
+    </div>
+    <div class="log-list" id="log-list"></div>
+
+    <!-- FOOTER -->
+    <div class="sb-footer">
+      <button class="btn-sb new-log" onclick="newLog()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Daily Log
+      </button>
+      <button class="btn-sb summary" onclick="openSummary()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Project Summary
+      </button>
+      <div class="btn-sb-row">
+        <button class="btn-sb io" onclick="document.getElementById('json-file-input').click()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Load
+        </button>
+        <button class="btn-sb io" onclick="saveProjectJSON()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Save JSON
+        </button>
+      </div>
+      <button class="btn-sb" onclick="clearDeviceData()" style="margin-top:8px;color:#c0392b">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Clear This Device
+      </button>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4;font-family:var(--cond)">Removes the autosave snapshot and stored initials from this browser only. Saved JSON files are not affected.</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content" id="main-content">
+
+    <div class="empty-state" id="empty-state">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <h2>No Log Selected</h2>
+      <p>Enter a project name and number in the sidebar, then create your first daily log.</p>
+      <button class="btn-empty" onclick="newLog()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Daily Log
+      </button>
+    </div>
+
+    <!-- TEMPLATE VIEW -->
+    <div id="template-view" style="display:none">
+      <div class="tmpl-view-hdr">
+        <div>
+          <div class="tmpl-view-title">Task Template</div>
+          <div class="tmpl-view-sub">Define the project's task items, planned quantities, and unit rates here. When you create a new daily log, these tasks will be pre-populated — ready to fill in each day. Total Cost and remaining quantity are tracked automatically.</div>
+        </div>
+        <div class="tmpl-view-actions">
+          <button class="btn-tmpl-back" onclick="closeTemplateView()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Log
+          </button>
+          <button class="btn-tmpl-save" onclick="saveTemplateView()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Save Template
+          </button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Project Tasks
+          <span class="sub">Item No. is the stable key used to match tasks across daily logs for running totals</span>
+        </div>
+        <div class="card-body" style="padding:10px">
+          <table class="dtable">
+            <thead><tr>
+              <th class="wno">Item No.</th>
+              <th>Description</th>
+              <th class="wunit">Unit</th>
+              <th class="tmpl-rate" style="text-align:right">Unit Rate ($)</th>
+              <th class="tmpl-qty-col" style="text-align:right">Init. Qty</th>
+              <th style="text-align:right;min-width:110px">Total Cost</th>
+              <th class="tmpl-del"></th>
+            </tr></thead>
+            <tbody id="tmpl-rows"></tbody>
+            <tfoot><tr class="tmpl-total-row" id="tmpl-total-row">
+              <td colspan="5" style="text-align:right;padding:6px 10px">Project Total Budget</td>
+              <td class="tmpl-cost-cell zero" id="tmpl-grand-total">—</td>
+              <td style="background:var(--accent-lt)!important"></td>
+            </tr></tfoot>
+          </table>
+          <button class="btn-add" onclick="addTemplateRow()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Task
+          </button>
+        </div>
+      </div>
+      <div style="background:var(--accent-lt);border:1px solid #c8d8ee;border-radius:var(--r);padding:14px 16px;display:flex;gap:10px;align-items:flex-start">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p style="font-size:12px;color:var(--accent);line-height:1.5">Changes to the template only affect <strong>new</strong> logs created after saving. Existing daily logs are not modified.</p>
+      </div>
+    </div>
+
+    <div id="log-form" style="display:none">
+
+      <!-- PROJECT INFO (read-only) -->
+      <div class="card">
+        <div class="card-hdr">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Project Information
+        </div>
+        <div class="card-body">
+          <div class="fgrid f3" style="margin-bottom:10px">
+            <div class="fg"><label class="flabel">Project Name</label><input id="f-proj-name" class="finput" readonly tabindex="-1"></div>
+            <div class="fg"><label class="flabel">Project No.</label><input id="f-proj-no" class="finput" readonly tabindex="-1"></div>
+            <div class="fg"><label class="flabel">Date</label><input id="f-date" class="finput" type="date"></div>
+          </div>
+          <div class="fgrid f21">
+            <div class="fg"><label class="flabel">Location</label><input id="f-location" class="finput" type="text" placeholder="Site location"></div>
+            <div class="fg"><label class="flabel">Weather</label><input id="f-weather" class="finput" type="text" placeholder="e.g. Partly cloudy, 72°F"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;padding:10px 14px;border-top:1px solid var(--border);background:#fafbfc">
+          <div class="fg" style="flex:1"><label class="flabel">Drilling Contractor</label><input id="f-contractor" class="finput" readonly tabindex="-1"></div>
+          <div class="fg" style="flex:1"><label class="flabel">Driller</label><input id="f-driller-name" class="finput" type="text"></div>
+        </div>
+      </div>
+
+      <!-- TASKS PERFORMED -->
+      <div class="card">
+        <div class="card-hdr">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Tasks Performed
+          <span class="sub">Running Total sums Qty across all logs for that Item No.</span>
+        </div>
+        <div class="card-body" style="padding:10px">
+          <table class="dtable">
+            <thead><tr>
+              <th class="wno">Item No.</th><th>Description</th>
+              <th class="wqty">Qty Today</th><th class="wunit">Unit</th>
+              <th class="total-cell" style="font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);background:var(--accent-lt);border:1px solid var(--border);padding:7px 10px">Running Total</th>
+              <th class="rem-hdr wrem" style="font-family:var(--cond);font-weight:700;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);background:var(--accent-lt);border:1px solid var(--border);padding:7px 10px">Qty Remaining</th>
+            </tr></thead>
+            <tbody id="tasks-body"></tbody>
+          </table>
+          <button class="btn-add" onclick="addTaskRow()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Row
+          </button>
+        </div>
+      </div>
+
+      <!-- WORK THIS DAY -->
+      <div class="card">
+        <div class="card-hdr">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Work This Day <span class="sub">* Indicates Completed</span>
+        </div>
+        <div class="card-body" style="padding:10px">
+          <table class="dtable">
+            <thead><tr><th style="width:130px">Boring No.</th><th style="width:85px">Depth – Est.</th><th style="width:85px">Depth – Act.</th><th>Boring Notes</th></tr></thead>
+            <tbody id="borings-body"></tbody>
+          </table>
+          <button class="btn-add" onclick="addBoringRow()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Row
+          </button>
+        </div>
+      </div>
+
+      <!-- LABOR + EQUIPMENT -->
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Labor</div>
+          <div class="card-body" style="padding:10px">
+            <table class="dtable"><thead><tr><th class="rn">No.</th><th>Classification</th><th class="wnr">On-Site</th><th class="wnr">Off-Site</th></tr></thead><tbody id="labor-body"></tbody></table>
+            <button class="btn-add" onclick="addLaborRow()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Row</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Equipment Type</div>
+          <div class="card-body" style="padding:10px">
+            <table class="dtable"><thead><tr><th class="rn">No.</th><th>Classification</th><th class="wnr">Size</th><th class="wnr">Rig No.</th></tr></thead><tbody id="equip-body"></tbody></table>
+            <button class="btn-add" onclick="addEquipRow()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Row</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- IDLE + DELAYS -->
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Idle Equipment &amp; Reasons</div>
+          <div class="card-body"><textarea id="f-idle" class="finput tall" placeholder="Describe idle equipment and reasons…"></textarea></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Delays</div>
+          <div class="card-body"><textarea id="f-delays" class="finput tall" placeholder="Describe any delays encountered…"></textarea></div>
+        </div>
+      </div>
+
+      <!-- SAFETY BRIEFING -->
+      <div class="card">
+        <div class="card-hdr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Daily Safety Briefing</div>
+        <div class="card-body">
+          <div class="fg" style="margin-bottom:12px"><label class="flabel">Topic(s)</label><textarea id="f-safety-topics" class="finput" placeholder="Safety briefing topics discussed…" style="min-height:60px"></textarea></div>
+          <div class="fgrid f21" style="align-items:end">
+            <div class="fg">
+              <label class="flabel">Crew Initials <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:9px">— sign below</span></label>
+              <div class="sigpad-wrap" id="wrap-crew"><canvas id="sig-crew" width="600" height="90"></canvas><div class="sigpad-controls"><button class="btn-sig-clear" onclick="clearSig('sig-crew','wrap-crew')">Clear</button></div><div class="sigpad-hint">Sign here</div></div>
+            </div>
+            <div class="fg"><label class="flabel">Time</label><input id="f-safety-time" class="finput" type="time"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTES / REMARKS -->
+      <div class="card">
+        <div class="card-hdr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Notes / Remarks<span class="sub">arrival/departure · directions to driller · communications</span></div>
+        <div class="card-body">
+          <div id="notes-entries"></div>
+          <button class="btn-add" onclick="addNoteEntry()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Entry</button>
+        </div>
+      </div>
+
+      <!-- PERSONNEL & SIGNATURES -->
+      <div class="card">
+        <div class="card-hdr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Personnel &amp; Signatures</div>
+        <div class="card-body"><div class="fg"><label class="flabel">Official Visitors</label><input id="f-visitors" class="finput" type="text" placeholder="Names of official visitors on site"></div></div>
+        <div class="sig-row">
+          <div class="sig-group">
+            <label class="flabel">Field Representative</label>
+            <div class="sigpad-wrap" id="wrap-rkk"><canvas id="sig-rkk" width="600" height="90"></canvas><div class="sigpad-controls"><button class="btn-sig-clear" onclick="clearSig('sig-rkk','wrap-rkk')">Clear</button></div><div class="sigpad-hint">Sign here</div></div>
+            <div class="fg" style="margin-top:4px"><label class="flabel">Date</label><input id="f-rkk-date" class="finput" type="date" style="font-size:12px;padding:5px 8px"></div>
+          </div>
+          <div class="sig-group">
+            <label class="flabel">Driller</label>
+            <div class="sigpad-wrap" id="wrap-driller"><canvas id="sig-driller" width="600" height="90"></canvas><div class="sigpad-controls"><button class="btn-sig-clear" onclick="clearSig('sig-driller','wrap-driller')">Clear</button></div><div class="sigpad-hint">Sign here</div></div>
+            <div class="fg" style="margin-top:4px"><label class="flabel">Date</label><input id="f-driller-date" class="finput" type="date" style="font-size:12px;padding:5px 8px"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end log-form -->
+  </main>
+</div>
+
+<!-- LOG SAVE BAR -->
+<div class="log-save-bar hidden" id="log-save-bar">
+  <div class="save-bar-status" id="save-bar-status">
+    <div class="save-dot"></div>
+    <span id="save-bar-text">Unsaved changes</span>
+  </div>
+  <button class="btn-save-log" onclick="manualSave()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    Save Log
+  </button>
+</div>
+
+<!-- SUMMARY MODAL -->
+<div class="modal-overlay" id="summary-modal">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr"><span id="summary-title">Project Summary</span><button class="modal-close" onclick="closeSummary()">×</button></div>
+    <div class="modal-toolbar">
+      <div class="modal-filter">
+        <label>From</label>
+        <input type="date" id="summary-from" oninput="updateSummaryFilter()">
+        <label>To</label>
+        <input type="date" id="summary-to" oninput="updateSummaryFilter()">
+        <button class="btn-filter-reset" onclick="resetSummaryFilter()">All Dates</button>
+      </div>
+      <button class="btn-print-summary" onclick="printSummaryFiltered()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Summary
+      </button>
+    </div>
+    <div class="modal-body" id="summary-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   STATE
+===================================================================== */
+let project = { schemaVersion: 2, name:'', no:'', taskTemplate:[], logs:[] };
+
+/* ═══════════════════════════════════════════════════════════════
+   SECURITY & DATA-INTEGRITY HELPERS
+   (code review items HS-2, P2-3, P3-3, P3-4)
+═══════════════════════════════════════════════════════════════ */
+
+// HS-2: HTML-escape every user-supplied value interpolated into a
+// template literal (covers text nodes and double-quoted attributes).
+function esc(v){
+  return String(v ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+const DAILYLOG_SCHEMA_VERSION = 2; // P2-3: bump when the data model changes
+
+function cleanStr(v,max=4000){ if(v===null||v===undefined) return ''; return String(v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').slice(0,max); }
+function cleanNum(v,fb=0){ const n=Number(v); return Number.isFinite(n)?n:fb; }
+// Signatures: only well-formed PNG/JPEG data URLs survive an import.
+function cleanSig(v){ return (typeof v==='string'&&/^data:image\/(png|jpeg);base64,[A-Za-z0-9+\/=]+$/.test(v))?v:null; }
+
+// P3-3: lightweight audit identity (until Entra ID auth, P1-1)
+function getUserInitials(){ try{ return localStorage.getItem('geotools_user_initials')||''; }catch(e){ return ''; } }
+function ensureUserInitials(){
+  let ini=getUserInitials();
+  if(!ini){
+    ini=(prompt('Enter your initials (recorded with log data for QC traceability):')||'').trim().replace(/[^A-Za-z.]/g,'').slice(0,6);
+    if(ini){ try{ localStorage.setItem('geotools_user_initials',ini); }catch(e){} }
+  }
+  return ini;
+}
+
+// P3-4: clear all Daily Log data from this device
+function clearDeviceData(){
+  if(!confirm('Clear ALL Daily Log data stored on this device?\n\nThis removes the autosave snapshot and your stored initials. Exported JSON files are NOT affected.\n\nThis cannot be undone.')) return;
+  try{
+    localStorage.removeItem('dailylog_autosave');
+    localStorage.removeItem('geotools_user_initials');
+  }catch(e){}
+  location.reload();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   P2-3 + HS-2: SCHEMA VERSIONING & IMPORT VALIDATION
+   Imported JSON and localStorage restores are whitelist-rebuilt:
+   only known fields with coerced types survive. Free-text fields are
+   kept verbatim but ALWAYS rendered through esc().
+═══════════════════════════════════════════════════════════════ */
+function sanitizeProject(raw){
+  if(!raw||typeof raw!=='object'||Array.isArray(raw)) throw new Error('Not a valid Daily Log project file.');
+  const ver=cleanNum(raw.schemaVersion,1); // pre-versioning saves = v1
+  if(ver>DAILYLOG_SCHEMA_VERSION) throw new Error('This file was saved by a newer version of Daily Log (schema v'+ver+'). Update the app, then try again.');
+  // v1 → v2 migration: schemaVersion + audit fields introduced; no shape changes.
+  const p={ schemaVersion:DAILYLOG_SCHEMA_VERSION, name:cleanStr(raw.name,200), no:cleanStr(raw.no,100), contractor:cleanStr(raw.contractor,200), taskTemplate:[], logs:[] };
+  (Array.isArray(raw.taskTemplate)?raw.taskTemplate:[]).forEach(t=>{
+    if(!t||typeof t!=='object') return;
+    p.taskTemplate.push({ itemNo:cleanStr(t.itemNo,50), description:cleanStr(t.description,500), unit:cleanStr(t.unit,30), unitRate:cleanStr(t.unitRate,30), quantity:cleanStr(t.quantity,30) });
+  });
+  (Array.isArray(raw.logs)?raw.logs:[]).forEach(l=>{
+    if(!l||typeof l!=='object') return;
+    const sb=l.safetyBriefing||{}; const sg=l.signatures||{};
+    const log={
+      // HS-2: log IDs are interpolated into inline handlers — enforce a safe charset
+      id: cleanStr(l.id,40).replace(/[^A-Za-z0-9_-]/g,'') || ('log'+Date.now()+Math.floor(Math.random()*1e6)),
+      date:cleanStr(l.date,20), weather:cleanStr(l.weather,200), location:cleanStr(l.location,300),
+      contractor:cleanStr(l.contractor,200), drillerName:cleanStr(l.drillerName,200),
+      idleEquipment:cleanStr(l.idleEquipment), delays:cleanStr(l.delays),
+      safetyBriefing:{ topics:cleanStr(sb.topics), time:cleanStr(sb.time,20) },
+      officialVisitors:cleanStr(l.officialVisitors,2000), rkkRepDate:cleanStr(l.rkkRepDate,20), drillerDate:cleanStr(l.drillerDate,20),
+      createdBy:cleanStr(l.createdBy,10), createdAt:cleanStr(l.createdAt,40),
+      modifiedBy:cleanStr(l.modifiedBy,10), modifiedAt:cleanStr(l.modifiedAt,40),
+      tasks:[], borings:[], labor:[], equipment:[], notes:[],
+      signatures:{ crew:cleanSig(sg.crew), rkk:cleanSig(sg.rkk), driller:cleanSig(sg.driller) }
+    };
+    (Array.isArray(l.tasks)?l.tasks:[]).forEach(t=>log.tasks.push({ itemNo:cleanStr(t&&t.itemNo,50), description:cleanStr(t&&t.description,500), qty:cleanStr(t&&t.qty,30), unit:cleanStr(t&&t.unit,30), unitCustom:cleanStr(t&&t.unitCustom,30) }));
+    (Array.isArray(l.borings)?l.borings:[]).forEach(b=>log.borings.push({ boringNo:cleanStr(b&&b.boringNo,50), depthEst:cleanStr(b&&b.depthEst,30), depthAct:cleanStr(b&&b.depthAct,30), notes:cleanStr(b&&b.notes,1000) }));
+    (Array.isArray(l.labor)?l.labor:[]).forEach(x=>log.labor.push({ classification:cleanStr(x&&x.classification,200), onSite:cleanStr(x&&x.onSite,20), offSite:cleanStr(x&&x.offSite,20) }));
+    (Array.isArray(l.equipment)?l.equipment:[]).forEach(x=>log.equipment.push({ classification:cleanStr(x&&x.classification,200), size:cleanStr(x&&x.size,100), rigNo:cleanStr(x&&x.rigNo,100) }));
+    (Array.isArray(l.notes)?l.notes:[]).forEach(n=>log.notes.push({ time:cleanStr(n&&n.time,20), note:cleanStr(n&&n.note) }));
+    p.logs.push(log);
+  });
+  return p;
+}
+let activeLogId = null;
+const sigPads = {};
+let _dirty = false;
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function formatDate(iso){ if(!iso) return '—'; const [y,m,d]=iso.split('-'); const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return mn[parseInt(m,10)-1]+' '+parseInt(d,10)+', '+y; }
+
+/* =====================================================================
+   TOAST
+===================================================================== */
+let _toastTimer;
+function showToast(msg, type=''){
+  const t=document.getElementById('toast');
+  clearTimeout(_toastTimer);
+  t.textContent=msg; t.className='toast'+(type?' '+type:'');
+  requestAnimationFrame(()=>{ t.classList.add('show'); });
+  _toastTimer=setTimeout(()=>{ t.classList.remove('show'); },2800);
+}
+
+/* =====================================================================
+   DIRTY TRACKING & SAVE BAR
+===================================================================== */
+function markDirty(){
+  _dirty=true;
+  const bar=document.getElementById('log-save-bar');
+  const st=document.getElementById('save-bar-status');
+  const tx=document.getElementById('save-bar-text');
+  if(activeLogId){ bar.classList.remove('hidden'); st.className='save-bar-status'; tx.textContent='Unsaved changes'; }
+}
+function markClean(timeStr){
+  _dirty=false;
+  const st=document.getElementById('save-bar-status');
+  const tx=document.getElementById('save-bar-text');
+  st.className='save-bar-status saved';
+  tx.textContent='Saved'+(timeStr?' at '+timeStr:'');
+}
+function manualSave(){
+  saveCurrentLogToState();
+  const now=new Date();
+  const ts=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  markClean(ts);
+  showToast('Log saved ✓','success');
+  renderLogList(); // refresh date sub-label
+}
+// mark dirty on any input in the log form
+document.addEventListener('input', e=>{
+  if(e.target.closest('#log-form')) markDirty();
+});
+
+/* =====================================================================
+   MOBILE SIDEBAR
+===================================================================== */
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
+
+/* =====================================================================
+   PROJECT INFO
+===================================================================== */
+function onProjectInfoChange(){
+  project.name=document.getElementById('sb-proj-name').value;
+  project.no  =document.getElementById('sb-proj-no').value;
+  project.contractor=document.getElementById('sb-contractor').value;
+  document.getElementById('f-proj-name').value=project.name;
+  document.getElementById('f-proj-no').value  =project.no;
+  document.getElementById('f-contractor').value=project.contractor;
+  updateTopbarContext();
+  renderLogList();
+}
+function updateTopbarContext(){
+  const p=[project.name,project.no].filter(Boolean);
+  document.getElementById('topbar-context').textContent=p.length?p.join(' · '):'No project loaded';
+}
+
+/* =====================================================================
+   TASK TEMPLATE VIEW
+===================================================================== */
+function openTemplateView(){
+  saveCurrentLogToState();
+  document.getElementById('empty-state').style.display='none';
+  document.getElementById('log-form').style.display='none';
+  document.getElementById('template-view').style.display='block';
+  document.getElementById('log-save-bar').classList.add('hidden');
+  document.getElementById('btn-tmpl-sb').classList.add('active');
+  renderLogList(); // deselect active log highlight
+  recalcTemplateCosts();
+  window.scrollTo(0,0);
+  if(window.innerWidth<768) document.getElementById('sidebar').classList.remove('open');
+}
+
+function closeTemplateView(){
+  document.getElementById('template-view').style.display='none';
+  document.getElementById('btn-tmpl-sb').classList.remove('active');
+  if(activeLogId){
+    document.getElementById('log-form').style.display='block';
+    document.getElementById('log-save-bar').classList.remove('hidden');
+  } else {
+    document.getElementById('empty-state').style.display='flex';
+  }
+  renderLogList();
+}
+
+function saveTemplateView(){
+  syncTemplate();
+  showToast('Template saved ✓','success');
+  // update the save bar text if we go back to a log
+  markClean();
+}
+
+function addTemplateRow(itemNo, desc, unit, unitRate, quantity){
+  const tbody=document.getElementById('tmpl-rows');
+  const n=tbody.rows.length+1;
+  const UNITS=['LS','EA','LF','HR','Custom…'];
+  const opts=UNITS.map(u=>`<option value="${u}"${u===(unit||'LS')?' selected':''}>${u}</option>`).join('');
+  const rate=unitRate!==undefined&&unitRate!==''?unitRate:'';
+  const qty=quantity!==undefined&&quantity!==''?quantity:'';
+  const tr=document.createElement('tr');
+  tr.innerHTML=
+    `<td class="wno"><input type="text" value="${esc(itemNo)||n}" placeholder="${n}" oninput="syncTemplate()"></td>`+
+    `<td><input type="text" value="${esc(desc)}" placeholder="Description…" oninput="syncTemplate()"></td>`+
+    `<td class="wunit"><select onchange="syncTemplate()">${opts}</select></td>`+
+    `<td class="tmpl-rate"><input type="number" class="rate-input" min="0" step="0.01" value="${esc(rate)}" placeholder="0.00" oninput="recalcTemplateCosts()"></td>`+
+    `<td class="tmpl-qty-col"><input type="number" class="rate-input" min="0" step="any" value="${esc(qty)}" placeholder="0" oninput="recalcTemplateCosts()"></td>`+
+    `<td class="tmpl-cost-cell zero" id="">—</td>`+
+    `<td class="tmpl-del"><button onclick="this.closest('tr').remove();syncTemplate();recalcTemplateCosts()" title="Remove row">×</button></td>`;
+  tbody.appendChild(tr);
+  syncTemplate();
+  recalcTemplateCosts();
+}
+
+function recalcTemplateCosts(){
+  let grandTotal=0;
+  let anyRate=false;
+  document.getElementById('tmpl-rows').querySelectorAll('tr').forEach(tr=>{
+    const inputs=tr.querySelectorAll('input');
+    const rateEl=inputs[2]; const qtyEl=inputs[3]; const costCell=tr.querySelectorAll('td')[5];
+    if(!costCell) return;
+    const rate=parseFloat(rateEl?.value)||0;
+    const qty=parseFloat(qtyEl?.value)||0;
+    if(rate>0||qty>0){ anyRate=true; }
+    const cost=rate*qty;
+    if(cost>0){
+      costCell.textContent='$'+cost.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+      costCell.className='tmpl-cost-cell';
+    } else {
+      costCell.textContent='—';
+      costCell.className='tmpl-cost-cell zero';
+    }
+    grandTotal+=cost;
+  });
+  const gt=document.getElementById('tmpl-grand-total');
+  if(gt){
+    if(grandTotal>0){
+      gt.textContent='$'+grandTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+      gt.className='tmpl-cost-cell';
+    } else {
+      gt.textContent='—';
+      gt.className='tmpl-cost-cell zero';
+    }
+  }
+}
+
+function syncTemplate(){
+  project.taskTemplate=[];
+  document.getElementById('tmpl-rows').querySelectorAll('tr').forEach(tr=>{
+    const inputs=tr.querySelectorAll('input,select');
+    project.taskTemplate.push({ itemNo:inputs[0]?.value||'', description:inputs[1]?.value||'', unit:inputs[2]?.value||'LS', unitRate:inputs[3]?.value||'', quantity:inputs[4]?.value||'' });
+  });
+}
+
+function loadTemplateToSidebar(tmpl){
+  document.getElementById('tmpl-rows').innerHTML='';
+  (tmpl||[]).forEach(t=>addTemplateRow(t.itemNo,t.description,t.unit,t.unitRate,t.quantity));
+}
+
+/* =====================================================================
+   LOG LIST
+===================================================================== */
+function renderLogList(){
+  const list=document.getElementById('log-list');
+  document.getElementById('log-count').textContent=project.logs.length;
+  if(!project.logs.length){ list.innerHTML='<div class="empty-logs">No logs yet.<br>Create one below.</div>'; return; }
+  const sorted=[...project.logs].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const inTmpl=document.getElementById('template-view').style.display!=='none';
+  list.innerHTML=sorted.map(log=>{
+    const dt=log.date?formatDate(log.date):'No date';
+    const bc=(log.borings||[]).filter(b=>b.boringNo).length;
+    const sub=bc?`${bc} boring${bc!==1?'s':''}`:(log.weather||'');
+    const isActive=log.id===activeLogId && !inTmpl;
+    return `<div class="log-item${isActive?' active':''}" onclick="switchToLog('${log.id}')">
+      <div><div class="log-item-date">${esc(dt)}</div>${sub?`<div class="log-item-sub">${esc(sub)}</div>`:''}</div>
+      <button class="log-item-del" onclick="event.stopPropagation();deleteLog('${log.id}')" title="Delete">×</button>
+    </div>`;
+  }).join('');
+}
+
+/* =====================================================================
+   LOG MANAGEMENT
+===================================================================== */
+function newLog(){
+  ensureUserInitials(); // P3-3
+  saveCurrentLogToState();
+  const log={ id:uid(), createdBy:getUserInitials(), createdAt:new Date().toISOString(),
+    modifiedBy:getUserInitials(), modifiedAt:new Date().toISOString(), date:'', weather:'', location:'', contractor:'', drillerName:'', tasks:[], borings:[], labor:[], equipment:[], idleEquipment:'', delays:'', safetyBriefing:{topics:'',time:''}, signatures:{crew:null,rkk:null,driller:null}, officialVisitors:'', rkkRepDate:'', drillerDate:'', notes:[] };
+  // Pre-populate tasks from template
+  if(project.taskTemplate&&project.taskTemplate.length){
+    log.tasks=project.taskTemplate.map(t=>({ itemNo:t.itemNo, description:t.description, qty:'', unit:t.unit, unitCustom:'' }));
+  }
+  project.logs.push(log);
+  activeLogId=log.id;
+  renderLogList();
+  loadLogToForm(log);
+  showLogForm(true);
+  // If no template tasks, seed empty rows
+  if(!log.tasks.length){ for(let i=0;i<8;i++) addTaskRow(); }
+  for(let i=0;i<4;i++) addBoringRow();
+  for(let i=0;i<3;i++) addLaborRow();
+  for(let i=0;i<3;i++) addEquipRow();
+  addNoteEntry();
+  recalcTotals();
+  markClean();
+  if(window.innerWidth<768) document.getElementById('sidebar').classList.remove('open');
+}
+
+function deleteLog(id){
+  if(!confirm('Delete this daily log? This cannot be undone.')) return;
+  project.logs=project.logs.filter(l=>l.id!==id);
+  if(activeLogId===id){ activeLogId=null; showLogForm(false); document.getElementById('log-save-bar').classList.add('hidden'); if(project.logs.length) switchToLog(project.logs[project.logs.length-1].id); }
+  renderLogList();
+}
+
+function switchToLog(id){
+  if(id===activeLogId && document.getElementById('log-form').style.display!=='none') return;
+  saveCurrentLogToState();
+  activeLogId=id;
+  const log=project.logs.find(l=>l.id===id); if(!log) return;
+  document.getElementById('template-view').style.display='none';
+  document.getElementById('btn-tmpl-sb').classList.remove('active');
+  loadLogToForm(log);
+  showLogForm(true);
+  renderLogList();
+  markClean();
+  if(window.innerWidth<768) document.getElementById('sidebar').classList.remove('open');
+}
+
+function showLogForm(show){
+  document.getElementById('log-form').style.display=show?'block':'none';
+  document.getElementById('empty-state').style.display=show?'none':'flex';
+  document.getElementById('log-save-bar').classList.toggle('hidden',!show);
+}
+
+/* =====================================================================
+   SAVE CURRENT LOG → STATE
+===================================================================== */
+function saveCurrentLogToState(){
+  if(!activeLogId) return;
+  const log=project.logs.find(l=>l.id===activeLogId); if(!log) return;
+  const gv=id=>{ const el=document.getElementById(id); return el?el.value:''; };
+  log.date=gv('f-date'); log.weather=gv('f-weather'); log.location=gv('f-location');
+  log.drillerName=gv('f-driller-name');
+  log.idleEquipment=gv('f-idle'); log.delays=gv('f-delays');
+  log.safetyBriefing={ topics:gv('f-safety-topics'), time:gv('f-safety-time') };
+  log.officialVisitors=gv('f-visitors'); log.rkkRepDate=gv('f-rkk-date'); log.drillerDate=gv('f-driller-date');
+  log.tasks=[];
+  document.getElementById('tasks-body').querySelectorAll('tr').forEach(tr=>{
+    const inputs=tr.querySelectorAll('input,select'); const sel=tr.querySelector('select'); const ci=tr.querySelector('.unit-custom');
+    const qtyEl=tr.querySelectorAll('input')[2];
+    log.tasks.push({ itemNo:inputs[0]?.value||'', description:inputs[1]?.value||'', qty:(!qtyEl||qtyEl.disabled)?'':qtyEl.value, unit:sel?.value||'LS', unitCustom:ci?.value||'' });
+  });
+  log.borings=[];
+  document.getElementById('borings-body').querySelectorAll('tr').forEach(tr=>{
+    const i=tr.querySelectorAll('input'); log.borings.push({ boringNo:i[0]?.value||'', depthEst:i[1]?.value||'', depthAct:i[2]?.value||'', notes:i[3]?.value||'' });
+  });
+  log.labor=[];
+  document.getElementById('labor-body').querySelectorAll('tr').forEach(tr=>{
+    const i=tr.querySelectorAll('input'); log.labor.push({ classification:i[0]?.value||'', onSite:i[1]?.value||'', offSite:i[2]?.value||'' });
+  });
+  log.equipment=[];
+  document.getElementById('equip-body').querySelectorAll('tr').forEach(tr=>{
+    const i=tr.querySelectorAll('input'); log.equipment.push({ classification:i[0]?.value||'', size:i[1]?.value||'', rigNo:i[2]?.value||'' });
+  });
+  log.notes=[];
+  document.getElementById('notes-entries').querySelectorAll('[data-note]').forEach(entry=>{
+    const i=entry.querySelectorAll('input,textarea'); log.notes.push({ time:i[0]?.value||'', note:i[1]?.value||'' });
+  });
+  log.signatures={ crew:getSigDataURL('sig-crew'), rkk:getSigDataURL('sig-rkk'), driller:getSigDataURL('sig-driller') };
+  // P3-3: audit trail
+  log.modifiedBy=getUserInitials(); log.modifiedAt=new Date().toISOString();
+  // also sync template
+  syncTemplate();
+}
+
+/* =====================================================================
+   LOAD LOG → FORM
+===================================================================== */
+function loadLogToForm(log){
+  const sv=(id,val)=>{ const el=document.getElementById(id); if(el) el.value=val||''; };
+  sv('f-proj-name',project.name); sv('f-proj-no',project.no); sv('f-contractor',project.contractor||'');
+  sv('f-date',log.date); sv('f-weather',log.weather); sv('f-location',log.location);
+  sv('f-contractor',log.contractor); sv('f-driller-name',log.drillerName);
+  sv('f-idle',log.idleEquipment); sv('f-delays',log.delays);
+  sv('f-safety-topics',log.safetyBriefing?.topics); sv('f-safety-time',log.safetyBriefing?.time);
+  sv('f-visitors',log.officialVisitors); sv('f-rkk-date',log.rkkRepDate); sv('f-driller-date',log.drillerDate);
+  taskRowCount=0;
+  document.getElementById('tasks-body').innerHTML='';
+  (log.tasks||[]).forEach(r=>addTaskRow(r.itemNo,r.description,r.qty,r.unit,r.unitCustom));
+  document.getElementById('borings-body').innerHTML='';
+  (log.borings||[]).forEach(r=>addBoringRow(r.boringNo,r.depthEst,r.depthAct,r.notes));
+  document.getElementById('labor-body').innerHTML='';
+  (log.labor||[]).forEach(r=>addLaborRow(r.classification,r.onSite,r.offSite));
+  document.getElementById('equip-body').innerHTML='';
+  (log.equipment||[]).forEach(r=>addEquipRow(r.classification,r.size,r.rigNo));
+  document.getElementById('notes-entries').innerHTML='';
+  (log.notes||[]).forEach(n=>addNoteEntry(n.time,n.note));
+  const sigs=log.signatures||{};
+  clearSig('sig-crew','wrap-crew'); clearSig('sig-rkk','wrap-rkk'); clearSig('sig-driller','wrap-driller');
+  if(sigs.crew)    setSigDataURL('sig-crew',   'wrap-crew',   sigs.crew);
+  if(sigs.rkk)     setSigDataURL('sig-rkk',    'wrap-rkk',    sigs.rkk);
+  if(sigs.driller) setSigDataURL('sig-driller','wrap-driller',sigs.driller);
+  recalcTotals();
+  window.scrollTo(0,0);
+}
+
+/* =====================================================================
+   SIGNATURE PAD
+===================================================================== */
+function initSigPad(cid,wid){
+  const canvas=document.getElementById(cid), wrap=document.getElementById(wid); if(!canvas||!wrap) return;
+  const ctx=canvas.getContext('2d'); let drawing=false;
+  function pos(e){ const r=canvas.getBoundingClientRect(),sx=canvas.width/r.width,sy=canvas.height/r.height,cx=e.clientX!==undefined?e.clientX:e.touches[0].clientX,cy=e.clientY!==undefined?e.clientY:e.touches[0].clientY; return{x:(cx-r.left)*sx,y:(cy-r.top)*sy}; }
+  function start(e){ e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); wrap.classList.add('has-sig'); sigPads[cid].hasData=true; markDirty(); }
+  function draw(e){ if(!drawing) return; e.preventDefault(); const p=pos(e); ctx.lineWidth=1.8; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#1a1f2e'; ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+  function stop(){ drawing=false; ctx.beginPath(); }
+  canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',draw); canvas.addEventListener('mouseup',stop); canvas.addEventListener('mouseleave',stop);
+  canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',draw,{passive:false}); canvas.addEventListener('touchend',stop);
+  sigPads[cid]={canvas,ctx,wrap,hasData:false};
+}
+function clearSig(cid,wid){ const p=sigPads[cid]; if(!p) return; p.ctx.clearRect(0,0,p.canvas.width,p.canvas.height); p.wrap.classList.remove('has-sig'); p.hasData=false; }
+function getSigDataURL(cid){ const p=sigPads[cid]; return(p&&p.hasData)?p.canvas.toDataURL('image/png'):null; }
+function setSigDataURL(cid,wid,url){ if(!url) return; const p=sigPads[cid]; if(!p) return; const img=new Image(); img.onload=()=>{ p.ctx.clearRect(0,0,p.canvas.width,p.canvas.height); p.ctx.drawImage(img,0,0,p.canvas.width,p.canvas.height); p.wrap.classList.add('has-sig'); p.hasData=true; }; img.src=url; }
+
+/* =====================================================================
+   TASKS TABLE
+===================================================================== */
+let taskRowCount=0;
+const UNITS=['LS','EA','LF','HR','Custom…'];
+function unitHTML(sel,cv){ sel=sel||'LS'; cv=cv||''; const opts=UNITS.map(u=>`<option value="${u}"${u===sel?' selected':''}>${u}</option>`).join(''); const show=sel==='Custom…'?'inline-block':'none'; return `<div class="unit-wrap"><select onchange="onUnitChange(this);recalcTotals()" style="width:auto;min-width:58px">${opts}</select><input class="unit-custom" type="text" placeholder="Type…" style="display:${show}" value="${esc(cv)}"></div>`; }
+function onUnitChange(sel){ const ci=sel.parentElement.querySelector('.unit-custom'); ci.style.display=sel.value==='Custom…'?'inline-block':'none'; if(sel.value==='Custom…') ci.focus(); }
+function addTaskRow(itemNo,desc,qty,unit,cu){
+  taskRowCount++;
+  const no=(itemNo!==undefined&&itemNo!=='') ? itemNo : taskRowCount;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td class="wno"><input type="text" value="${esc(no)}" oninput="recalcTotals()"></td>`+`<td><input type="text" value="${esc(desc)}" placeholder="Description…"></td>`+`<td class="wqty"><input type="number" min="0" step="any" value="${esc(qty)}" placeholder="0" oninput="recalcTotals()"></td>`+`<td class="wunit">${unitHTML(unit,cu)}</td>`+`<td class="total-cell zero">—</td>`+`<td class="rem-cell none">—</td>`;
+  document.getElementById('tasks-body').appendChild(tr);
+}
+function recalcTotals(){
+  const other={};
+  const otherUnit={};
+  const upToOther={}; // only logs with date ≤ active log's date (for Qty Remaining snapshot)
+  const activeLog=project.logs.find(l=>l.id===activeLogId);
+  const activeDate=activeLog?.date||'';
+  project.logs.forEach(log=>{ if(log.id===activeLogId) return; (log.tasks||[]).forEach(t=>{ const k=String(t.itemNo).trim(); if(!k) return; other[k]=(other[k]||0)+(parseFloat(t.qty)||0); if(t.unit) otherUnit[k]=t.unit;
+    // For Qty Remaining: only count logs on or before this log's date
+    if(!activeDate||!log.date||log.date<=activeDate){ upToOther[k]=(upToOther[k]||0)+(parseFloat(t.qty)||0); }
+  }); });
+  // Build template lookup for remaining qty
+  const tmplMap={};
+  (project.taskTemplate||[]).forEach(t=>{ const k=String(t.itemNo).trim(); if(k) tmplMap[k]={ quantity:parseFloat(t.quantity)||0, hasQty:t.quantity!==''&&t.quantity!==undefined&&t.quantity!==null }; });
+  document.getElementById('tasks-body').querySelectorAll('tr').forEach(tr=>{
+    const cells=tr.querySelectorAll('td'); if(cells.length<6) return;
+    const itemNo=cells[0].querySelector('input')?.value?.trim()||'';
+    const qtyInput=cells[2].querySelector('input');
+    const unitSel=cells[3].querySelector('select');
+    const tc=cells[4];
+    const rc=cells[5];
+    tr.classList.remove('row-claimed');
+    if(qtyInput){ qtyInput.classList.remove('qty-input'); qtyInput.disabled=false; qtyInput.title=''; }
+    if(!itemNo){ tc.textContent='—'; tc.className='total-cell zero'; rc.textContent='—'; rc.className='rem-cell none'; return; }
+    const qty=parseFloat(qtyInput?.value)||0;
+    const total=(other[itemNo]||0)+qty;
+    const currentUnit=unitSel?.value||otherUnit[itemNo]||'';
+    const isLS=currentUnit==='LS';
+    const otherTotal=other[itemNo]||0;
+    const isClaimed=isLS && otherTotal>=1;
+    if(isClaimed){
+      tr.classList.add('row-claimed');
+      if(qtyInput){ qtyInput.classList.add('qty-input'); qtyInput.disabled=true; qtyInput.value=''; qtyInput.title='LS item already claimed in another log'; }
+      tc.innerHTML='<span class="claimed-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Claimed</span>';
+      tc.className='total-cell';
+      rc.textContent='—'; rc.className='rem-cell none';
+    } else {
+      tc.textContent=total%1===0?total:total.toFixed(2);
+      tc.className=total>0?'total-cell':'total-cell zero';
+      // Remaining cell
+      const tmpl=tmplMap[itemNo];
+      if(tmpl&&tmpl.hasQty&&tmpl.quantity>0){
+        const totalUpToNow=(upToOther[itemNo]||0)+qty;
+        const rem=tmpl.quantity-totalUpToNow;
+        const dispRem=(rem%1===0?rem:rem.toFixed(2));
+        if(rem>0){ rc.textContent='+'+dispRem; rc.className='rem-cell under'; }
+        else if(rem===0){ rc.textContent='0'; rc.className='rem-cell exact'; }
+        else { rc.textContent=String(dispRem); rc.className='rem-cell over'; }
+      } else {
+        rc.textContent='—'; rc.className='rem-cell none';
+      }
+    }
+  });
+}
+
+/* =====================================================================
+   OTHER TABLES / NOTES
+===================================================================== */
+function addBoringRow(bno,est,act,notes){ const tbody=document.getElementById('borings-body'); const n=tbody.rows.length+1; const tr=document.createElement('tr'); tr.innerHTML=`<td><input type="text" value="${esc(bno)}" placeholder="B-${String(n).padStart(2,'0')}"></td><td class="wnr"><input type="text" value="${esc(est)}" placeholder="ft"></td><td class="wnr"><input type="text" value="${esc(act)}" placeholder="ft"></td><td><input type="text" value="${esc(notes)}" placeholder="Notes…"></td>`; tbody.appendChild(tr); }
+function addLaborRow(cls,on,off){ const tbody=document.getElementById('labor-body'); const n=tbody.rows.length+1; const tr=document.createElement('tr'); tr.innerHTML=`<td class="rn">${n}</td><td><input type="text" value="${esc(cls)}" placeholder="e.g. Driller"></td><td class="wnr"><input type="number" min="0" value="${esc(on)}" placeholder="0"></td><td class="wnr"><input type="number" min="0" value="${esc(off)}" placeholder="0"></td>`; tbody.appendChild(tr); }
+function addEquipRow(cls,size,rig){ const tbody=document.getElementById('equip-body'); const n=tbody.rows.length+1; const tr=document.createElement('tr'); tr.innerHTML=`<td class="rn">${n}</td><td><input type="text" value="${esc(cls)}" placeholder="e.g. CME-75"></td><td class="wnr"><input type="text" value="${esc(size)}" placeholder="—"></td><td class="wnr"><input type="text" value="${esc(rig)}" placeholder="—"></td>`; tbody.appendChild(tr); }
+function addNoteEntry(time,note){ const c=document.getElementById('notes-entries'); const d=document.createElement('div'); d.setAttribute('data-note','1'); d.style.cssText='display:grid;grid-template-columns:110px 1fr;gap:10px;margin-bottom:10px;align-items:start'; d.innerHTML=`<div class="fg"><label class="flabel">Time</label><input class="finput" type="time" value="${esc(time)}"></div><div class="fg"><label class="flabel">Note</label><textarea class="finput" placeholder="Note or remark…" style="min-height:60px">${esc(note)}</textarea></div>`; c.appendChild(d); }
+
+/* =====================================================================
+   PROJECT SUMMARY
+===================================================================== */
+let _summaryLogs = []; // all logs for current modal session, sorted by date
+
+function openSummary(){
+  saveCurrentLogToState();
+  _summaryLogs=[...project.logs].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  document.getElementById('summary-from').value='';
+  document.getElementById('summary-to').value='';
+  const label=[project.name,project.no].filter(Boolean).join(' — ')||'Unnamed Project';
+  document.getElementById('summary-title').textContent=`Project Summary · ${label}`;
+  renderSummaryTable(_summaryLogs);
+  document.getElementById('summary-modal').classList.add('open');
+}
+
+function getSummaryFilteredLogs(){
+  const from=document.getElementById('summary-from').value;
+  const to=document.getElementById('summary-to').value;
+  return _summaryLogs.filter(l=>{
+    if(!l.date) return true;
+    if(from&&l.date<from) return false;
+    if(to&&l.date>to) return false;
+    return true;
+  });
+}
+
+function updateSummaryFilter(){ renderSummaryTable(getSummaryFilteredLogs()); }
+
+function resetSummaryFilter(){
+  document.getElementById('summary-from').value='';
+  document.getElementById('summary-to').value='';
+  renderSummaryTable(_summaryLogs);
+}
+
+function renderSummaryTable(filteredLogs){
+  const itemMap={};
+  filteredLogs.forEach(log=>{ (log.tasks||[]).forEach(t=>{ const k=String(t.itemNo).trim(); if(!k) return; if(!itemMap[k]) itemMap[k]={description:t.description||'',unit:t.unit||'',byLog:{}}; if(t.description&&!itemMap[k].description) itemMap[k].description=t.description; itemMap[k].byLog[log.id]=(parseFloat(t.qty)||0); }); });
+  const items=Object.keys(itemMap).sort((a,b)=>parseFloat(a)-parseFloat(b)||a.localeCompare(b));
+  if(!items.length){ document.getElementById('summary-body').innerHTML='<div class="no-items">No task items logged yet.</div>'; return; }
+  const from=document.getElementById('summary-from').value;
+  const to=document.getElementById('summary-to').value;
+  const isFiltered=!!(from||to);
+  let rangeLabel='';
+  if(from||to){ rangeLabel=` · ${from?formatDate(from):'start'} – ${to?formatDate(to):'end'}`; }
+
+  // Build template lookup
+  const tmplMap={};
+  (project.taskTemplate||[]).forEach(t=>{ const k=String(t.itemNo).trim(); if(k) tmplMap[k]={ unitRate:parseFloat(t.unitRate)||0, quantity:parseFloat(t.quantity)||0, hasRate:t.unitRate!==''&&t.unitRate!==undefined, hasQty:t.quantity!==''&&t.quantity!==undefined }; });
+
+  function fmtCost(v){ return v>0?'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'; }
+  function fmtNum(v){ return v%1===0?String(v):v.toFixed(2); }
+
+  const dc=filteredLogs.map(l=>`<th>${l.date?formatDate(l.date):'No date'}</th>`).join('');
+
+  if(!isFiltered){
+    // ALL DATES MODE: show init qty, qty to date, remaining, cost to date
+    let totalSpend=0;
+    const rows=items.map(k=>{
+      const item=itemMap[k];
+      const qtyToDate=filteredLogs.reduce((s,l)=>s+(item.byLog[l.id]||0),0);
+      const qc=filteredLogs.map(l=>{ const v=item.byLog[l.id]; return v?`<td class="num">${fmtNum(v)}</td>`:'<td class="num" style="color:var(--border2)">—</td>'; }).join('');
+      const tmpl=tmplMap[k]||{};
+      const initQty=tmpl.hasQty?tmpl.quantity:null;
+      const unitRate=tmpl.hasRate?tmpl.unitRate:null;
+      const costToDate=unitRate!==null?qtyToDate*unitRate:null;
+      if(costToDate!==null) totalSpend+=costToDate;
+      const initCell=initQty!==null?`<td class="num">${fmtNum(initQty)}</td>`:'<td class="num" style="color:var(--border2)">—</td>';
+      let remCell;
+      if(initQty!==null){
+        const rem=initQty-qtyToDate;
+        if(rem>0) remCell=`<td class="rem-pos">${rem%1===0?rem:rem.toFixed(2)}</td>`;
+        else if(rem===0) remCell=`<td class="rem-zero">0</td>`;
+        else remCell=`<td class="rem-neg">${rem%1===0?rem:rem.toFixed(2)}</td>`;
+      } else { remCell='<td class="num" style="color:var(--border2)">—</td>'; }
+      const costCell=costToDate!==null?`<td class="cost">${fmtCost(costToDate)}</td>`:'<td class="num" style="color:var(--border2)">—</td>';
+      return `<tr><td class="num">${esc(k)}</td><td>${esc(item.description)||'<span style="color:var(--muted)">—</span>'}</td><td class="num">${esc(item.unit)||'—'}</td>${qc}<td class="tot">${fmtNum(qtyToDate)}</td>${initCell}${remCell}${costCell}</tr>`;
+    }).join('');
+    const spendFooter=totalSpend>0?`<tfoot><tr><td colspan="${3+filteredLogs.length+2}" style="text-align:right">Total Spend to Date</td><td class="spend">${fmtCost(totalSpend)}</td></tr></tfoot>`:'';
+    document.getElementById('summary-body').innerHTML=`<p style="font-size:12px;color:var(--muted);font-family:var(--cond);margin-bottom:12px">${filteredLogs.length} log${filteredLogs.length!==1?'s':''}${rangeLabel} · quantities by Item No.</p><table class="summary-table"><thead><tr><th class="left" style="width:60px">Item No.</th><th class="left">Description</th><th style="width:60px">Unit</th>${dc}<th style="width:80px">Qty to Date</th><th style="width:70px">Init. Qty</th><th style="width:80px">Remaining</th><th style="width:110px;text-align:right">Cost to Date</th></tr></thead><tbody>${rows}</tbody>${spendFooter}</table>`;
+  } else {
+    // DATE RANGE MODE: show qty in range and cost in range only
+    let totalSpend=0;
+    const rows=items.map(k=>{
+      const item=itemMap[k];
+      const qtyInRange=filteredLogs.reduce((s,l)=>s+(item.byLog[l.id]||0),0);
+      const qc=filteredLogs.map(l=>{ const v=item.byLog[l.id]; return v?`<td class="num">${fmtNum(v)}</td>`:'<td class="num" style="color:var(--border2)">—</td>'; }).join('');
+      const tmpl=tmplMap[k]||{};
+      const unitRate=tmpl.hasRate?tmpl.unitRate:null;
+      const costInRange=unitRate!==null?qtyInRange*unitRate:null;
+      if(costInRange!==null) totalSpend+=costInRange;
+      const costCell=costInRange!==null?`<td class="cost">${fmtCost(costInRange)}</td>`:'<td class="num" style="color:var(--border2)">—</td>';
+      return `<tr><td class="num">${esc(k)}</td><td>${esc(item.description)||'<span style="color:var(--muted)">—</span>'}</td><td class="num">${esc(item.unit)||'—'}</td>${qc}<td class="tot">${fmtNum(qtyInRange)}</td>${costCell}</tr>`;
+    }).join('');
+    const spendFooter=totalSpend>0?`<tfoot><tr><td colspan="${3+filteredLogs.length+1}" style="text-align:right">Total Spend for Period</td><td class="spend">${fmtCost(totalSpend)}</td></tr></tfoot>`:'';
+    document.getElementById('summary-body').innerHTML=`<p style="font-size:12px;color:var(--muted);font-family:var(--cond);margin-bottom:12px">${filteredLogs.length} log${filteredLogs.length!==1?'s':''}${rangeLabel} · quantities by Item No.</p><table class="summary-table"><thead><tr><th class="left" style="width:60px">Item No.</th><th class="left">Description</th><th style="width:60px">Unit</th>${dc}<th style="width:80px">Qty in Period</th><th style="width:110px;text-align:right">Cost in Period</th></tr></thead><tbody>${rows}</tbody>${spendFooter}</table>`;
+  }
+}
+
+function closeSummary(){ document.getElementById('summary-modal').classList.remove('open'); }
+document.getElementById('summary-modal').addEventListener('click',function(e){ if(e.target===this) closeSummary(); });
+
+function printSummaryFiltered(){
+  const filteredLogs=getSummaryFilteredLogs();
+  const itemMap={};
+  filteredLogs.forEach(log=>{ (log.tasks||[]).forEach(t=>{ const k=String(t.itemNo).trim(); if(!k) return; if(!itemMap[k]) itemMap[k]={description:t.description||'',unit:t.unit||'',byLog:{}}; if(t.description&&!itemMap[k].description) itemMap[k].description=t.description; itemMap[k].byLog[log.id]=(parseFloat(t.qty)||0); }); });
+  const items=Object.keys(itemMap).sort((a,b)=>parseFloat(a)-parseFloat(b)||a.localeCompare(b));
+  const projLabel=esc([project.name,project.no].filter(Boolean).join(' — ')||'Unnamed Project');
+  const contractor=project.contractor?`<div style="font-size:12px;color:#6b7490;margin-top:2px">Drilling Contractor: ${esc(project.contractor)}</div>`:'';
+  const from=document.getElementById('summary-from').value;
+  const to=document.getElementById('summary-to').value;
+  const isFiltered=!!(from||to);
+  let rangeStr='';
+  if(from||to){ rangeStr=` · ${from?formatDate(from):'start'} – ${to?formatDate(to):'end'}`; }
+  const dc=filteredLogs.map(l=>`<th>${l.date?formatDate(l.date):'No date'}</th>`).join('');
+  const tmplMap={};
+  (project.taskTemplate||[]).forEach(t=>{ const k=String(t.itemNo).trim(); if(k) tmplMap[k]={ unitRate:parseFloat(t.unitRate)||0, quantity:parseFloat(t.quantity)||0, hasRate:t.unitRate!==''&&t.unitRate!==undefined, hasQty:t.quantity!==''&&t.quantity!==undefined }; });
+  function fmtCost(v){ return v>0?'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'; }
+  function fmtNum(v){ return v%1===0?String(v):v.toFixed(2); }
+  let totalSpend=0;
+  let extraHeaders='';
+  const rows=items.length ? items.map(k=>{
+    const item=itemMap[k];
+    const tmpl=tmplMap[k]||{};
+    const unitRate=tmpl.hasRate?tmpl.unitRate:null;
+    const qc=filteredLogs.map(l=>{ const v=item.byLog[l.id]; return v?`<td>${fmtNum(v)}</td>`:'<td style="color:#ccc">—</td>'; }).join('');
+    if(!isFiltered){
+      const qtyToDate=filteredLogs.reduce((s,l)=>s+(item.byLog[l.id]||0),0);
+      const initQty=tmpl.hasQty?tmpl.quantity:null;
+      const costToDate=unitRate!==null?qtyToDate*unitRate:null;
+      if(costToDate!==null) totalSpend+=costToDate;
+      const initCell=initQty!==null?`<td>${fmtNum(initQty)}</td>`:'<td style="color:#ccc">—</td>';
+      let remCell; if(initQty!==null){ const rem=initQty-qtyToDate; const s=rem>0?'color:#1a7a5e':rem<0?'color:#c0392b':'color:#999'; remCell=`<td style="${s}">${fmtNum(rem)}</td>`; } else remCell='<td style="color:#ccc">—</td>';
+      return `<tr><td>${esc(k)}</td><td>${esc(item.description)||'—'}</td><td>${esc(item.unit)||'—'}</td>${qc}<td class="tot">${fmtNum(qtyToDate)}</td>${initCell}${remCell}<td class="tot" style="text-align:right">${fmtCost(costToDate)}</td></tr>`;
+    } else {
+      const qtyInRange=filteredLogs.reduce((s,l)=>s+(item.byLog[l.id]||0),0);
+      const costInRange=unitRate!==null?qtyInRange*unitRate:null;
+      if(costInRange!==null) totalSpend+=costInRange;
+      return `<tr><td>${esc(k)}</td><td>${esc(item.description)||'—'}</td><td>${esc(item.unit)||'—'}</td>${qc}<td class="tot">${fmtNum(qtyInRange)}</td><td class="tot" style="text-align:right">${fmtCost(costInRange)}</td></tr>`;
+    }
+  }).join('') : `<tr><td colspan="100" style="text-align:center;color:#999;padding:20px">No task items logged yet.</td></tr>`;
+  const spendLabel=isFiltered?'Total Spend for Period':'Total Spend to Date';
+  const spendColspan=isFiltered?3+filteredLogs.length+1:3+filteredLogs.length+3;
+  const spendRow=totalSpend>0?`<tr><td colspan="${spendColspan}" style="text-align:right;font-weight:700">${spendLabel}</td><td style="text-align:right;font-weight:700;color:#1a7a5e;background:#e6f4ef">${fmtCost(totalSpend)}</td></tr>`:'';
+  const extraTH=isFiltered?`<th style="width:80px">Qty in Period</th><th style="width:110px;text-align:right">Cost in Period</th>`:`<th style="width:80px">Qty to Date</th><th style="width:70px">Init. Qty</th><th style="width:80px">Remaining</th><th style="width:110px;text-align:right">Cost to Date</th>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Project Summary – ${projLabel}</title>
+  <style>
+    body{font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#1a1f2e;margin:0;padding:24px}
+    h1{font-size:16px;font-weight:700;letter-spacing:.5px;margin:0 0 2px}
+    .sub{font-size:11px;color:#6b7490;margin-bottom:16px}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th{background:#e8eef7;color:#1b4f8a;font-size:10px;letter-spacing:.7px;text-transform:uppercase;padding:7px 10px;border:1px solid #d0d5de;text-align:left;white-space:nowrap}
+    td{border:1px solid #d0d5de;padding:6px 10px;vertical-align:middle}
+    td:nth-child(n+4){text-align:center;font-family:monospace}
+    .tot{text-align:center;font-weight:700;color:#1b4f8a;background:#e8eef7;font-family:monospace}
+    tr:nth-child(even) td{background:#fafbfc}
+    tr:nth-child(even) .tot{background:#e8eef7}
+    @media print{body{padding:0} button{display:none}}
+  </style></head><body>
+  <h1>${projLabel}</h1>${contractor}
+  <div class="sub">${filteredLogs.length} log${filteredLogs.length!==1?'s':''}${rangeStr} · quantities by Item No. · printed ${new Date().toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'})}</div>
+  <table><thead><tr><th style="width:60px">Item No.</th><th>Description</th><th style="width:55px">Unit</th>${dc}${extraTH}</tr></thead><tbody>${rows}</tbody><tfoot>${spendRow}</tfoot></table>
+  <script>window.onload=()=>window.print()<\/script></body></html>`;
+  const w=window.open('','_blank','width=1000,height=650');
+  if(w){ w.document.write(html); w.document.close(); }
+}
+
+/* =====================================================================
+   SAVE / LOAD PROJECT JSON
+===================================================================== */
+function saveProjectJSON(){
+  saveCurrentLogToState();
+  const proj=project.no||'project', date=new Date().toISOString().slice(0,10);
+  const fn=`DailyLog_Project_${proj}_${date}.json`.replace(/[^a-z0-9_\-.]/gi,'_');
+  project.schemaVersion=DAILYLOG_SCHEMA_VERSION;
+  const blob=new Blob([JSON.stringify(project,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fn; a.click(); URL.revokeObjectURL(a.href);
+  showToast('Project JSON saved ✓','success');
+}
+function loadProjectJSON(event){
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ try{
+    const data=JSON.parse(e.target.result);
+    // HS-2/P2-3: whitelist-rebuild everything before it touches the app
+    project=sanitizeProject(data); activeLogId=null;
+    document.getElementById('sb-proj-name').value=project.name||'';
+    document.getElementById('sb-proj-no').value  =project.no||'';
+    document.getElementById('sb-contractor').value=project.contractor||'';
+    loadTemplateToSidebar(project.taskTemplate||[]);
+    updateTopbarContext(); renderLogList(); showLogForm(false);
+    document.getElementById('log-save-bar').classList.add('hidden');
+    if(project.logs&&project.logs.length){ const s=[...project.logs].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); switchToLog(s[0].id); }
+    showToast('Project loaded ✓','success');
+  }catch(err){ alert('Could not load project JSON: '+(err&&err.message?err.message:'invalid file')); } };
+  reader.readAsText(file); event.target.value='';
+}
+
+/* =====================================================================
+   AUTOSAVE (localStorage, every 5 min)
+===================================================================== */
+const AUTOSAVE_KEY='dailylog_autosave';
+const AUTOSAVE_MS=5*60*1000;
+
+function autosave(){
+  try{
+    if(!project.name&&!project.logs.length) return;
+    saveCurrentLogToState();
+    const snap={ _tool:'Daily Log', _version:'1.0', _schemaVersion:DAILYLOG_SCHEMA_VERSION, _saved:new Date().toISOString(), project:JSON.parse(JSON.stringify(project)), activeLogId };
+    // Strip signature data from autosave to avoid quota issues; they're preserved in manual JSON save
+    snap.project.logs.forEach(l=>{ if(l.signatures) l.signatures={crew:null,rkk:null,driller:null}; });
+    localStorage.setItem(AUTOSAVE_KEY,JSON.stringify(snap));
+    const el=document.getElementById('autosave-status');
+    const d=new Date(); const ts=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+    el.textContent='AUTOSAVED '+ts; el.style.opacity='1';
+    setTimeout(()=>{ el.style.opacity='.6'; el.textContent='AUTOSAVED '+ts; },3000);
+  }catch(e){ console.warn('Autosave failed',e); }
+}
+
+(function checkAutosave(){
+  try{
+    const raw=localStorage.getItem(AUTOSAVE_KEY); if(!raw) return;
+    const snap=JSON.parse(raw);
+    if(snap._tool!=='Daily Log'||!snap.project) return;
+    const ageMin=(Date.now()-new Date(snap._saved).getTime())/60000;
+    if(ageMin>1440) return; // ignore if older than 24h
+    window._pendingAutosave=snap;
+    setTimeout(showAutosaveBanner,700);
+  }catch(e){}
+})();
+
+function showAutosaveBanner(){
+  if(!window._pendingAutosave) return;
+  const snap=window._pendingAutosave;
+  const d=new Date(snap._saved);
+  const proj=snap.project?.name?` — ${esc(snap.project.name)}`:'';
+  const nlogs=snap.project?.logs?.length||0;
+  const time=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const date=d.toLocaleDateString([],{month:'short',day:'numeric'});
+  const banner=document.createElement('div');
+  banner.id='autosave-banner';
+  banner.style.cssText='position:fixed;bottom:56px;left:0;right:0;z-index:600;background:var(--accent);color:white;padding:9px 16px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--sans);box-shadow:0 -2px 10px rgba(0,0,0,.25)';
+  banner.innerHTML=`<span style="flex:1">⟳ Autosave found — ${date} ${time}${proj} (${nlogs} log${nlogs!==1?'s':''})</span>`+
+    `<button onclick="restoreAutosave()" style="background:white;color:var(--accent);border:none;padding:5px 12px;border-radius:3px;font-weight:700;cursor:pointer;font-size:12px;font-family:var(--cond);letter-spacing:.5px">Restore</button>`+
+    `<button onclick="dismissAutosaveBanner()" style="background:rgba(255,255,255,.18);color:white;border:1px solid rgba(255,255,255,.3);padding:5px 10px;border-radius:3px;cursor:pointer;font-size:12px;font-family:var(--cond)">Dismiss</button>`;
+  document.body.appendChild(banner);
+}
+
+function restoreAutosave(){
+  const snap=window._pendingAutosave; if(!snap) return;
+  try{
+    // HS-2: localStorage is untrusted — same whitelist rebuild as imports
+    project=sanitizeProject(snap.project); activeLogId=null;
+    document.getElementById('sb-proj-name').value=project.name||'';
+    document.getElementById('sb-proj-no').value  =project.no||'';
+    document.getElementById('sb-contractor').value=project.contractor||'';
+    loadTemplateToSidebar(project.taskTemplate||[]);
+    updateTopbarContext(); renderLogList(); showLogForm(false);
+    document.getElementById('log-save-bar').classList.add('hidden');
+    if(project.logs&&project.logs.length){
+      const aid=snap.activeLogId&&project.logs.find(l=>l.id===snap.activeLogId)?snap.activeLogId:project.logs[project.logs.length-1].id;
+      switchToLog(aid);
+    }
+    dismissAutosaveBanner();
+    showToast('Autosave restored ✓','success');
+  }catch(e){ showToast('Could not restore autosave','warn'); }
+}
+
+function dismissAutosaveBanner(){ const b=document.getElementById('autosave-banner'); if(b) b.remove(); window._pendingAutosave=null; }
+
+setInterval(autosave, AUTOSAVE_MS);
+
+/* =====================================================================
+   PRINT: HIDE EMPTY / PLACEHOLDER ROWS
+===================================================================== */
+window.addEventListener('beforeprint', function(){
+  // Borings: hide rows where boring number is blank
+  document.getElementById('borings-body').querySelectorAll('tr').forEach(tr=>{
+    const inputs=tr.querySelectorAll('input');
+    if(Array.from(inputs).every(i=>!i.value.trim())) tr.classList.add('print-empty');
+  });
+  // Labor: hide rows where classification is blank
+  document.getElementById('labor-body').querySelectorAll('tr').forEach(tr=>{
+    const inputs=tr.querySelectorAll('input');
+    if(Array.from(inputs).every(i=>!i.value.trim())) tr.classList.add('print-empty');
+  });
+  // Equipment: hide rows where classification is blank
+  document.getElementById('equip-body').querySelectorAll('tr').forEach(tr=>{
+    const inputs=tr.querySelectorAll('input');
+    if(Array.from(inputs).every(i=>!i.value.trim())) tr.classList.add('print-empty');
+  });
+  // Tasks: hide rows where both item no. and description are blank
+  document.getElementById('tasks-body').querySelectorAll('tr').forEach(tr=>{
+    const inputs=tr.querySelectorAll('input');
+    const itemNo=inputs[0]?.value?.trim()||'';
+    const desc=inputs[1]?.value?.trim()||'';
+    if(!itemNo&&!desc) tr.classList.add('print-empty');
+  });
+  // Notes: hide entries where both time and note text are blank
+  document.getElementById('notes-entries').querySelectorAll('[data-note]').forEach(entry=>{
+    const fields=entry.querySelectorAll('input,textarea');
+    if(Array.from(fields).every(f=>!f.value.trim())) entry.classList.add('print-empty');
+  });
+});
+window.addEventListener('afterprint', function(){
+  document.querySelectorAll('.print-empty').forEach(el=>el.classList.remove('print-empty'));
+});
+
+/* =====================================================================
+   INIT
+===================================================================== */
+initSigPad('sig-crew','wrap-crew');
+initSigPad('sig-rkk','wrap-rkk');
+initSigPad('sig-driller','wrap-driller');
+</script>
+<script>
+// P1-3: every tool registers the service worker so the whole suite
+// gets pre-cached for offline use no matter which page is opened first.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('Geotech Tools: service worker registered'))
+    .catch(e => console.warn('Geotech Tools: SW registration failed', e));
+}
+</script>
+</body>
+</html>

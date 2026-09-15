@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Downdrag / Neutral Plane Calculator</title>
+<link rel="manifest" href="manifest.json">
+<link href="fonts/fonts.css" rel="stylesheet">
+<style>
+:root{
+  --navy:#0c1f35;--navy2:#152d4a;--blue:#1d5fa8;--blue2:#2471c9;
+  --steel:#4a7daa;--amber:#d97706;--green:#166534;--red:#991b1b;--orange:#c2410c;
+  --bg:#f0f4f8;--bg2:#ffffff;--border:#c8d6e5;--text:#1a2b3c;--muted:#5a738a;
+  --mono:'IBM Plex Mono','Courier New',monospace;
+  --sans:'IBM Plex Sans','Segoe UI',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--text);line-height:1.5}
+
+/* HEADER */
+.header{background:var(--navy);color:#fff;border-bottom:3px solid var(--blue2)}
+.breadcrumb{padding:6px 24px;font-size:11px;font-family:var(--mono);color:var(--muted);background:#fff;border-bottom:1px solid var(--border)}
+.breadcrumb a{color:var(--blue2);text-decoration:none}
+.breadcrumb a:hover{text-decoration:underline}
+.header-inner{max-width:1280px;margin:0 auto;padding:15px 24px 12px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.header h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.header h1 span{color:#6db3f5}
+.header-sub{font-size:10.5px;color:#7a9fc0;margin-top:3px;font-family:var(--mono)}
+.hdr-actions{display:flex;gap:7px;align-items:center;flex-shrink:0}
+.hdr-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:3px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#c8ddf0;cursor:pointer;transition:background .15s;white-space:nowrap}
+.hdr-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.32)}
+.hdr-btn.save{border-color:#4ade80aa;color:#4ade80}
+.hdr-btn.save:hover{background:rgba(74,222,128,.12)}
+.hdr-btn.print{border-color:#93c5fdaa;color:#93c5fd}
+
+.container{max-width:1280px;margin:0 auto;padding:20px 20px 60px}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card-head{background:var(--navy2);color:#fff;padding:9px 16px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.card-head .lt{display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--blue2);flex-shrink:0}
+.card-head .ann{font-family:var(--mono);font-size:10px;color:#8fb8e0;text-transform:none;letter-spacing:0}
+.card-body{padding:16px}
+
+/* GRID / FIELDS */
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+label{display:block;font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+input[type=text],input[type=number],input[type=date],select{
+  width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:3px;
+  font-family:var(--mono);font-size:12.5px;color:var(--text);background:#fff;
+}
+input::placeholder{color:#b0bec5;font-style:italic}
+input:focus,select:focus{outline:2px solid var(--blue2);outline-offset:-1px}
+.field-note{font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+
+/* FORMULA BAR */
+.formula-bar{display:flex;gap:16px;flex-wrap:wrap;padding:10px 14px;background:var(--navy);border-radius:3px;font-family:var(--mono);font-size:10.5px;color:#6db3f5;margin-top:12px}
+.formula-bar span{white-space:nowrap}
+.formula-bar em{color:#a0c8f0;font-style:normal}
+
+/* STRATUM TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--navy2);color:#fff;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:7px 8px;text-align:left;white-space:nowrap}
+td{padding:5px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
+td input,td select{padding:4px 6px;font-size:12px}
+.strat-row td:first-child{border-left:4px solid var(--strat-color,#ccc)}
+.r{text-align:right}
+.c{text-align:center}
+.mini-btn{font-family:var(--mono);font-size:10.5px;padding:3px 9px;border-radius:3px;border:1px solid var(--border);background:#fff;color:var(--blue2);cursor:pointer}
+.mini-btn:hover{background:var(--bg)}
+.mini-btn.del{color:var(--red);border-color:#e8b4b4}
+.mini-btn.del:hover{background:#fdf0f0}
+
+/* RESULT PILLS */
+.pill-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+.pill{flex:1;min-width:190px;border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.pill-head{background:var(--navy2);color:#9fc3e8;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:6px 10px}
+.pill-body{padding:10px 10px;background:#fff}
+.pill-val{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--navy)}
+.pill-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+.pill-green .pill-head{background:#0e3d24;color:#7fe0a8}
+.pill-green .pill-val{color:var(--green)}
+.pill-red .pill-head{background:#3d0e0e;color:#f0a0a0}
+.pill-red .pill-val{color:var(--red)}
+
+/* NOTE BOXES */
+.note-box,.info-box,.warn-box{padding:10px 12px;border-radius:3px;font-size:12px;margin-top:12px;line-height:1.5}
+.note-box{background:#eef4fb;border:1px solid #c3d8ee;color:#1a3a5c}
+.info-box{background:#eef7f1;border:1px solid #bfe0cc;color:#164a2c}
+.warn-box{background:#fdf3e7;border:1px solid #edcd9c;color:#7a4a06}
+.note-box strong,.info-box strong,.warn-box strong{display:inline-block;margin-right:4px}
+
+/* CHART */
+.chart-wrap{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+svg.npchart{background:#fff;border:1px solid var(--border);border-radius:3px}
+
+/* REFERENCES */
+.ref-toggle{background:none;border:none;color:#9fc3e8;font-family:var(--mono);font-size:10.5px;cursor:pointer;text-transform:none;letter-spacing:0}
+.ref-body{display:none}
+.ref-body.open{display:block}
+.ref-table{margin-top:8px}
+.ref-table td,.ref-table th{font-size:11px}
+.eq{font-family:var(--mono);font-size:12px;background:#f4f8fc;border:1px solid var(--border);border-radius:3px;padding:8px 10px;margin:6px 0}
+
+@media print{
+  .hdr-actions,.mini-btn,#printModalOverlay{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>Downdrag / Neutral Plane Calculator <span>Method A · Fully Mobilized</span></h1>
+      <div class="header-sub">FHWA-NHI-16-009 (Hannigan et al. 2016) · Siegel et al. (2013) Unified Design · AASHTO LRFD §10.7.1.4 / §3.11.8</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="hdr-btn save" onclick="saveJSON()">&#8595; Save JSON</button>
+      <button class="hdr-btn" onclick="document.getElementById('loadInput').click()">&#8593; Load JSON</button>
+      <input type="file" id="loadInput" accept=".json" style="display:none" onchange="loadJSON(event)">
+      <button class="hdr-btn print" onclick="window.print()">&#9099; Print / PDF</button>
+    </div>
+  </div>
+</div>
+<div class="breadcrumb"><a href="index.html">&larr; Geotech Tools</a> &nbsp;/&nbsp; Downdrag / Neutral Plane Calculator</div>
+
+<div class="container">
+
+  <div class="warn-box">
+    <strong>Screening / Method A tool.</strong> This implements the fully-mobilized effective-stress (&beta;-method) neutral-plane
+    procedure per Hannigan et al. (2016) / Siegel et al. (2013) &mdash; the current FHWA/AASHTO-adopted approach. It does not
+    perform a partially-mobilized t-z/q-z (Method B / Fellenius Method 2) settlement-compatibility solve. Use for GER screening
+    and preliminary structural-demand estimates; verify governing cases against the project's licensed pile-settlement software.
+  </div>
+
+  <!-- PROJECT INFO -->
+  <div class="card">
+    <div class="card-head"><div class="lt"><span class="dot"></span>Project Information</div></div>
+    <div class="card-body">
+      <div class="grid g4">
+        <div><label>Project Name</label><input type="text" id="p-name" placeholder="Project name" oninput="markDirty()"></div>
+        <div><label>Project No.</label><input type="text" id="p-num" placeholder="Project number" oninput="markDirty()"></div>
+        <div><label>Location / Description</label><input type="text" id="p-loc" placeholder="City, State" oninput="markDirty()"></div>
+        <div><label>Pile / Foundation ID</label><input type="text" id="p-pile" placeholder="e.g. Pier 2, Pile Group A" oninput="markDirty()"></div>
+        <div><label>Prepared By</label><input type="text" id="p-prep" placeholder="Engineer name" oninput="markDirty()"></div>
+        <div><label>Date Prepared</label><input type="text" id="p-prepdate" placeholder="MM/DD/YYYY" oninput="markDirty()"></div>
+        <div><label>Checked By</label><input type="text" id="p-chk" placeholder="Engineer name" oninput="markDirty()"></div>
+        <div><label>Date Checked</label><input type="text" id="p-chkdate" placeholder="MM/DD/YYYY" oninput="markDirty()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PILE & LOADING -->
+  <div class="card">
+    <div class="card-head"><div class="lt"><span class="dot"></span>Pile Geometry &amp; Loading</div></div>
+    <div class="card-body">
+      <div class="grid g4">
+        <div>
+          <label>Pile Shape</label>
+          <select id="pileShape" onchange="onShapeChange();compute()">
+            <option value="circle">Circular (driven pipe / micropile / drilled shaft)</option>
+            <option value="square">Square (precast concrete)</option>
+            <option value="hpile">H-Pile (box perimeter)</option>
+            <option value="manual">Manual perimeter input</option>
+          </select>
+        </div>
+        <div id="dimBox"><label>Diameter / Width, B (in)</label><input type="number" id="pileDim" step="any" placeholder="e.g. 18" oninput="compute()"></div>
+        <div id="periBox" style="display:none"><label>Perimeter, per (ft)</label><input type="number" id="pilePeri" step="any" placeholder="e.g. 4.71" oninput="compute()"></div>
+        <div><label>Pile / Micropile Length, L (ft)</label><input type="number" id="pileLen" step="any" placeholder="e.g. 60" oninput="compute()"></div>
+        <div><label>Pile Toe Elevation (derived, ft)</label><input type="text" id="toeEL" readonly style="background:#f0f4f8;color:var(--navy)"></div>
+      </div>
+      <div class="grid g4" style="margin-top:12px">
+        <div><label>Total Service Reaction (kip)</label><input type="number" id="qTotal" step="any" placeholder="e.g. 250 &mdash; from Structures" oninput="compute()"></div>
+        <div><label>Live Load Portion (kip)</label><input type="number" id="qLL" step="any" placeholder="0 if N/A" oninput="compute()"></div>
+        <div><label>Sustained Dead Load, Q<sub>d</sub> (derived, kip)</label><input type="text" id="qd" readonly style="background:#f0f4f8;color:var(--navy);font-weight:700"></div>
+        <div><label>Pile / Footing Head Elevation (ft)</label><input type="number" id="headEL" step="any" placeholder="e.g. 371" oninput="compute()"></div>
+      </div>
+      <div class="formula-bar">
+        <span><em>Q<sub>d</sub> = Q<sub>total</sub> &minus; LL</em></span>
+        <span>Downdrag / neutral-plane analysis uses <em>Q<sub>d</sub></em> only &mdash; live load is excluded from the sustained load per Hannigan et al. (2016) / NCHRP 1112.</span>
+      </div>
+
+      <div class="note-box" style="margin-top:12px">
+        <strong>Reference Elevations &amp; Surcharge.</strong> Pile Head Elevation is the datum for depth = 0 in
+        the analysis (bottom of footing, matching your bond-calc convention). Everything below is measured against
+        it, including groundwater and the strata table. Surcharge from new fill is computed as a simple 1D uniform
+        stress increase (&gamma;<sub>fill</sub> &times; fill thickness) &mdash; not Boussinesq/2:1 spreading &mdash;
+        which is a reasonable simplification for a wide approach fill but should be revisited for narrow or
+        localized loading.
+      </div>
+      <div class="grid g4" style="margin-top:10px">
+        <div><label>Existing Ground Surface Elevation (ft)</label><input type="number" id="existEL" step="any" placeholder="e.g. 396" oninput="compute()"></div>
+        <div><label>Proposed (Future) Ground Surface Elevation (ft)</label><input type="number" id="propEL" step="any" placeholder="e.g. 398.5" oninput="compute()"></div>
+        <div><label>Overburden Unit Weight, Existing Grade to Pile Head (pcf)</label><input type="number" id="overburdenGamma" step="any" placeholder="e.g. 120" oninput="compute()"></div>
+        <div><label>Fill Unit Weight (pcf)</label><input type="number" id="fillGamma" step="any" placeholder="e.g. 125" oninput="compute()"></div>
+      </div>
+      <div class="grid g4" style="margin-top:10px">
+        <div><label>Groundwater Elevation (ft)</label><input type="number" id="gwtEL" step="any" placeholder="e.g. 388" oninput="compute()"></div>
+        <div><label>Embedment Depth (derived, ft)</label><input type="text" id="embedDepth" readonly style="background:#f0f4f8;color:var(--navy)"></div>
+        <div><label>Fill Thickness (derived, ft)</label><input type="text" id="fillThk" readonly style="background:#f0f4f8;color:var(--navy)"></div>
+        <div><label>&sigma;&prime;<sub>v</sub> at Pile Head (derived, ksf)</label><input type="text" id="sigV0" readonly style="background:#f0f4f8;color:var(--navy);font-weight:700"></div>
+      </div>
+      <div class="formula-bar">
+        <span><em>Embedment = Existing EL &minus; Head EL</em></span>
+        <span><em>Fill Thickness = Proposed EL &minus; Existing EL</em></span>
+        <span><em>&sigma;&prime;<sub>v0</sub> = &gamma;<sub>overburden,eff</sub>&middot;Embedment + &gamma;<sub>fill</sub>&middot;Fill Thickness</em></span>
+      </div>
+      <div class="grid g4" style="margin-top:12px">
+        <div><label>Ultimate Toe Resistance, R<sub>t</sub> (kip)</label><input type="number" id="rt" step="any" placeholder="from bearing/shaft calc" oninput="compute()"></div>
+        <div><label>Ultimate Positive Shaft Resist. Below Toe Layer (optional override, kip)</label><input type="number" id="rsOverride" step="any" placeholder="leave blank to use profile" oninput="compute()"></div>
+        <div>
+          <label>Micropile Type (§10.9.1, for presumptive &alpha;<sub>b</sub> strata)</label>
+          <select id="micropileType" onchange="onMicropileTypeChange()">
+            <option value="A">Type A (gravity-grouted)</option>
+            <option value="B">Type B (pressure-grouted, single pkr)</option>
+            <option value="C">Type C (pressure-grouted, 1&deg; stage)</option>
+            <option value="D">Type D (pressure-grouted, post-grout)</option>
+            <option value="E">Type E</option>
+          </select>
+        </div>
+        <div class="field-note" style="align-self:flex-end;padding-bottom:6px">Only used by strata set to "Presumptive &alpha;<sub>b</sub>" mode below &mdash; ignored for &beta;-method layers.</div>
+      </div>
+      <div class="field-note">R<sub>t</sub> should come from your bearing / rock-socket / drilled-shaft or micropile bond calculator for this pile &mdash; this tool does not independently derive toe capacity. For shaft/bond-dominated piles (e.g., Type A micropiles), enter 0 explicitly rather than leaving blank, so the assumption is documented.</div>
+
+      <div class="grid g3" style="margin-top:12px">
+        <div>
+          <label>Downdrag Method (AASHTO Table 3.4.1-2, &gamma;<sub>DD</sub>)</label>
+          <select id="ddMethod" onchange="onDDMethodChange();compute()">
+            <option value="tomlinson">Piles, &alpha;-Tomlinson Method (1.40 / 0.25)</option>
+            <option value="lambda">Piles, &lambda; Method (1.05 / 0.30)</option>
+            <option value="drilled">Drilled Shafts, O'Neill &amp; Reese (1.25 / 0.35)</option>
+            <option value="manual">Manual entry</option>
+          </select>
+        </div>
+        <div><label>&gamma;<sub>DD</sub> Max</label><input type="number" id="gDDmax" step="any" oninput="compute()"></div>
+        <div><label>&gamma;<sub>DC</sub> Max (dead load, Strength I)</label><input type="number" id="gDCmax" step="any" value="1.25" oninput="compute()"></div>
+      </div>
+
+      <div class="note-box" style="margin-top:12px">
+        <strong>Geotechnical Resistance Factors — below the neutral plane.</strong> Shaft and tip resistance use
+        separate &phi; values per AASHTO LRFD (methods rarely share the same factor), pulled from the table
+        matching the selected foundation type. Both remain editable — the dropdowns are a starting point, not a lock.
+      </div>
+      <div class="grid g3" style="margin-top:10px">
+        <div>
+          <label>Foundation Type (&phi; table basis)</label>
+          <select id="foundType" onchange="onFoundTypeChange()">
+            <option value="driven">Driven Pile — Table 10.5.5.2.3-1</option>
+            <option value="drilled">Drilled Shaft — Table 10.5.5.2.4-1</option>
+            <option value="micropile">Micropile — Table 10.5.5.2.5-1</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid g3" style="margin-top:10px">
+        <div>
+          <label>Shaft Resistance Method (below NP)</label>
+          <select id="shaftMethod" onchange="onResistMethodChange('shaft')"></select>
+        </div>
+        <div><label>&phi;<sub>shaft</sub></label><input type="number" id="phiShaft" step="any" placeholder="e.g. 0.45" oninput="compute()"></div>
+        <div class="field-note" style="align-self:center">Driven-pile side/end-bearing methods in Table 10.5.5.2.3-1 pair the same &phi; to both components &mdash; selecting a Shaft Method for Driven Pile auto-fills the paired Toe &phi; too (still overridable).</div>
+      </div>
+      <div class="grid g3" style="margin-top:10px">
+        <div>
+          <label>Toe / Tip Resistance Method</label>
+          <select id="toeMethod" onchange="onResistMethodChange('toe')"></select>
+        </div>
+        <div><label>&phi;<sub>toe</sub></label><input type="number" id="phiToe" step="any" placeholder="e.g. 0.45" oninput="compute()"></div>
+      </div>
+
+      <div class="formula-bar">
+        <span><em>Q<sub>u,Strength I</sub> = &gamma;<sub>DC</sub>&middot;Q<sub>d</sub> + &gamma;<sub>DD</sub>&middot;Q<sub>n</sub></em></span>
+        <span><em>R<sub>R</sub> = &phi;<sub>shaft</sub>&middot;R<sub>s,+ below NP</sub> + &phi;<sub>toe</sub>&middot;R<sub>t</sub></em></span>
+        <span>CDR = R<sub>R</sub> &divide; Q<sub>u,Strength I</sub></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOIL STRATA -->
+  <div class="card">
+    <div class="card-head">
+      <div class="lt"><span class="dot"></span>Soil Profile — &beta;-Coefficient Strata</div>
+      <button class="mini-btn" style="color:#9fc3e8;border-color:rgba(255,255,255,.3)" onclick="onAddLayerClick()">+ Add Layer</button>
+    </div>
+    <div class="card-body">
+      <table>
+        <thead>
+          <tr>
+            <th>Layer</th><th>Top EL (ft)</th><th>Bottom EL (ft)</th><th>Thickness (ft)</th>
+            <th>Moist &gamma; (pcf)</th><th>Method</th><th>&beta; / &alpha;<sub>b</sub> (ksf)</th>
+            <th>Contributes to Downdrag?</th><th>Notes</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="stratBody"></tbody>
+      </table>
+      <div class="formula-bar">
+        <span><em>&beta;-method: f<sub>s</sub> = &beta;&middot;&sigma;&prime;<sub>v</sub></em></span>
+        <span><em>Presumptive: f<sub>s</sub> = &alpha;<sub>b</sub></em> (fixed, not stress-scaled)</span>
+        <span>sign flips at neutral plane in both methods</span>
+      </div>
+      <div class="note-box">
+        <strong>Convention:</strong> layers marked "Contributes to Downdrag" generate <em>negative</em> skin friction above the
+        neutral plane; layers below the neutral plane always contribute positive shaft resistance. A layer can be excluded
+        entirely from the downdrag side by unchecking the box — it still contributes positive resistance below NP.
+        <strong>Method</strong> is set per layer: use <em>&beta;-method</em> for effective-stress driven-pile/drilled-shaft
+        analysis, or <em>Presumptive &alpha;<sub>b</sub></em> to enter a fixed AASHTO Table 10.9.3.5.2-1 bond value directly
+        (same basis as the project's micropile bond-zone calculators) without back-converting to an equivalent &beta;.
+      </div>
+
+      <div class="ref-toggle" style="color:var(--blue2);margin-top:10px" onclick="toggleAbRef()">Show &#9662; Presumptive &alpha;<sub>b</sub> Reference Table (AASHTO Table C10.9.3.5.2-1)</div>
+      <div id="abRefBody" style="display:none;margin-top:8px">
+        <table class="ref-table">
+          <thead><tr><th>Soil / Rock Description</th><th class="r">Type A (ksf)</th><th class="r">Type B (ksf)</th><th class="r">Type C (ksf)</th><th class="r">Type D (ksf)</th><th class="r">Type E (ksf)</th></tr></thead>
+          <tbody id="abRefTbody"></tbody>
+        </table>
+        <div class="field-note" style="margin-top:6px">Subset of Table C10.9.3.5.2-1 (soil rows + one representative rock row) mirrored from the project's Micropile Capacity Calculator so both tools cite the same source values. Add rows to <code>AB_DATA</code> in this file if additional rock types are needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="card">
+    <div class="card-head"><div class="lt"><span class="dot"></span>Results — Neutral Plane &amp; Drag Force</div></div>
+    <div class="card-body">
+      <div class="pill-row">
+        <div class="pill" id="pill-np"><div class="pill-head">Neutral Plane Depth</div><div class="pill-body"><div class="pill-val" id="np-val">——</div><div class="pill-sub">ft below pile head &middot; EL <span id="np-el">——</span></div></div></div>
+        <div class="pill" id="pill-qn"><div class="pill-head">Drag Force, Q<sub>n</sub></div><div class="pill-body"><div class="pill-val" id="qn-val">——</div><div class="pill-sub">kip (structural check only)</div></div></div>
+        <div class="pill" id="pill-max"><div class="pill-head">Max Axial Force in Pile</div><div class="pill-body"><div class="pill-val" id="max-val">——</div><div class="pill-sub">kip, unfactored — at neutral plane</div></div></div>
+        <div class="pill" id="pill-struct"><div class="pill-head">Factored Structural Demand</div><div class="pill-body"><div class="pill-val" id="struct-val">——</div><div class="pill-sub">kip, Strength I incl. drag force</div></div></div>
+      </div>
+      <div class="pill-row" style="margin-top:12px">
+        <div class="pill" id="pill-rr"><div class="pill-head">Factored Geotechnical Resistance, R<sub>R</sub></div><div class="pill-body"><div class="pill-val" id="rr-val">——</div><div class="pill-sub">kip, positive shaft (below NP) + toe</div></div></div>
+        <div class="pill" id="pill-cdr"><div class="pill-head">CDR (Geotechnical, below NP)</div><div class="pill-body"><div class="pill-val" id="cdr-val">——</div><div class="pill-sub">R<sub>R</sub> &divide; (&gamma;<sub>DC</sub>&middot;Q<sub>d</sub>)</div></div></div>
+      </div>
+      <div class="info-box" id="geoNote">
+        <strong>Geotechnical check note:</strong> per Hannigan et al. (2016) / Siegel et al. (2013), drag force is <em>not</em>
+        added to the geotechnical demand — only the sustained structure load (&gamma;<sub>DC</sub>&middot;Q<sub>d</sub>) is checked
+        against the factored resistance mobilized <em>below</em> the neutral plane. Drag force enters the structural
+        (axial strength) check only.
+      </div>
+
+      <div class="chart-wrap">
+        <svg id="npChart" class="npchart" viewBox="0 0 460 480" width="460" height="480"></svg>
+        <div style="flex:1;min-width:260px">
+          <table class="ref-table">
+            <thead><tr><th>Depth (ft)</th><th class="r">&sigma;&prime;<sub>v</sub> (ksf)</th><th class="r">Downward F (kip)</th><th class="r">Upward F (kip)</th></tr></thead>
+            <tbody id="profileBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERENCES -->
+  <div class="card">
+    <div class="card-head">
+      <div class="lt"><span class="dot"></span>References &amp; Method Notes</div>
+      <button class="ref-toggle" onclick="toggleRef()">Show &#9662;</button>
+    </div>
+    <div class="card-body ref-body" id="refBody">
+      <p><strong>Method A (fully mobilized, effective stress &beta;-method).</strong> The unfactored downward force curve is
+      built from the sustained dead load, Q<sub>d</sub>, adding accumulated negative skin friction (f<sub>n</sub> = &beta;&middot;&sigma;&prime;<sub>v</sub>)
+      down the pile. The unfactored upward force curve is built from the ultimate toe resistance, R<sub>t</sub>, adding
+      accumulated positive shaft resistance (f<sub>s</sub> = &beta;&middot;&sigma;&prime;<sub>v</sub>) up from the toe. Their intersection
+      is the neutral plane. This mirrors Fellenius's Unified Method Figure 2A / 3A construction (Fellenius, 2025) and is the
+      basis for the Siegel et al. (2013) LRFD "Unified Design" procedure adopted into FHWA-NHI-16-009.</p>
+      <div class="eq">Downward: F<sub>d</sub>(z) = Q<sub>d</sub> + &Sigma;<sub>0&rarr;z</sub> per&middot;&beta;&middot;&sigma;&prime;<sub>v</sub>&middot;&Delta;z</div>
+      <div class="eq">Upward: F<sub>u</sub>(z) = R<sub>t</sub> + &Sigma;<sub>L&rarr;z</sub> per&middot;&beta;&middot;&sigma;&prime;<sub>v</sub>&middot;&Delta;z</div>
+      <div class="eq">Neutral Plane: depth z<sub>n</sub> where F<sub>d</sub>(z<sub>n</sub>) = F<sub>u</sub>(z<sub>n</sub>); Q<sub>n</sub> = F<sub>d</sub>(z<sub>n</sub>) &minus; Q<sub>d</sub></div>
+
+      <p style="margin-top:10px"><strong>Mixed β / presumptive-α<sub>b</sub> profiles.</strong> Each stratum independently selects its
+      unit-resistance method. β-method layers scale with effective stress (σ&prime;<sub>v</sub>) as depth and groundwater
+      conditions change; presumptive α<sub>b</sub> layers use a fixed AASHTO Table 10.9.3.5.2-1 value regardless of depth,
+      matching how the project's micropile bond calculators are built. Mixing methods within one profile is intentional and
+      common — e.g., an overburden soil profile in β-method above a rock socket entered as presumptive α<sub>b</sub>.</p>
+
+      <p style="margin-top:10px"><strong>What this tool does not do:</strong> it does not run a Method B / t-z-q-z
+      settlement-compatibility loop (Fellenius's "Loop" procedure, Fig. 3), does not compute settlement below the pile toe
+      (equivalent-raft method), and does not perform pile-group interior/perimeter load distribution (Franke principle). Those
+      remain hand/software analyses per the referenced literature.</p>
+
+      <table class="ref-table" style="margin-top:10px">
+        <thead><tr><th>&gamma;<sub>DD</sub> Method</th><th class="r">Max</th><th class="r">Min</th></tr></thead>
+        <tbody>
+          <tr><td>Piles, &alpha;-Tomlinson Method</td><td class="r">1.40</td><td class="r">0.25</td></tr>
+          <tr><td>Piles, &lambda; Method</td><td class="r">1.05</td><td class="r">0.30</td></tr>
+          <tr><td>Drilled Shafts, O'Neill &amp; Reese (2010)</td><td class="r">1.25</td><td class="r">0.35</td></tr>
+        </tbody>
+      </table>
+      <div class="field-note" style="margin-top:6px">Verify &gamma;<sub>DD</sub> and &gamma;<sub>DC</sub> against the AASHTO LRFD edition and any DOT-specific modifications governing the project.</div>
+
+      <p style="margin-top:14px"><strong>Geotechnical Resistance Factors, &phi;</strong> &mdash; source tables for the Shaft/Toe Method dropdowns above. Both &phi; fields remain manually editable; the dropdowns populate a starting value only.</p>
+
+      <table class="ref-table" style="margin-top:8px">
+        <thead><tr><th colspan="2">Driven Piles &mdash; Table 10.5.5.2.3-1 (Nominal Bearing Resistance, Static Analysis)</th></tr></thead>
+        <tbody>
+          <tr><td>&alpha;-method (Tomlinson 1987; Skempton 1951) &mdash; clay/mixed, side &amp; end bearing</td><td class="r">0.35</td></tr>
+          <tr><td>&beta;-method (Esrig &amp; Kirby 1979; Skempton 1951) &mdash; clay/mixed, side &amp; end bearing</td><td class="r">0.25</td></tr>
+          <tr><td>&lambda;-method (Vijayvergiya &amp; Focht 1972; Skempton 1951) &mdash; clay/mixed, side &amp; end bearing</td><td class="r">0.40</td></tr>
+          <tr><td>Nordlund/Thurman Method (Hannigan et al. 2006) &mdash; sand, side &amp; end bearing</td><td class="r">0.45</td></tr>
+          <tr><td>SPT-method (Meyerhof) &mdash; sand, side &amp; end bearing</td><td class="r">0.30</td></tr>
+          <tr><td>CPT-method (Schmertmann 1970)</td><td class="r">0.50</td></tr>
+          <tr><td>End bearing in rock (Canadian Geotechnical Society 1985)</td><td class="r">0.45</td></tr>
+        </tbody>
+      </table>
+
+      <table class="ref-table" style="margin-top:10px">
+        <thead><tr><th colspan="2">Drilled Shafts &mdash; Table 10.5.5.2.4-1</th></tr></thead>
+        <tbody>
+          <tr><td>Side resistance in clay, &alpha;-method (Brown et al. 2010)</td><td class="r">0.45</td></tr>
+          <tr><td>Tip resistance in clay, Total Stress (Brown et al. 2010)</td><td class="r">0.40</td></tr>
+          <tr><td>Side resistance in sand, &beta;-method (Brown et al. 2010)</td><td class="r">0.55</td></tr>
+          <tr><td>Tip resistance in sand (Brown et al. 2010)</td><td class="r">0.50</td></tr>
+          <tr><td>Side resistance in cohesive IGMs (Brown et al. 2010)</td><td class="r">0.60</td></tr>
+          <tr><td>Tip resistance in cohesive IGMs (Brown et al. 2010)</td><td class="r">0.55</td></tr>
+          <tr><td>Side resistance in rock (Kulhawy et al. 2005 / Brown et al. 2010)</td><td class="r">0.55</td></tr>
+          <tr><td>Side resistance in rock (Carter &amp; Kulhawy 1988)</td><td class="r">0.50</td></tr>
+          <tr><td>Tip resistance in rock (Canadian Geotech. Society 1985 / Pressuremeter / Brown et al. 2010)</td><td class="r">0.50</td></tr>
+        </tbody>
+      </table>
+
+      <table class="ref-table" style="margin-top:10px">
+        <thead><tr><th colspan="2">Micropiles &mdash; Table 10.5.5.2.5-1 (Compression Resistance of Single Micropile)</th></tr></thead>
+        <tbody>
+          <tr><td>Side Resistance (Bond) &mdash; Presumptive Values (&sect;C10.9.3.5.2)</td><td class="r">0.55</td></tr>
+          <tr><td>Tip Resistance on Rock &mdash; O'Neill &amp; Reese (1999)</td><td class="r">0.50</td></tr>
+          <tr><td>Side &amp; Tip Resistance &mdash; Load Test (values per Table 10.5.5.2.3-1, capped at 0.70)</td><td class="r">&le; 0.70</td></tr>
+        </tbody>
+      </table>
+      <div class="field-note" style="margin-top:6px">Reproduced from the project's current AASHTO LRFD edition as provided; reverify against the governing edition/DOT amendments before use on a stamped deliverable.</div>
+
+      <p style="margin-top:12px"><strong>References</strong></p>
+      <ul style="margin-left:18px;font-size:12px;line-height:1.7">
+        <li>Hannigan, P.J., Rausche, F., Likins, G.E., Robinson, B.R., and Becker, M.L. (2016). <em>Design and Construction of Driven Pile Foundations</em>, FHWA-NHI-16-009, Volume I &amp; II. Federal Highway Administration.</li>
+        <li>Siegel, T.C., Lamb, R., Dasenbrock, D., and Axtell, P. (2013). Alternative Design Approach for Drag Load and Downdrag with the LRFD Framework. <em>Proc. 38th Annual Conf. on Deep Foundations</em>, DFI, Phoenix, AZ, pp. 23&ndash;39.</li>
+        <li>Coffman, R.A., Blanchard, J.D., Stuedlein, A.W., Jana, A., and Budge, A.S. (2024). <em>NCHRP Research Report 1112: Design of Piles for Downdrag.</em> Transportation Research Board.</li>
+        <li>Fellenius, B.H. (2025). Response of Pile Groups to Applied Load and General Subsidence per the Unified Method. Keynote Lecture, DFI-EFFC International Conference, Bruges, Belgium.</li>
+        <li>AASHTO (current edition). <em>LRFD Bridge Design Specifications</em>, Tables 10.5.5.2.3-1, 10.5.5.2.4-1, 10.5.5.2.5-1 (resistance factors), Table 3.4.1-2 (load factors), &sect;10.7.1.4 / &sect;3.11.8 (downdrag).</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// FIELD & STATE HELPERS (Build Spec §4.1–4.3)
+// ─────────────────────────────────────────────────────────────────────────────
+function numField(id, def){
+  const el = document.getElementById(id);
+  if(!el) return def;
+  const raw = el.value.trim();
+  if(raw === '') return def;
+  const v = parseFloat(raw);
+  return Number.isFinite(v) ? v : def;
+}
+function gv(id){ const e=document.getElementById(id); return e?e.value:''; }
+function sv(id,val){ const e=document.getElementById(id); if(!e) return; if(['INPUT','TEXTAREA','SELECT'].includes(e.tagName)) e.value=(val==null)?'':val; else e.innerHTML=(val==null)?'':val; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtN(n,d){ return (n==null||isNaN(n)||!isFinite(n))?'——':n.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d}); }
+
+let isDirty=false;
+function markDirty(){ isDirty=true; compute(); }
+window.addEventListener('beforeunload', e=>{ if(isDirty){ e.preventDefault(); e.returnValue=''; } });
+
+function toggleRef(){
+  const b=document.getElementById('refBody');
+  b.classList.toggle('open');
+  event.target.innerHTML = b.classList.contains('open') ? 'Hide &#9652;' : 'Show &#9662;';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PILE SHAPE / PERIMETER
+// ─────────────────────────────────────────────────────────────────────────────
+function onShapeChange(){
+  const shape = gv('pileShape');
+  document.getElementById('dimBox').style.display  = (shape==='manual') ? 'none' : '';
+  document.getElementById('periBox').style.display = (shape==='manual') ? '' : 'none';
+}
+function getPerimeterFt(){
+  const shape = gv('pileShape');
+  if(shape==='manual') return numField('pilePeri', null);
+  const Din = numField('pileDim', null);
+  if(Din==null) return null;
+  const Dft = Din/12;
+  if(shape==='circle') return Math.PI*Dft;
+  if(shape==='square') return 4*Dft;
+  if(shape==='hpile')  return 2*Dft; // box perimeter approx (flange+web loop) using nominal depth as governing dim
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOAD FACTOR PRESETS (AASHTO LRFD Table 3.4.1-2)
+// ─────────────────────────────────────────────────────────────────────────────
+const DD_PRESETS = {
+  tomlinson: {max:1.40, min:0.25},
+  lambda:    {max:1.05, min:0.30},
+  drilled:   {max:1.25, min:0.35}
+};
+function onDDMethodChange(){
+  const m = gv('ddMethod');
+  if(DD_PRESETS[m]) sv('gDDmax', DD_PRESETS[m].max);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRESUMPTIVE α_b DATA — subset of AASHTO Table C10.9.3.5.2-1, mirrored from
+// micropile-capacity-calculator.html so both tools cite the same source values.
+// Add rows here (matching that file's AB_DATA) if additional rock types are needed.
+// ─────────────────────────────────────────────────────────────────────────────
+const AB_DATA = [
+  { id:'silt-clay-soft',  rock:false, desc:'Silt & Clay (some sand) — soft, medium plastic',
+    vals:{ A:[0.7,1.4], B:[0.7,2.0], C:[0.7,2.5], D:[0.7,3.0], E:[0.7,2.0] } },
+  { id:'silt-clay-stiff', rock:false, desc:'Silt & Clay (some sand) — stiff, dense to very dense',
+    vals:{ A:[0.7,2.5], B:[1.4,4.0], C:[2.0,4.0], D:[2.0,4.0], E:[1.4,4.0] } },
+  { id:'sand-loose',      rock:false, desc:'Sand (some silt) — fine, loose–medium dense',
+    vals:{ A:[1.4,3.0], B:[1.4,4.0], C:[2.0,4.0], D:[2.0,5.0], E:[1.4,5.0] } },
+  { id:'sand-dense',      rock:false, desc:'Sand (some silt, gravel) — fine–coarse, medium–very dense',
+    vals:{ A:[2.0,4.5], B:[2.5,7.5], C:[3.0,7.5], D:[3.0,8.0], E:[2.5,7.5] } },
+  { id:'gravel',          rock:false, desc:'Gravel (some sand) — medium–very dense',
+    vals:{ A:[2.0,5.5], B:[2.5,7.5], C:[3.0,7.5], D:[3.0,8.0], E:[2.5,7.5] } },
+  { id:'glacial-till',    rock:false, desc:'Glacial Till (silt, sand, gravel) — medium–very dense, cemented',
+    vals:{ A:[2.0,4.0], B:[2.0,6.5], C:[2.5,6.5], D:[2.5,7.0], E:[2.0,6.5] } },
+  { id:'soft-shale',      rock:true,  desc:'Soft Shales — fresh–moderate fracturing, little to no weathering',
+    vals:{ A:[4.3,11.5], B:[4.3,11.5], C:[4.3,11.5], D:[4.3,11.5], E:[4.3,11.5] } }
+];
+
+function populateAbRefTable(){
+  const tbody = document.getElementById('abRefTbody');
+  if(!tbody) return;
+  tbody.innerHTML = AB_DATA.map(r=>{
+    const cells = ['A','B','C','D','E'].map(t=>{
+      if(r.rock && t!=='A') return '<td class="r">&mdash;</td>';
+      const [lo,hi]=r.vals[t];
+      return `<td class="r">${lo.toFixed(1)}&ndash;${hi.toFixed(1)}</td>`;
+    }).join('');
+    return `<tr><td>${esc(r.desc)}${r.rock?' <em style="color:var(--muted);font-size:10px">(rock, Type A only)</em>':''}</td>${cells}</tr>`;
+  }).join('');
+}
+function toggleAbRef(){
+  const b=document.getElementById('abRefBody');
+  const shown = b.style.display!=='none';
+  b.style.display = shown ? 'none' : 'block';
+  event.target.innerHTML = shown ? 'Show &#9662; Presumptive &alpha;<sub>b</sub> Reference Table (AASHTO Table C10.9.3.5.2-1)' : 'Hide &#9652; Presumptive &alpha;<sub>b</sub> Reference Table';
+}
+function onMicropileTypeChange(){ refreshAbDropdowns(); markDirty(); }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GEOTECHNICAL RESISTANCE FACTOR TABLES — AASHTO LRFD Tables 10.5.5.2.3-1,
+// 10.5.5.2.4-1, 10.5.5.2.5-1 (as provided from the current edition in use).
+// Driven-pile side/end-bearing methods share one φ per method per the table —
+// "pair" links the shaft selection to the matching toe entry automatically.
+// ─────────────────────────────────────────────────────────────────────────────
+const RESIST_TABLES = {
+  driven: {
+    label: 'Driven Piles — Table 10.5.5.2.3-1',
+    shaft: [
+      {id:'alpha',    label:'\u03B1-method (Tomlinson 1987; Skempton 1951) \u2014 clay/mixed soils', phi:0.35, pair:'alpha'},
+      {id:'beta',     label:'\u03B2-method (Esrig & Kirby 1979; Skempton 1951) \u2014 clay/mixed soils', phi:0.25, pair:'beta'},
+      {id:'lambda',   label:'\u03BB-method (Vijayvergiya & Focht 1972; Skempton 1951) \u2014 clay/mixed soils', phi:0.40, pair:'lambda'},
+      {id:'nordlund', label:'Nordlund/Thurman Method (Hannigan et al. 2006) \u2014 sand', phi:0.45, pair:'nordlund'},
+      {id:'spt',      label:'SPT-method (Meyerhof) \u2014 sand', phi:0.30, pair:'spt'},
+      {id:'cpt',      label:'CPT-method (Schmertmann 1970)', phi:0.50, pair:'cpt'}
+    ],
+    toe: [
+      {id:'alpha',    label:'\u03B1-method (paired w/ side, clay/mixed)', phi:0.35},
+      {id:'beta',     label:'\u03B2-method (paired w/ side, clay/mixed)', phi:0.25},
+      {id:'lambda',   label:'\u03BB-method (paired w/ side, clay/mixed)', phi:0.40},
+      {id:'nordlund', label:'Nordlund/Thurman (paired w/ side, sand)', phi:0.45},
+      {id:'spt',      label:'SPT-method (paired w/ side, sand)', phi:0.30},
+      {id:'cpt',      label:'CPT-method (paired w/ side)', phi:0.50},
+      {id:'rock',     label:'End bearing in rock (Canadian Geotech. Society 1985)', phi:0.45}
+    ]
+  },
+  drilled: {
+    label: 'Drilled Shafts — Table 10.5.5.2.4-1',
+    shaft: [
+      {id:'alpha-clay',  label:'\u03B1-method, side resistance in clay (Brown et al. 2010)', phi:0.45},
+      {id:'beta-sand',   label:'\u03B2-method, side resistance in sand (Brown et al. 2010)', phi:0.55},
+      {id:'igm-side',    label:'Side resistance in cohesive IGMs (Brown et al. 2010)', phi:0.60},
+      {id:'rock-kulhawy',label:'Side resistance in rock (Kulhawy et al. 2005 / Brown et al. 2010)', phi:0.55},
+      {id:'rock-carter', label:'Side resistance in rock (Carter & Kulhawy 1988)', phi:0.50}
+    ],
+    toe: [
+      {id:'clay-tip',  label:'Tip resistance in clay, Total Stress (Brown et al. 2010)', phi:0.40},
+      {id:'sand-tip',  label:'Tip resistance in sand (Brown et al. 2010)', phi:0.50},
+      {id:'igm-tip',   label:'Tip resistance in cohesive IGMs (Brown et al. 2010)', phi:0.55},
+      {id:'rock-tip',  label:'Tip resistance in rock (Canadian Geotech. Society 1985 / Pressuremeter / Brown et al. 2010)', phi:0.50}
+    ]
+  },
+  micropile: {
+    label: 'Micropiles — Table 10.5.5.2.5-1',
+    shaft: [
+      {id:'presumptive', label:'Side Resistance (Bond) \u2014 Presumptive Values (\u00A7C10.9.3.5.2)', phi:0.55},
+      {id:'loadtest',     label:'Side & Tip Resistance \u2014 Load Test (values per Table 10.5.5.2.3-1, capped at 0.70)', phi:0.70}
+    ],
+    toe: [
+      {id:'rock-oneill', label:'Tip Resistance on Rock \u2014 O\u2019Neill & Reese (1999)', phi:0.50},
+      {id:'loadtest',     label:'Side & Tip Resistance \u2014 Load Test (values per Table 10.5.5.2.3-1, capped at 0.70)', phi:0.70}
+    ]
+  }
+};
+
+function populateResistDropdown(kind){
+  // kind: 'shaft' or 'toe'
+  const foundType = gv('foundType') || 'driven';
+  const table = RESIST_TABLES[foundType];
+  const sel = document.getElementById(kind==='shaft' ? 'shaftMethod' : 'toeMethod');
+  const cur = sel.value;
+  const rows = table[kind];
+  sel.innerHTML = rows.map(r=>`<option value="${r.id}"${r.id===cur?' selected':''}>${esc(r.label)} (\u03C6=${r.phi.toFixed(2)})</option>`).join('');
+}
+function onFoundTypeChange(){
+  populateResistDropdown('shaft');
+  populateResistDropdown('toe');
+  onResistMethodChange('shaft');
+  onResistMethodChange('toe');
+  markDirty();
+}
+function onResistMethodChange(kind){
+  const foundType = gv('foundType') || 'driven';
+  const table = RESIST_TABLES[foundType];
+  const sel = document.getElementById(kind==='shaft' ? 'shaftMethod' : 'toeMethod');
+  const row = table[kind].find(r=>r.id===sel.value);
+  if(!row){ compute(); return; }
+  if(kind==='shaft'){
+    sv('phiShaft', row.phi);
+    // Driven-pile methods pair side + toe to the same φ per the table structure
+    if(foundType==='driven' && row.pair){
+      sv('toeMethod', row.pair);
+      const toeRow = table.toe.find(r=>r.id===row.pair);
+      if(toeRow) sv('phiToe', toeRow.phi);
+    }
+  } else {
+    sv('phiToe', row.phi);
+  }
+  compute();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STRATUM TABLE
+// ─────────────────────────────────────────────────────────────────────────────
+const STRAT_COLORS = ['#e0ecf7','#e3f2e6','#fdf0dc','#f6e3ec','#e5e0f5','#dff5f2','#f7e9d9','#e6ecd8'];
+let stratRows = [];
+let stratId = 0;
+
+function abDescOptionsHtml(selectedId){
+  const type = gv('micropileType') || 'A';
+  let h = '<option value="">— select description —</option>';
+  AB_DATA.forEach(r=>{
+    if(r.rock && type!=='A') return; // rock rows are Type A (gravity-grouted) only
+    const [lo,hi] = r.vals[type];
+    const sel = (r.id===selectedId) ? ' selected' : '';
+    h += `<option value="${r.id}"${sel}>${esc(r.desc)} (${lo.toFixed(1)}&ndash;${hi.toFixed(1)} ksf)</option>`;
+  });
+  return h;
+}
+function refreshAbDropdowns(){
+  stratRows.forEach(id=>{
+    const sel = document.getElementById('abdesc_'+id);
+    if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = abDescOptionsHtml(cur);
+  });
+}
+function onAbDescChange(id){
+  const sel = document.getElementById('abdesc_'+id);
+  const row = AB_DATA.find(r=>r.id===sel.value);
+  if(row){
+    const type = gv('micropileType') || 'A';
+    const [lo,hi] = row.vals[type];
+    sv('abval_'+id, ((lo+hi)/2).toFixed(2));
+  }
+  compute();
+}
+function onStratMethodChange(id){
+  const method = gv('mth_'+id);
+  document.getElementById('betaWrap_'+id).style.display = (method==='presumptive') ? 'none' : '';
+  document.getElementById('abWrap_'+id).style.display   = (method==='presumptive') ? '' : 'none';
+  compute();
+}
+
+function onTopChange(id){
+  updateThickness(id);
+  compute();
+}
+function onBotChange(id){
+  const val = document.getElementById('bot_'+id).value;
+  const idx = stratRows.indexOf(id);
+  if(idx>=0 && idx < stratRows.length-1){
+    const nextId = stratRows[idx+1];
+    const nextTop = document.getElementById('top_'+nextId);
+    if(nextTop){ nextTop.value = val; updateThickness(nextId); }
+  }
+  updateThickness(id);
+  compute();
+}
+function updateThickness(id){
+  const top = numField('top_'+id, null);
+  const bot = numField('bot_'+id, null);
+  const el = document.getElementById('thk_'+id);
+  if(!el) return;
+  el.textContent = (top!=null && bot!=null) ? (top-bot).toFixed(1) : '—';
+}
+function onAddLayerClick(){
+  let defTop = null;
+  if(stratRows.length>0){
+    const lastId = stratRows[stratRows.length-1];
+    const lastBot = document.getElementById('bot_'+lastId);
+    if(lastBot && lastBot.value!=='') defTop = lastBot.value;
+  }
+  addStratum(defTop, null, null, 'beta', null, null, null, true, '');
+}
+
+function addStratum(top, bot, gamma, method, beta, abDescId, abVal, active, notes){
+  method = method || 'beta';
+  const id = 'sr'+(stratId++)+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  stratRows.push(id);
+  const color = STRAT_COLORS[(stratRows.length-1) % STRAT_COLORS.length];
+  const tbody = document.getElementById('stratBody');
+  const tr = document.createElement('tr');
+  tr.className = 'strat-row';
+  tr.id = 'row_'+id;
+  tr.style.setProperty('--strat-color', color);
+  const thkInit = (top!=null && bot!=null && top!=='' && bot!=='') ? (parseFloat(top)-parseFloat(bot)).toFixed(1) : '—';
+  tr.innerHTML = `
+    <td class="c">${stratRows.length}</td>
+    <td><input type="number" step="any" id="top_${id}" value="${top??''}" oninput="onTopChange('${id}')"></td>
+    <td><input type="number" step="any" id="bot_${id}" value="${bot??''}" oninput="onBotChange('${id}')"></td>
+    <td class="c" id="thk_${id}" style="font-family:var(--mono);color:var(--muted)">${thkInit}</td>
+    <td><input type="number" step="any" id="gam_${id}" value="${gamma??''}" placeholder="e.g. 120" oninput="compute()"></td>
+    <td>
+      <select id="mth_${id}" onchange="onStratMethodChange('${id}')" style="min-width:118px">
+        <option value="beta" ${method==='beta'?'selected':''}>&beta;-method</option>
+        <option value="presumptive" ${method==='presumptive'?'selected':''}>Presumptive &alpha;<sub>b</sub></option>
+      </select>
+    </td>
+    <td>
+      <div id="betaWrap_${id}" style="display:${method==='presumptive'?'none':''}">
+        <input type="number" step="any" id="bet_${id}" value="${beta??''}" placeholder="&beta;, e.g. 0.30" oninput="compute()">
+      </div>
+      <div id="abWrap_${id}" style="display:${method==='presumptive'?'':'none'};min-width:210px">
+        <select id="abdesc_${id}" onchange="onAbDescChange('${id}')" style="margin-bottom:4px">${abDescOptionsHtml(abDescId)}</select>
+        <input type="number" step="any" id="abval_${id}" value="${abVal??''}" placeholder="&alpha;b, ksf (editable)" oninput="compute()">
+      </div>
+    </td>
+    <td class="c"><input type="checkbox" id="act_${id}" ${active===false?'':'checked'} onchange="compute()"></td>
+    <td><input type="text" id="not_${id}" value="${notes?esc(notes):''}" placeholder="soil type / description" oninput="markDirty()"></td>
+    <td class="c"><button class="mini-btn del" onclick="removeStratum('${id}')">&times;</button></td>
+  `;
+  tbody.appendChild(tr);
+  compute();
+}
+function removeStratum(id){
+  stratRows = stratRows.filter(x=>x!==id);
+  const row = document.getElementById('row_'+id);
+  if(row) row.remove();
+  // renumber
+  document.querySelectorAll('#stratBody tr').forEach((tr,i)=>{ tr.querySelector('td:first-child').textContent = i+1; });
+  markDirty();
+}
+function getStrata(){
+  return stratRows.map(id=>{
+    const method = gv('mth_'+id) || 'beta';
+    return {
+      id, topEL: numField('top_'+id,null), botEL: numField('bot_'+id,null),
+      gamma: numField('gam_'+id,null),
+      method,
+      beta: numField('bet_'+id,null),
+      abDescId: gv('abdesc_'+id),
+      abVal: numField('abval_'+id,null),
+      active: document.getElementById('act_'+id) ? document.getElementById('act_'+id).checked : true
+    };
+  }).filter(s=>s.topEL!=null && s.botEL!=null && s.topEL>s.botEL);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CORE CALC ENGINE — Method A, fully-mobilized β-method
+// ─────────────────────────────────────────────────────────────────────────────
+const GAMMA_W = 62.4/1000; // kcf
+
+function stratumAt(strata, z){
+  for(const s of strata) if(z >= s.top - 1e-9 && z <= s.bot + 1e-9) return s;
+  return null;
+}
+
+// Unit skin friction (ksf) for a stratum at a given mid-depth effective stress.
+// β-method scales with σ'v; presumptive method uses a fixed α_b value regardless of depth.
+function unitFsAt(s, sigMid){
+  if(!s) return null;
+  if(s.method==='presumptive') return (s.abVal!=null) ? s.abVal : null;
+  return (s.beta!=null) ? s.beta*sigMid : null;
+}
+
+function updateQd(){
+  const total = numField('qTotal', null);
+  const ll = numField('qLL', 0);
+  const qd = (total!=null) ? Math.max(total-ll, 0) : null;
+  sv('qd', qd!=null ? qd.toFixed(1) : '');
+  return qd;
+}
+
+// Reference elevations: embedment (existing grade -> pile head), new-fill surcharge, and the
+// resulting starting effective stress at the pile head (depth = 0 in the analysis below).
+// Surcharge is treated as a simple 1D uniform stress increase, not Boussinesq/2:1 spreading.
+function updateReferenceCalcs(){
+  const headEL = numField('headEL', null);
+  const existEL = numField('existEL', null);
+  const propEL = numField('propEL', null);
+  const overburdenGamma = numField('overburdenGamma', null);
+  const fillGamma = numField('fillGamma', null);
+  const gwtEL = numField('gwtEL', null);
+  const pileLen = numField('pileLen', null);
+
+  let embedDepth = null, fillThk = null, sigV0 = null, toeEL = null;
+
+  if(headEL!=null && existEL!=null) embedDepth = existEL - headEL;
+  if(existEL!=null && propEL!=null) fillThk = propEL - existEL;
+
+  if(embedDepth!=null && embedDepth>0 && overburdenGamma!=null){
+    const gammaMoist = overburdenGamma/1000;
+    if(gwtEL!=null){
+      const moistThk = Math.max(existEL - Math.max(gwtEL, headEL), 0);
+      const buoyThk  = Math.max(Math.min(gwtEL, existEL) - headEL, 0);
+      const gammaBuoy = Math.max(gammaMoist - GAMMA_W, 0);
+      sigV0 = gammaMoist*moistThk + gammaBuoy*buoyThk;
+    } else {
+      sigV0 = gammaMoist*embedDepth;
+    }
+  } else if(embedDepth!=null){
+    sigV0 = 0; // pile head at or above existing grade — no embedment overburden
+  }
+
+  if(fillThk!=null && fillThk>0 && fillGamma!=null){
+    sigV0 = (sigV0??0) + (fillGamma/1000)*fillThk;
+  }
+
+  if(headEL!=null && pileLen!=null) toeEL = headEL - pileLen;
+
+  sv('embedDepth', embedDepth!=null ? embedDepth.toFixed(1) : '');
+  sv('fillThk', fillThk!=null ? fillThk.toFixed(1) : '');
+  sv('sigV0', sigV0!=null ? sigV0.toFixed(3) : '');
+  sv('toeEL', toeEL!=null ? toeEL.toFixed(1) : '');
+
+  return {headEL, gwtEL, sigV0};
+}
+
+// Build a fine depth grid across all strata boundaries + pile length, then compute
+// sigma'v profile and cumulative Fdown/Fup curves.
+function runAnalysis(){
+  const ref = updateReferenceCalcs();
+  const headEL = ref.headEL;
+  const rawStrata = getStrata();
+  // Convert elevation-based strata to depth-from-pile-head (depth 0 = pile head = headEL)
+  const strata = rawStrata.map(s=>({
+    ...s,
+    top: (headEL!=null) ? headEL - s.topEL : null,
+    bot: (headEL!=null) ? headEL - s.botEL : null
+  })).filter(s=>s.top!=null && s.bot!=null).sort((a,b)=>a.top-b.top);
+
+  const L   = numField('pileLen', null);
+  const per = getPerimeterFt();
+  const Qd  = updateQd();
+  const Rt  = numField('rt', null);
+  const gwt = (headEL!=null && ref.gwtEL!=null) ? headEL - ref.gwtEL : null;
+  const sigV0 = ref.sigV0 ?? 0;
+  const rsOverride = numField('rsOverride', null);
+
+  if(headEL==null || !strata.length || L==null || per==null || Qd==null || Rt==null){
+    return {ok:false};
+  }
+
+  const dz = 0.25; // ft step
+  const depths = [];
+  for(let z=0; z<=L+1e-9; z+=dz) depths.push(Math.min(z,L));
+  if(depths[depths.length-1] < L) depths.push(L);
+
+  // sigma'v at each depth (cumulative from sigV0 at pile head, with buoyant weight below GWT)
+  const sigV = new Array(depths.length).fill(0);
+  sigV[0] = sigV0;
+  for(let i=1;i<depths.length;i++){
+    const zMid = (depths[i]+depths[i-1])/2;
+    const s = stratumAt(strata, zMid);
+    const gamma = s ? (s.gamma||0)/1000 : 0; // kcf
+    const gEff = (gwt!=null && zMid > gwt) ? Math.max(gamma-GAMMA_W,0) : gamma;
+    sigV[i] = sigV[i-1] + gEff*(depths[i]-depths[i-1]);
+  }
+
+  // downward cumulative force (Qd + accumulated negative skin friction), using each layer's beta,
+  // only for layers flagged active (contributes to downdrag)
+  const Fdown = new Array(depths.length).fill(0);
+  Fdown[0] = Qd;
+  for(let i=1;i<depths.length;i++){
+    const zMid=(depths[i]+depths[i-1])/2;
+    const s = stratumAt(strata, zMid);
+    let df = 0;
+    if(s && s.active){
+      const sigMid = (sigV[i]+sigV[i-1])/2;
+      const fs = unitFsAt(s, sigMid);
+      if(fs!=null) df = per * fs * (depths[i]-depths[i-1]);
+    }
+    Fdown[i] = Fdown[i-1] + df;
+  }
+
+  // upward cumulative force (Rt + accumulated positive shaft resistance), built from toe upward
+  const Fup = new Array(depths.length).fill(0);
+  Fup[depths.length-1] = Rt;
+  for(let i=depths.length-2;i>=0;i--){
+    const zMid=(depths[i]+depths[i+1])/2;
+    const s = stratumAt(strata, zMid);
+    let df = 0;
+    if(s){
+      const sigMid = (sigV[i]+sigV[i+1])/2;
+      const fs = unitFsAt(s, sigMid);
+      if(fs!=null) df = per * fs * (depths[i+1]-depths[i]);
+    }
+    Fup[i] = Fup[i+1] + df;
+  }
+
+  // find intersection (neutral plane): first index where Fdown crosses Fup (Fdown-Fup changes sign from - to +)
+  let npIdx = -1, npDepth=null, npForce=null;
+  const diff = depths.map((z,i)=>Fdown[i]-Fup[i]);
+  for(let i=1;i<depths.length;i++){
+    if((diff[i-1] < 0 && diff[i] >= 0) || (diff[i-1] <= 0 && diff[i] > 0)){
+      // linear interpolate
+      const t = diff[i-1] / (diff[i-1]-diff[i]);
+      npDepth = depths[i-1] + t*(depths[i]-depths[i-1]);
+      npForce = Fdown[i-1] + t*(Fdown[i]-Fdown[i-1]);
+      npIdx = i;
+      break;
+    }
+  }
+  // fallback: if curves never cross (e.g., downdrag exceeds toe+shaft everywhere, or vice versa),
+  // report the closest approach
+  if(npIdx===-1){
+    let bestI=0, bestD=Infinity;
+    diff.forEach((d,i)=>{ if(Math.abs(d)<bestD){bestD=Math.abs(d);bestI=i;} });
+    npDepth = depths[bestI]; npForce = Fdown[bestI];
+  }
+
+  const Qn = (npForce!=null) ? npForce - Qd : null;
+
+  // positive shaft resistance mobilized BELOW the neutral plane (for geotechnical resistance check)
+  let Rs_belowNP = null;
+  if(rsOverride!=null){
+    Rs_belowNP = rsOverride;
+  } else if(npDepth!=null){
+    // Rs below NP = Fup(npDepth) - Rt  (i.e., total upward curve value at NP minus toe alone)
+    // interpolate Fup at npDepth
+    let iLo=0; for(let i=0;i<depths.length-1;i++){ if(depths[i]<=npDepth) iLo=i; }
+    const iHi = Math.min(iLo+1, depths.length-1);
+    const span = depths[iHi]-depths[iLo];
+    const t = span>0 ? (npDepth-depths[iLo])/span : 0;
+    const FupAtNP = Fup[iLo] + t*(Fup[iHi]-Fup[iLo]);
+    Rs_belowNP = FupAtNP - Rt;
+  }
+
+  return {ok:true, depths, sigV, Fdown, Fup, npDepth, npForce, Qn, Rs_belowNP, Rt, Qd, L, per, headEL};
+}
+
+function compute(){
+  const r = runAnalysis();
+  const gDCmax = numField('gDCmax', 1.25);
+  const gDDmax = numField('gDDmax', null);
+  const phiShaft = numField('phiShaft', null);
+  const phiToe   = numField('phiToe', null);
+
+  if(!r.ok){
+    sv('np-val','——'); sv('np-el','——'); sv('qn-val','——'); sv('max-val','——'); sv('struct-val','——');
+    sv('rr-val','——'); sv('cdr-val','——');
+    document.getElementById('profileBody').innerHTML='';
+    drawChart(null);
+    return;
+  }
+
+  sv('np-val', fmtN(r.npDepth,1));
+  sv('np-el', (r.headEL!=null && r.npDepth!=null) ? fmtN(r.headEL-r.npDepth,1) : '——');
+  sv('qn-val', fmtN(r.Qn,1));
+  sv('max-val', fmtN(r.npForce,1));
+
+  let structDemand=null, RR=null, cdr=null, cdrGeo=null;
+  if(gDDmax!=null && r.Qn!=null){
+    structDemand = gDCmax*r.Qd + gDDmax*r.Qn;
+    sv('struct-val', fmtN(structDemand,1));
+  } else sv('struct-val','——');
+
+  if(phiShaft!=null && phiToe!=null && r.Rs_belowNP!=null && r.Rt!=null){
+    RR = phiShaft*r.Rs_belowNP + phiToe*r.Rt;
+    sv('rr-val', fmtN(RR,1));
+    const geoDemand = gDCmax*r.Qd;
+    cdrGeo = geoDemand>0 ? RR/geoDemand : null;
+    const cdrEl = document.getElementById('cdr-val');
+    if(cdrGeo!=null){
+      sv('cdr-val', fmtN(cdrGeo,2));
+      const pill = document.getElementById('pill-cdr');
+      pill.className = 'pill ' + (cdrGeo>=1.0 ? 'pill-green' : 'pill-red');
+    } else { sv('cdr-val','——'); document.getElementById('pill-cdr').className='pill'; }
+  } else { sv('rr-val','——'); sv('cdr-val','——'); document.getElementById('pill-cdr').className='pill'; }
+
+  // profile table (sample every ~10% of depths for readability)
+  const tbody = document.getElementById('profileBody');
+  tbody.innerHTML='';
+  const n = r.depths.length;
+  const step = Math.max(1, Math.floor(n/16));
+  for(let i=0;i<n;i+=step){
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${r.depths[i].toFixed(1)}</td><td class="r">${r.sigV[i].toFixed(3)}</td><td class="r">${r.Fdown[i].toFixed(1)}</td><td class="r">${r.Fup[i].toFixed(1)}</td>`;
+    tbody.appendChild(tr);
+  }
+  // ensure last row shown
+  if((n-1)%step!==0){
+    const i=n-1;
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${r.depths[i].toFixed(1)}</td><td class="r">${r.sigV[i].toFixed(3)}</td><td class="r">${r.Fdown[i].toFixed(1)}</td><td class="r">${r.Fup[i].toFixed(1)}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  drawChart(r);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHART — force vs depth (Fellenius Fig. 2A style)
+// ─────────────────────────────────────────────────────────────────────────────
+function drawChart(r){
+  const svg = document.getElementById('npChart');
+  const W=460,H=480, padL=55,padR=15,padT=15,padB=35;
+  if(!r){ svg.innerHTML = `<text x="${W/2}" y="${H/2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="#8ba3bb">Enter pile, load, and strata data to see the force-depth plot</text>`; return; }
+
+  const maxF = Math.max(...r.Fdown, ...r.Fup) * 1.08;
+  const maxZ = r.L;
+  const x = f => padL + (f/maxF)*(W-padL-padR);
+  const y = z => padT + (z/maxZ)*(H-padT-padB);
+
+  let s = '';
+  // axes
+  s += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#c8d6e5" stroke-width="1"/>`;
+  s += `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#c8d6e5" stroke-width="1"/>`;
+  s += `<text x="${(padL+W-padR)/2}" y="${H-8}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#5a738a">LOAD (kip)</text>`;
+  s += `<text x="14" y="${(padT+H-padB)/2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#5a738a" transform="rotate(-90 14 ${(padT+H-padB)/2})">DEPTH (ft)</text>`;
+
+  // gridlines / ticks (depth)
+  const zTicks = 6;
+  for(let i=0;i<=zTicks;i++){
+    const z = maxZ*i/zTicks;
+    const yy = y(z);
+    s += `<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#eef2f6" stroke-width="1"/>`;
+    s += `<text x="${padL-6}" y="${yy+3}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="#8ba3bb">${z.toFixed(0)}</text>`;
+  }
+  const fTicks=5;
+  for(let i=0;i<=fTicks;i++){
+    const f = maxF*i/fTicks;
+    const xx = x(f);
+    s += `<text x="${xx}" y="${H-padB+14}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#8ba3bb">${f.toFixed(0)}</text>`;
+  }
+
+  // Fdown curve
+  let pd = r.depths.map((z,i)=>`${x(r.Fdown[i])},${y(z)}`).join(' ');
+  s += `<polyline points="${pd}" fill="none" stroke="#991b1b" stroke-width="2"/>`;
+  // Fup curve
+  let pu = r.depths.map((z,i)=>`${x(r.Fup[i])},${y(z)}`).join(' ');
+  s += `<polyline points="${pu}" fill="none" stroke="#166534" stroke-width="2"/>`;
+
+  // neutral plane marker
+  if(r.npDepth!=null){
+    const yy=y(r.npDepth), xx=x(r.npForce);
+    s += `<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#2471c9" stroke-width="1" stroke-dasharray="4,3"/>`;
+    s += `<circle cx="${xx}" cy="${yy}" r="4" fill="#2471c9" stroke="#fff" stroke-width="1.5"/>`;
+    s += `<text x="${W-padR-4}" y="${yy-6}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="#2471c9" font-weight="700">NP: ${r.npDepth.toFixed(1)} ft</text>`;
+  }
+
+  // legend
+  s += `<rect x="${padL+6}" y="${padT+4}" width="10" height="3" fill="#991b1b"/><text x="${padL+20}" y="${padT+9}" font-family="IBM Plex Mono" font-size="9.5" fill="#5a738a">Downward (Q&#8203;d + NSF)</text>`;
+  s += `<rect x="${padL+6}" y="${padT+18}" width="10" height="3" fill="#166534"/><text x="${padL+20}" y="${padT+23}" font-family="IBM Plex Mono" font-size="9.5" fill="#5a738a">Upward (R&#8203;t + PSF)</text>`;
+
+  svg.innerHTML = s;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SAVE / LOAD JSON
+// ─────────────────────────────────────────────────────────────────────────────
+function saveJSON(){
+  const data = {
+    schemaVersion:4,
+    project:{
+      name:gv('p-name'), num:gv('p-num'), loc:gv('p-loc'), pile:gv('p-pile'),
+      prep:gv('p-prep'), prepdate:gv('p-prepdate'), chk:gv('p-chk'), chkdate:gv('p-chkdate')
+    },
+    pile:{
+      shape:gv('pileShape'), dim:gv('pileDim'), peri:gv('pilePeri'), len:gv('pileLen'),
+      headEL:gv('headEL'), existEL:gv('existEL'), propEL:gv('propEL'),
+      overburdenGamma:gv('overburdenGamma'), fillGamma:gv('fillGamma'), gwtEL:gv('gwtEL'),
+      qTotal:gv('qTotal'), qLL:gv('qLL'), rt:gv('rt'), rsOverride:gv('rsOverride'),
+      micropileType:gv('micropileType'),
+      ddMethod:gv('ddMethod'), gDDmax:gv('gDDmax'), gDCmax:gv('gDCmax'),
+      foundType:gv('foundType'), shaftMethod:gv('shaftMethod'), toeMethod:gv('toeMethod'),
+      phiShaft:gv('phiShaft'), phiToe:gv('phiToe')
+    },
+    strata: getStrata().map(s=>({
+      topEL:s.topEL, botEL:s.botEL, gamma:s.gamma, method:s.method, beta:s.beta,
+      abDescId:s.abDescId, abVal:s.abVal, active:s.active, notes:gv('not_'+s.id)
+    }))
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const nm = (gv('p-name')||'downdrag-analysis').replace(/[^a-z0-9\-_]+/gi,'_');
+  a.download = nm + '.json';
+  a.click();
+  isDirty = false;
+}
+
+function loadJSON(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const d = JSON.parse(e.target.result);
+      if(!d || ![1,2,3,4].includes(d.schemaVersion)) throw new Error('Unrecognized file format');
+      const p = d.project||{};
+      sv('p-name',p.name); sv('p-num',p.num); sv('p-loc',p.loc); sv('p-pile',p.pile);
+      sv('p-prep',p.prep); sv('p-prepdate',p.prepdate); sv('p-chk',p.chk); sv('p-chkdate',p.chkdate);
+      const pl = d.pile||{};
+      sv('pileShape', pl.shape||'circle'); onShapeChange();
+      sv('pileDim', pl.dim); sv('pilePeri', pl.peri); sv('pileLen', pl.len);
+      sv('rt', pl.rt); sv('rsOverride', pl.rsOverride);
+      sv('micropileType', pl.micropileType||'A');
+      sv('ddMethod', pl.ddMethod||'tomlinson'); sv('gDDmax', pl.gDDmax); sv('gDCmax', pl.gDCmax);
+      sv('foundType', pl.foundType||'driven'); populateResistDropdown('shaft'); populateResistDropdown('toe');
+      if(d.schemaVersion>=3){
+        sv('shaftMethod', pl.shaftMethod); sv('toeMethod', pl.toeMethod);
+        sv('phiShaft', pl.phiShaft); sv('phiToe', pl.phiToe);
+      } else {
+        // v1/v2 files stored a single combined "phi" — migrate to both shaft and toe as manual overrides
+        sv('phiShaft', pl.phi); sv('phiToe', pl.phi);
+      }
+      if(d.schemaVersion===1){ sv('qTotal', pl.qd); sv('qLL', 0); }
+      else { sv('qTotal', pl.qTotal); sv('qLL', pl.qLL); }
+
+      if(d.schemaVersion===4){
+        sv('headEL', pl.headEL); sv('existEL', pl.existEL); sv('propEL', pl.propEL);
+        sv('overburdenGamma', pl.overburdenGamma); sv('fillGamma', pl.fillGamma); sv('gwtEL', pl.gwtEL);
+      } else {
+        // v1–v3 files had no elevation datum — they implicitly treated pile head as depth 0 with no
+        // embedment and no fill. Migrate onto a synthetic 0-datum: headEL = existEL = propEL = 0,
+        // gwtEL = -oldGwtDepth. Results are numerically identical to the original file; only the
+        // reference elevations are placeholders the person should replace with real project elevations.
+        sv('headEL', 0); sv('existEL', 0); sv('propEL', 0);
+        sv('overburdenGamma', ''); sv('fillGamma', '');
+        const oldGwt = numField_raw(pl.gwt);
+        sv('gwtEL', oldGwt!=null ? (0 - oldGwt) : '');
+      }
+
+      document.getElementById('stratBody').innerHTML=''; stratRows=[]; stratId=0;
+      (d.strata||[]).forEach(s=>{
+        if(d.schemaVersion===4){
+          addStratum(s.topEL, s.botEL, s.gamma, s.method||'beta', s.beta, s.abDescId||null, s.abVal, s.active, s.notes);
+        } else {
+          // v1–v3 strata used depth-from-head (top/bot) — convert onto the synthetic 0-datum: EL = 0 - depth
+          const topEL = (s.top!=null) ? (0 - s.top) : null;
+          const botEL = (s.bot!=null) ? (0 - s.bot) : null;
+          addStratum(topEL, botEL, s.gamma, s.method||'beta', s.beta, s.abDescId||null, s.abVal, s.active, s.notes);
+        }
+      });
+
+      isDirty=false;
+      evt.target.value='';
+      compute();
+    }catch(err){ alert('Error loading file: '+err.message); }
+  };
+  reader.readAsText(file);
+}
+function numField_raw(v){
+  if(v==null || v==='') return null;
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+onShapeChange();
+onDDMethodChange();
+populateAbRefTable();
+onFoundTypeChange();
+sv('headEL', 100);
+sv('existEL', 100);
+sv('propEL', 100);
+sv('overburdenGamma', 120);
+sv('fillGamma', 125);
+sv('gwtEL', 92);
+addStratum(100,85,110,'beta',0.28,null,null,true,'Compressible fill / clay — downdrag zone');
+addStratum(85,60,125,'beta',0.35,null,null,true,'Medium dense sand');
+addStratum(60,40,130,'beta',0.45,null,null,false,'Dense sand / bearing stratum');
+compute();
+</script>
+</body>
+</html>

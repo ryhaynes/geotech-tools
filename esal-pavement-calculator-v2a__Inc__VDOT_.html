@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESAL & Pavement Design Calculator</title>
+<link rel="manifest" href="manifest.json">
+<link href="fonts/fonts.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+:root{
+  --navy:#0c1f35;--navy2:#152d4a;--blue:#1d5fa8;--blue2:#2471c9;
+  --steel:#4a7daa;--green:#166534;--red:#991b1b;--orange:#c2410c;
+  --bg:#f0f4f8;--bg2:#ffffff;--border:#c8d6e5;--text:#1a2b3c;--muted:#5a738a;
+  --mono:'IBM Plex Mono','Courier New',monospace;
+  --sans:'IBM Plex Sans','Segoe UI',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--text);line-height:1.5}
+
+/* HEADER */
+.header{background:var(--navy);color:#fff;border-bottom:3px solid var(--blue2)}
+.header-inner{max-width:1300px;margin:0 auto;padding:14px 24px 11px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.header h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.header h1 span{color:#6db3f5}
+.header-sub{font-size:10.5px;color:#7a9fc0;margin-top:3px;font-family:var(--mono)}
+.hdr-actions{display:flex;gap:7px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.hdr-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:3px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#c8ddf0;cursor:pointer;transition:background .15s;white-space:nowrap}
+.hdr-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.32)}
+.hdr-btn.save{border-color:#4ade80aa;color:#4ade80}
+.hdr-btn.save:hover{background:rgba(74,222,128,.12)}
+.hdr-btn.print-btn{border-color:#93c5fdaa;color:#93c5fd}
+.hdr-btn.print-btn:hover{background:rgba(147,197,253,.1)}
+.breadcrumb{padding:6px 24px;font-size:11px;font-family:var(--mono);color:var(--muted);background:#fff;border-bottom:1px solid var(--border)}
+.breadcrumb a{color:var(--blue2);text-decoration:none}
+.breadcrumb a:hover{text-decoration:underline}
+
+.container{max-width:1300px;margin:0 auto;padding:18px 20px 60px}
+
+/* PROJECT CARD */
+.proj-card{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+.proj-head{background:var(--navy2);color:#fff;padding:7px 16px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.proj-row{display:flex;gap:0;border-bottom:1px solid var(--border)}
+.proj-row:last-child{border-bottom:none}
+.proj-cell{display:flex;align-items:center;gap:10px;padding:9px 16px;flex:1;min-width:0}
+.proj-cell:not(:first-child){border-left:1px solid var(--border)}
+.proj-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.proj-input{border:none;border-bottom:1px solid transparent;background:transparent;font-family:var(--sans);font-size:13px;color:var(--text);padding:1px 4px;flex:1;min-width:0;outline:none}
+.proj-input:focus{border-bottom-color:var(--blue2)}
+.proj-input::placeholder{color:#b0bec5;font-style:italic}
+
+/* TABS */
+.tab-bar{display:flex;align-items:flex-end;gap:0;border-bottom:2px solid var(--navy2);margin-bottom:16px;flex-wrap:wrap}
+.tab-btn{padding:9px 22px;font-size:12px;font-weight:600;letter-spacing:.2px;border:1px solid var(--border);border-bottom:none;background:var(--bg);color:var(--muted);cursor:pointer;border-radius:3px 3px 0 0;margin-right:3px;margin-bottom:-2px;transition:background .12s,color .12s;white-space:nowrap;position:relative;z-index:0}
+.tab-btn:hover:not(.active){background:#e4ecf4;color:var(--navy)}
+.tab-btn.active{background:var(--navy2);color:#fff;border-color:var(--navy2);z-index:1}
+
+/* AGENCY SUB-TABS */
+.sub-tab-bar{display:flex;align-items:flex-end;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;flex-wrap:wrap}
+.sub-tab-btn{padding:6px 16px;font-size:11.5px;font-weight:600;border:1px solid var(--border);border-bottom:none;background:#f7f9fc;color:var(--muted);cursor:pointer;border-radius:3px 3px 0 0;margin-right:2px;margin-bottom:-2px;transition:all .12s;white-space:nowrap;position:relative;z-index:0}
+.sub-tab-btn:hover:not(.active){background:#e4ecf4;color:var(--navy)}
+.sub-tab-btn.active{background:var(--blue2);color:#fff;border-color:var(--blue2);z-index:1}
+.sub-tab-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-right:10px;align-self:center}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card-head{background:var(--navy2);color:#fff;padding:8px 16px;font-size:10.5px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-head-right{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--blue2);flex-shrink:0}
+.card-body{padding:16px 20px}
+
+/* FORM */
+.field-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px}
+.field-row:last-child{margin-bottom:0}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.field label em{font-style:italic;text-transform:none;letter-spacing:0;font-weight:400}
+select,input[type=number],input[type=text]{padding:6px 9px;border:1px solid var(--border);border-radius:3px;font-size:13px;font-family:var(--sans);color:var(--text);background:#fff}
+select:focus,input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(36,113,201,.12)}
+.computed{background:#f0f4f8;color:var(--navy);font-family:var(--mono);font-weight:600;cursor:default}
+.w48{width:48px}.w64{width:64px}.w80{width:80px}.w96{width:96px}.w120{width:120px}.w160{width:160px}.w200{width:200px}
+
+/* RESULT PILL */
+.result-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;margin-top:4px}
+.result-pill{border-radius:3px;overflow:hidden;border:1px solid var(--border);min-width:160px}
+.result-pill-head{padding:5px 12px;font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;background:var(--navy2);color:#fff}
+.result-pill-val{padding:10px 14px;font-family:var(--mono);font-size:26px;font-weight:700;color:var(--navy);background:var(--bg2);line-height:1.1}
+.result-pill-val .unit{font-size:13px;font-weight:400;color:var(--muted);margin-left:4px}
+.result-pill-sub{padding:4px 14px 8px;font-family:var(--mono);font-size:10.5px;color:var(--muted);background:var(--bg2)}
+.pill-green .result-pill-head{background:var(--green)}
+.pill-green .result-pill-val{color:var(--green)}
+.pill-red .result-pill-head{background:var(--red)}
+.pill-red .result-pill-val{color:var(--red)}
+
+/* TRAFFIC TABLE */
+.traf-table{width:100%;border-collapse:collapse;font-size:12px}
+.traf-table th{background:var(--navy2);color:#fff;padding:6px 8px;text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+.traf-table td{padding:4px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
+.traf-table tr:last-child td{border-bottom:none}
+.traf-table tr:nth-child(even) td{background:#f7f9fc}
+.traf-table input[type=number]{width:80px;padding:4px 6px;font-size:12px;font-family:var(--mono)}
+.traf-table select{padding:4px 6px;font-size:12px;max-width:280px;width:100%}
+.traf-val{font-family:var(--mono);font-weight:600;color:var(--navy);padding:4px 8px;text-align:right}
+.del-btn{background:none;border:none;color:#9cb4c8;cursor:pointer;font-size:16px;padding:0 4px;line-height:1;transition:color .1s}
+.del-btn:hover{color:var(--red)}
+.add-row-btn{background:none;border:1px dashed var(--border);border-radius:3px;padding:7px 16px;font-size:12px;font-weight:600;color:var(--blue2);cursor:pointer;margin-top:10px;transition:all .15s;font-family:var(--sans)}
+.add-row-btn:hover{border-color:var(--blue2);background:rgba(29,95,168,.05)}
+.pct-warn{color:var(--orange);font-size:10px;font-weight:600;margin-top:4px;display:none}
+
+/* LAYER TABLE */
+.layer-table{width:100%;border-collapse:collapse;font-size:12px}
+.layer-table th{background:var(--navy2);color:#fff;padding:6px 8px;text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+.layer-table td{padding:4px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
+.layer-table tr:last-child td{border-bottom:none}
+.layer-table input[type=number]{width:70px;padding:4px 6px;font-size:12px;font-family:var(--mono);text-align:center}
+.layer-table select{padding:4px 6px;font-size:12px}
+.layer-val{font-family:var(--mono);font-weight:600;color:var(--navy);text-align:center}
+.warn-cell{font-size:11px;font-weight:600;white-space:nowrap;text-align:center}
+.warn-ok{color:var(--green)}.warn-err{color:var(--red)}.warn-na{color:var(--muted)}
+/* Course row tints — match shear strength tool saturation */
+.row-surf td{background:#dbeafe!important;border-bottom-color:#93c5fd!important}
+.row-lev  td{background:#fef9c3!important;border-bottom-color:#fde047!important}
+.row-base td{background:#dcfce7!important;border-bottom-color:#86efac!important}
+.row-sub  td{background:#ede9fe!important;border-bottom-color:#c4b5fd!important}
+.row-surf,.row-lev,.row-base,.row-sub{border-left:4px solid transparent}
+.row-surf{border-left-color:#93c5fd}
+.row-lev {border-left-color:#fde047}
+.row-base{border-left-color:#86efac}
+.row-sub {border-left-color:#c4b5fd}
+.section-badge{font-size:9px;padding:2px 6px;border-radius:2px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+.badge-surf{background:#dbeafe;color:#1e3a8a}
+.badge-lev{background:#fef3c7;color:#78350f}
+.badge-base{background:#dcfce7;color:#14532d}
+.badge-sub{background:#f3e8ff;color:#581c87}
+
+/* SN PROGRESS */
+.sn-progress-wrap{margin-top:16px;padding:14px 18px;background:#f7f9fc;border:1px solid var(--border);border-radius:3px}
+.sn-progress-labels{display:flex;justify-content:space-between;font-size:11px;font-family:var(--mono);margin-bottom:6px}
+.sn-bar-outer{height:16px;background:#e2e8f0;border-radius:8px;overflow:visible;position:relative}
+.sn-bar-inner{height:100%;border-radius:8px;transition:width .3s,background .3s;background:var(--blue2);max-width:100%}
+.sn-bar-inner.bar-ok{background:#16a34a}
+.sn-bar-inner.bar-short{background:#dc2626}
+.sn-bar-req{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--navy);border-radius:1px;z-index:2}
+.sn-bar-req-label{position:absolute;top:-18px;font-size:9px;font-family:var(--mono);color:var(--navy);font-weight:700;transform:translateX(-50%);white-space:nowrap}
+.sn-status{margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sn-chip{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;font-family:var(--mono)}
+.sn-chip-ok{background:#dcfce7;color:var(--green)}
+.sn-chip-short{background:#fee2e2;color:var(--red)}
+.sn-chip-na{background:#f0f4f8;color:var(--muted)}
+
+/* CONDITION TOGGLE (active = LIGHT) */
+.cond-toggle{display:flex;gap:0;border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.cond-btn{padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;background:#f0f4f8;color:var(--muted);border:none;border-right:1px solid var(--border);transition:all .15s;font-family:var(--sans)}
+.cond-btn:last-child{border-right:none}
+.cond-btn.active{background:#fff;color:var(--blue2);box-shadow:inset 0 -2px 0 var(--blue2)}
+.cond-btn:hover:not(.active){background:#e8edf3}
+
+/* INFO BOX */
+.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:3px;padding:10px 14px;font-size:11.5px;color:#1e3a5f;margin-bottom:14px;line-height:1.6}
+.warn-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:3px;padding:10px 14px;font-size:11.5px;color:#7c2d12;margin-bottom:14px;line-height:1.6}
+
+/* EQ DISPLAY WRAP */
+.eq-wrap{display:none;margin-top:14px;border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.eq-wrap.has-eq{display:block}
+.eq-section-head{padding:5px 14px;font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);background:#f7f9fc;border-bottom:1px solid var(--border)}
+.eq-section-body{padding:8px 20px;overflow-x:auto;background:#fff}
+.eq-section-body+.eq-section-head{border-top:1px solid var(--border)}
+/* KaTeX override: keep display equations left-aligned */
+.eq-section-body .katex-display{margin:4px 0;text-align:left}
+
+/* EQ DISPLAY (old inline stats) */
+.eq-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+.eq-label{color:var(--muted);min-width:100px;flex-shrink:0}
+.eq-val{font-weight:600;color:var(--navy)}
+
+/* REFERENCE TABLES */
+.ref-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px}
+.ref-table th{background:var(--navy2);color:#fff;padding:6px 10px;text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.ref-table th.r{text-align:right}
+.ref-table td{padding:5px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11.5px}
+.ref-table td.l{font-family:var(--sans)}
+.ref-table tr:nth-child(even) td{background:#f7f9fc}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table td.r{text-align:right}
+
+/* PRINT MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.25);width:400px;overflow:hidden}
+.modal-head{background:var(--navy2);color:#fff;padding:14px 20px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;color:#7a9fc0;cursor:pointer;font-size:20px;line-height:1;padding:0}
+.modal-close:hover{color:#fff}
+.modal-body{padding:20px}
+.modal-prompt{font-size:12px;color:var(--muted);margin-bottom:14px}
+.modal-check-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:3px;margin-bottom:6px;cursor:pointer;transition:background .12s;user-select:none}
+.modal-check-row:hover{background:#f7f9fc}
+.modal-check-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue2);cursor:pointer;flex-shrink:0}
+.modal-check-row span{font-size:13px;font-weight:600;color:var(--text)}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-ok{flex:1;padding:9px;background:var(--navy2);color:#fff;border:none;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;font-family:var(--sans)}
+.modal-ok:hover{background:var(--navy)}
+.modal-cancel{flex:1;padding:9px;background:#f0f4f8;color:var(--muted);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.modal-cancel:hover{background:#e2e8f0;color:var(--text)}
+
+/* TAB CONTENT */
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* PRINT */
+@media print {
+  body{background:#fff;font-size:10px}
+  .header{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hdr-actions,.breadcrumb,.tab-bar,.add-row-btn,.del-btn,.modal-overlay,.cond-toggle{display:none!important}
+  .container{padding:6px 10px;max-width:100%}
+  .card,.proj-card{box-shadow:none;margin-bottom:8px}
+  .card-body{padding:10px 14px}
+  .card-head,.proj-head,.traf-table th,.layer-table th,.ref-table th,.result-pill-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .tab-content{display:none!important}
+  .tab-content.print-show{display:block!important}
+  .sn-bar-inner.bar-ok,.sn-bar-inner.bar-short{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .row-surf td,.row-lev td,.row-base td,.row-sub td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .row-surf{border-left-color:#93c5fd!important}
+  .row-lev {border-left-color:#fde047!important}
+  .row-base{border-left-color:#86efac!important}
+  .row-sub {border-left-color:#c4b5fd!important}
+  .sn-bar-req-label{display:none}
+  /* Scale KaTeX equations to fit letter width */
+  #esalEqInline,#flexEqSymbolicInline,#flexEqInline,
+  #rigidEqSymbolicInline,#rigidEqInline,#tgfEqDiv{
+    font-size:9px!important;
+    overflow:visible!important;
+  }
+  /* Prevent scrollbar artifacts in PDF */
+  .result-bar > div:last-child{overflow:visible!important}
+  /* Tighten result pills for print */
+  .result-pill-val{font-size:20px!important;padding:6px 10px!important}
+  .result-pill-sub{padding:2px 10px 6px!important}
+  .result-bar{gap:8px!important}
+}
+</style>
+</head>
+<body>
+
+<!-- PRINT MODAL -->
+<div class="modal-overlay" id="printModal">
+  <div class="modal">
+    <div class="modal-head">Print / Export PDF <button class="modal-close" onclick="closePrintModal()">✕</button></div>
+    <div class="modal-body">
+      <p class="modal-prompt">Select the sections you'd like to include:</p>
+      <label class="modal-check-row"><input type="checkbox" id="pESAL" checked><span>⎙ ESAL Calculator</span></label>
+      <label class="modal-check-row"><input type="checkbox" id="pFlex"><span>⎙ Flexible Pavement Design</span></label>
+      <label class="modal-check-row"><input type="checkbox" id="pRigid"><span>⎙ Rigid Pavement Design</span></label>
+      <label class="modal-check-row"><input type="checkbox" id="pRefs"><span>⎙ Reference Tables</span></label>
+      <div class="modal-actions">
+        <button class="modal-ok" onclick="doPrint()">OK — Print / Export</button>
+        <button class="modal-cancel" onclick="closePrintModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>ESAL &amp; <span>Pavement Design Calculator</span></h1>
+      <div class="header-sub">1993 AASHTO Guide for Design of Pavement Structures · MDOT Pavement &amp; Geotechnical Design Guide · VDOT Geotechnical &amp; Pavement Design Manual (2026)</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="hdr-btn save" onclick="saveJSON()">↓ Save JSON</button>
+      <button class="hdr-btn" onclick="document.getElementById('loadInput').click()">↑ Load JSON</button>
+      <input type="file" id="loadInput" accept=".json" style="display:none" onchange="loadJSON(event)">
+      <button class="hdr-btn print-btn" onclick="openPrintModal()">⎙ Print / PDF</button>
+    </div>
+  </div>
+</div>
+<div class="breadcrumb">
+  <a href="index.html">← Geotech Tools</a> &nbsp;/&nbsp; ESAL &amp; Pavement Design Calculator
+</div>
+
+<div class="container">
+
+<!-- PROJECT INFO -->
+<div class="proj-card" id="proj-card">
+  <div class="proj-head">Project Information</div>
+  <div class="proj-row">
+    <div class="proj-cell" style="flex:3">
+      <span class="proj-label">Project Name</span>
+      <input class="proj-input" id="pi-name" type="text" placeholder="Project Name" oninput="markDirty()">
+    </div>
+    <div class="proj-cell" style="flex:1.5">
+      <span class="proj-label">Project No.</span>
+      <input class="proj-input" id="pi-num" type="text" placeholder="Project Number" oninput="markDirty()">
+    </div>
+  </div>
+  <div class="proj-row">
+    <div class="proj-cell" style="flex:2.5">
+      <span class="proj-label">Prepared By</span>
+      <input class="proj-input" id="pi-by" type="text" placeholder="Engineer Name" oninput="markDirty()">
+    </div>
+    <div class="proj-cell" style="flex:1">
+      <span class="proj-label">Date</span>
+      <input class="proj-input" id="pi-date" type="text" placeholder="MM/DD/YYYY" oninput="markDirty()">
+    </div>
+    <div class="proj-cell" style="flex:2.5">
+      <span class="proj-label">Checked By</span>
+      <input class="proj-input" id="pi-chk" type="text" placeholder="Engineer Name" oninput="markDirty()">
+    </div>
+    <div class="proj-cell" style="flex:1">
+      <span class="proj-label">Date</span>
+      <input class="proj-input" id="pi-chkdate" type="text" placeholder="MM/DD/YYYY" oninput="markDirty()">
+    </div>
+  </div>
+  <div class="proj-row">
+    <div class="proj-cell">
+      <span class="proj-label">Pavement Location / Description</span>
+      <input class="proj-input" id="pi-loc" type="text" placeholder="e.g., Roadway segment description, station range, jurisdiction" oninput="markDirty()">
+    </div>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('esal',this)">ESAL Calculator</button>
+  <button class="tab-btn" onclick="showTab('flex',this)">Flexible Pavement</button>
+  <button class="tab-btn" onclick="showTab('rigid',this)">Rigid Pavement</button>
+  <button class="tab-btn" onclick="showTab('refs',this)">References &amp; Standards</button>
+</div>
+
+<!-- ═══════════════ ESAL TAB ═══════════════ -->
+<div class="tab-content active tab-esal" id="tab-esal">
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> Initial Design Parameters</div>
+    <div class="card-body" style="display:flex;gap:20px;align-items:center">
+      <div>
+        <div class="field-row" style="margin-bottom:0;flex-wrap:wrap">
+          <div class="field">
+            <label>Start Year</label>
+            <input type="number" class="w80" id="e-startYear" placeholder="——" min="1990" max="2100" oninput="calcESAL()">
+          </div>
+          <div class="field">
+            <label>Base-Year AADT <em>(veh/day)</em></label>
+            <input type="number" class="w120" id="e-aadt" placeholder="——" min="0" oninput="calcESAL()">
+          </div>
+          <div class="field">
+            <label>Traffic Growth Rate <em>(%/yr)</em></label>
+            <input type="number" class="w96" id="e-growth" placeholder="——" min="0" max="20" step="0.1" oninput="calcESAL()">
+          </div>
+          <div class="field">
+            <label>Design Life <em>(years)</em></label>
+            <input type="number" class="w80" id="e-life" placeholder="——" min="1" max="50" oninput="calcESAL()">
+          </div>
+          <div class="field">
+            <label>Future Year</label>
+            <input type="text" class="w80 computed" id="e-futureYear" readonly placeholder="——">
+          </div>
+          <div class="field">
+            <label>Traffic Growth Factor <span style="font-style:normal;font-weight:700;color:var(--blue2);letter-spacing:0">(TGF)</span></label>
+            <input type="text" class="w120 computed" id="e-tgf" readonly placeholder="——">
+          </div>
+        </div>
+      </div>
+      <div id="tgfEqPanel" style="display:none;flex:1;min-width:0;overflow-x:auto">
+        <div id="tgfEqDiv" style="font-size:11px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="dot"></span> Traffic Breakdown
+      <span class="card-head-right" style="font-size:10px;color:#7a9fc0;font-family:var(--mono)">ESAL = AADT × 365 × TGF × Σ(factor × dir% × lane% × vol%)</span>
+    </div>
+    <div class="card-body">
+      <div class="info-box">
+        Enter directional and lane distributions as percentages (e.g., 50 for 50%). Traffic volume percentages should sum to 100%.
+        ESAL equivalency factors from the <strong>1993 AASHTO Guide for Design of Pavement Structures</strong>.
+      </div>
+      <div style="overflow-x:auto">
+        <table class="traf-table" id="trafTable">
+          <thead>
+            <tr>
+              <th style="width:24px">#</th>
+              <th style="min-width:240px">Vehicle Type</th>
+              <th>ESAL Factor</th>
+              <th>Dir. Dist. (%)</th>
+              <th>Lane Dist. (%)</th>
+              <th>% of Traffic</th>
+              <th style="text-align:right">ESAL Contribution</th>
+              <th style="width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="trafBody"></tbody>
+        </table>
+      </div>
+      <div id="pctWarn" class="pct-warn">⚠ Traffic volume percentages sum to <span id="pctSum">0</span>% — should equal 100%.</div>
+      <button class="add-row-btn" onclick="addTrafRow()">+ Add Vehicle Type</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> ESAL Result</div>
+    <div class="card-body">
+      <div class="result-bar">
+        <div class="result-pill" id="esalPill">
+          <div class="result-pill-head">18-kip Design ESAL</div>
+          <div class="result-pill-val" id="esalVal">——</div>
+          <div class="result-pill-sub" id="esalLog">log₁₀(ESAL) = ——</div>
+        </div>
+        <div style="flex:1;min-width:0;padding-top:4px">
+          <div id="esalEqInline" style="display:none;font-size:11px;overflow-x:auto"></div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Notes</label>
+        <textarea id="e-notes" rows="2" style="width:100%;margin-top:4px;padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-family:var(--sans);font-size:12px;resize:vertical;color:var(--text)" placeholder="Additional notes..." oninput="markDirty()"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /esal tab -->
+
+<!-- ═══════════════ FLEXIBLE TAB ═══════════════ -->
+<div class="tab-content tab-flex" id="tab-flex">
+
+  <!-- Agency sub-tab bar -->
+  <div style="display:flex;align-items:center;gap:0;margin-bottom:16px">
+    <span class="sub-tab-label">Agency:</span>
+    <div class="sub-tab-bar" style="margin-bottom:0;border-bottom:none;flex:none">
+      <button class="sub-tab-btn active" id="flexAgencyMDOT" onclick="showFlexAgency('mdot',this)">MDOT</button>
+      <button class="sub-tab-btn" id="flexAgencyVDOT" onclick="showFlexAgency('vdot',this)">VDOT</button>
+    </div>
+  </div>
+
+  <!-- VDOT Quick-Fill card (shown in VDOT mode only) -->
+  <div class="card" id="vdotFlexCard" style="display:none">
+    <div class="card-head"><span class="dot"></span> VDOT Highway Classification &amp; Default Parameters
+      <span class="card-head-right" style="font-size:9.5px;color:#7a9fc0;font-family:var(--mono)">VDOT Geotechnical &amp; Pavement Design Manual §3.4.2</span>
+    </div>
+    <div class="card-body">
+      <div class="info-box">
+        Select highway classification to apply VDOT standard design values for reliability, serviceability, and standard deviation. Values are applied to the Design Parameters fields below and can be further modified as needed. Select Urban or Rural to set the correct reliability target.
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Highway Classification</label>
+          <select id="vdot-flex-class" class="w200" onchange="applyVdotFlexDefaults()">
+            <option value="">— Select Classification —</option>
+            <option value="Interstate">Interstate</option>
+            <option value="Divided Primary">Divided Primary Route</option>
+            <option value="Undivided Primary">Undivided Primary Route</option>
+            <option value="High-Volume Secondary">High-Volume Secondary Route</option>
+            <option value="Farm-to-Market">Farm-to-Market Secondary Route</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Area Type</label>
+          <select id="vdot-flex-area" class="w120" onchange="applyVdotFlexDefaults()">
+            <option value="urban">Urban</option>
+            <option value="rural">Rural</option>
+          </select>
+        </div>
+        <div class="field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <button onclick="applyVdotFlexDefaults()" style="padding:6px 14px;border:1px solid var(--blue2);border-radius:3px;background:#eff6ff;color:var(--blue2);font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap">↓ Apply VDOT Defaults</button>
+        </div>
+      </div>
+      <div id="vdotFlexApplied" style="display:none;margin-top:8px" class="formula-bar">
+        <span id="vdotFlexAppliedText"></span>
+      </div>
+      <div style="margin-top:10px" class="warn-box" id="vdotFlexMrNote" style="display:none">
+        <strong>VDOT M<sub>R</sub> Correlation:</strong> For fine-grained soils with soaked CBR ≤ 10: M<sub>R</sub> = 1,500 × CBR. For non-fine-grained soils with CBR > 10: M<sub>R</sub> = 3,000 × CBR<sup>0.65</sup>. Design M<sub>R</sub> is capped at 15,000 psi. (VDOT §3.4.2)
+      </div>
+      <div class="warn-box" style="margin-top:10px">
+        <strong>VDOT Overlay Design Life:</strong> Interstate / Primary / High-Vol. Secondary = 12 years &nbsp;·&nbsp; Farm-to-Market Secondary = 10 years. For new construction, coordinate with the VDOT District Materials Engineer.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="dot"></span> Pavement Condition
+      <span class="card-head-right">
+        <div class="cond-toggle">
+          <button class="cond-btn active" id="flexNew" onclick="setFlexMode('new')">New Pavement</button>
+          <button class="cond-btn" id="flexExist" onclick="setFlexMode('exist')">Overlay / Rehabilitation</button>
+        </div>
+      </span>
+    </div>
+    <div class="card-body" style="padding:10px 20px">
+      <div class="info-box" id="flexModeBox">
+        <strong>New Pavement:</strong> Design for full structural number using new-material layer coefficients. Typical reliability: 75–95%.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> Design Parameters
+      <span class="card-head-right" style="font-size:9.5px;color:#7a9fc0;font-family:var(--mono)">AASHTO 1993 §5</span>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>18-kip ESAL</label>
+          <input type="number" class="w160" id="f-esal" placeholder="——" min="0" oninput="calcFlex()">
+        </div>
+        <div class="field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <button onclick="linkESAL('f-esal')" style="padding:6px 12px;border:1px solid var(--blue2);border-radius:3px;background:#eff6ff;color:var(--blue2);font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap">↑ Link from ESAL Tab</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Reliability, R <em>(%)</em></label>
+          <input type="number" class="w80" id="f-R" placeholder="——" min="1" max="99" oninput="calcFlex()">
+        </div>
+        <div class="field">
+          <label>Z<sub>R</sub></label>
+          <input type="text" class="w80 computed" id="f-Zr" readonly placeholder="——">
+        </div>
+        <div class="field">
+          <label>Std. Deviation, S<sub>o</sub></label>
+          <input type="number" class="w80" id="f-So" placeholder="——" min="0.1" max="1.0" step="0.01" oninput="calcFlex()">
+        </div>
+        <div class="field">
+          <label>Initial Serviceability, P<sub>i</sub></label>
+          <input type="number" class="w80" id="f-Pi" placeholder="——" min="2" max="5" step="0.1" oninput="calcFlex()">
+        </div>
+        <div class="field">
+          <label>Terminal Serviceability, P<sub>t</sub></label>
+          <input type="number" class="w80" id="f-Pt" placeholder="——" min="1" max="4" step="0.1" oninput="calcFlex()">
+        </div>
+        <div class="field">
+          <label>ΔPSI <em>(P<sub>i</sub> − P<sub>t</sub>)</em></label>
+          <input type="text" class="w64 computed" id="f-dPSI" readonly placeholder="——">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>CBR <em>(subgrade)</em></label>
+          <input type="number" class="w80" id="f-cbr" placeholder="——" min="0.5" max="100" step="0.5" oninput="calcFlex()">
+        </div>
+        <div class="field">
+          <label>M<sub>R</sub> <em id="fMrLabel">= 1,500 × CBR (psi)</em></label>
+          <input type="text" class="w120 computed" id="f-MR" readonly placeholder="——">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> Required Structural Number <span style="font-size:10px;font-weight:400;font-style:italic;color:#7a9fc0;margin-left:4px">(AASHTO Eq. 5-1, 1993)</span></div>
+    <div class="card-body">
+      <div class="result-bar" style="align-items:flex-start">
+        <div class="result-pill" id="snPill">
+          <div class="result-pill-head">Required SN</div>
+          <div class="result-pill-val" id="snVal">——</div>
+          <div class="result-pill-sub" id="snSub">Enter design parameters above</div>
+        </div>
+        <div style="flex:1;min-width:0;padding-top:4px">
+          <div id="flexEqSymbolicInline" style="display:none;font-size:11px;overflow-x:auto;margin-bottom:2px"></div>
+          <div id="flexEqInline" style="display:none;font-size:11px;overflow-x:auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> Pavement Section Builder
+      <span class="card-head-right" style="font-size:9.5px;color:#7a9fc0;font-family:var(--mono)" id="layerStdLabel">SN<sub>i</sub> = a<sub>i</sub> × D<sub>i</sub> × m<sub>i</sub> · MDOT Standards</span>
+    </div>
+    <div class="card-body">
+      <div class="info-box" id="layerInfoBox">
+        Layer coefficients and thickness limits per <strong>MDOT Pavement &amp; Geotechnical Design Guide</strong>.
+        Thickness flags in red indicate values outside the MDOT recommended range.
+        <span id="existCoeffNote" style="display:none"> For rehabilitation, check <strong>Deteriorated</strong> to apply reduced layer coefficients to existing layers.</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="layer-table" id="layerTable">
+          <thead>
+            <tr>
+              <th style="width:24px">#</th>
+              <th style="width:72px">Course</th>
+              <th style="min-width:200px">Material</th>
+              <th>Thickness<br><em>(in)</em></th>
+              <th>Layer Coeff<br><em>(a)</em></th>
+              <th>Drain Coeff<br><em>(m)</em></th>
+              <th id="detColHead" style="display:none;text-align:center">Detr.</th>
+              <th style="text-align:center">SN<sub>i</sub></th>
+              <th style="text-align:center;min-width:100px">Thickness<br>Status</th>
+              <th style="width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="layerBody"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addLayerRow()">+ Add Layer</button>
+
+      <div class="sn-progress-wrap">
+        <div class="sn-progress-labels">
+          <span>Calculated SN: <strong id="snCalcLabel">——</strong></span>
+          <span>Required SN: <strong id="snReqLabel">——</strong></span>
+        </div>
+        <div class="sn-bar-outer">
+          <div class="sn-bar-inner" id="snBarInner" style="width:0%"></div>
+          <div class="sn-bar-req" id="snBarReq" style="left:70%;display:none">
+            <div class="sn-bar-req-label">Required</div>
+          </div>
+        </div>
+        <div class="sn-status">
+          <div class="sn-chip sn-chip-na" id="snStatusChip">Enter layers and design parameters to check adequacy</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--muted)" id="snDeltaLabel"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <label style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Notes</label>
+        <textarea id="f-notes" rows="2" style="width:100%;margin-top:4px;padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-family:var(--sans);font-size:12px;resize:vertical;color:var(--text)" placeholder="Additional notes..." oninput="markDirty()"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /flex tab -->
+
+<!-- ═══════════════ RIGID TAB ═══════════════ -->
+<div class="tab-content tab-rigid" id="tab-rigid">
+
+  <!-- Agency sub-tab bar -->
+  <div style="display:flex;align-items:center;gap:0;margin-bottom:16px">
+    <span class="sub-tab-label">Agency:</span>
+    <div class="sub-tab-bar" style="margin-bottom:0;border-bottom:none;flex:none">
+      <button class="sub-tab-btn active" id="rigidAgencyMDOT" onclick="showRigidAgency('mdot',this)">MDOT</button>
+      <button class="sub-tab-btn" id="rigidAgencyVDOT" onclick="showRigidAgency('vdot',this)">VDOT</button>
+    </div>
+  </div>
+
+  <!-- VDOT Quick-Fill card (shown in VDOT mode only) -->
+  <div class="card" id="vdotRigidCard" style="display:none">
+    <div class="card-head"><span class="dot"></span> VDOT Highway Classification &amp; Default Parameters
+      <span class="card-head-right" style="font-size:9.5px;color:#7a9fc0;font-family:var(--mono)">VDOT Geotechnical &amp; Pavement Design Manual §3.4.3</span>
+    </div>
+    <div class="card-body">
+      <div class="info-box">
+        Select highway classification to apply VDOT standard design values for PCC rigid pavement. VDOT defaults: S<sub>c</sub> = 650 psi, E<sub>c</sub> = 5,000,000 psi, k = 250 pci (or derived from CBR as Mr/19.4), C<sub>d</sub> = 1.0, J = 3.2 (asphalt shoulder). Values can be further modified after applying.
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Highway Classification</label>
+          <select id="vdot-rigid-class" class="w200" onchange="applyVdotRigidDefaults()">
+            <option value="">— Select Classification —</option>
+            <option value="Interstate">Interstate</option>
+            <option value="Divided Primary">Divided Primary Route</option>
+            <option value="Undivided Primary">Undivided Primary Route</option>
+            <option value="High-Volume Secondary">High-Volume Secondary Route</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Area Type</label>
+          <select id="vdot-rigid-area" class="w120" onchange="applyVdotRigidDefaults()">
+            <option value="urban">Urban</option>
+            <option value="rural">Rural</option>
+          </select>
+        </div>
+        <div class="field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <button onclick="applyVdotRigidDefaults()" style="padding:6px 14px;border:1px solid var(--blue2);border-radius:3px;background:#eff6ff;color:var(--blue2);font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap">↓ Apply VDOT Defaults</button>
+        </div>
+      </div>
+      <div id="vdotRigidApplied" style="display:none;margin-top:8px" class="formula-bar">
+        <span id="vdotRigidAppliedText"></span>
+      </div>
+      <div class="warn-box" style="margin-top:10px">
+        <strong>VDOT k-value:</strong> If subgrade resilient modulus is available, use k = M<sub>R</sub> / 19.4. If k from back-calculation or M<sub>R</sub>/19.4 exceeds 500 pci, cap at 500 pci. Use the k Override field to enter a site-specific value.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> Design Parameters
+      <span class="card-head-right" style="font-size:9.5px;color:#7a9fc0;font-family:var(--mono)">AASHTO 1993 §4</span>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>18-kip ESAL</label>
+          <input type="number" class="w160" id="r-esal" placeholder="——" min="0" oninput="calcRigid()">
+        </div>
+        <div class="field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <button onclick="linkESAL('r-esal')" style="padding:6px 12px;border:1px solid var(--blue2);border-radius:3px;background:#eff6ff;color:var(--blue2);font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap">↑ Link from ESAL Tab</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Reliability, R <em>(%)</em></label>
+          <input type="number" class="w80" id="r-R" placeholder="——" min="1" max="99" oninput="calcRigid()">
+        </div>
+        <div class="field">
+          <label>Z<sub>R</sub></label>
+          <input type="text" class="w80 computed" id="r-Zr" readonly placeholder="——">
+        </div>
+        <div class="field">
+          <label>Std. Deviation, S<sub>o</sub></label>
+          <input type="number" class="w80" id="r-So" placeholder="——" min="0.1" max="1.0" step="0.01" oninput="calcRigid()">
+        </div>
+        <div class="field">
+          <label>Initial Serviceability, P<sub>i</sub></label>
+          <input type="number" class="w80" id="r-Pi" placeholder="——" min="2" max="5" step="0.1" oninput="calcRigid()">
+        </div>
+        <div class="field">
+          <label>Terminal Serviceability, P<sub>t</sub></label>
+          <input type="number" class="w80" id="r-Pt" placeholder="——" min="1" max="4" step="0.1" oninput="calcRigid()">
+        </div>
+        <div class="field">
+          <label>ΔPSI</label>
+          <input type="text" class="w64 computed" id="r-dPSI" readonly placeholder="——">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Elastic Modulus, E<sub>c</sub> <em>(psi)</em></label>
+          <input type="number" class="w120" id="r-Ec" placeholder="——" min="1000000" max="8000000" step="100000" oninput="calcRigid()">
+        </div>
+        <div class="field">
+          <label>Modulus of Rupture, S<sub>c</sub> <em>(psi)</em></label>
+          <input type="number" class="w96" id="r-Sc" placeholder="——" min="200" max="1000" oninput="calcRigid()">
+        </div>
+        <div class="field">
+          <label>Drainage Coeff., C<sub>d</sub></label>
+          <input type="number" class="w80" id="r-Cd" placeholder="——" min="0.5" max="1.25" step="0.05" oninput="calcRigid()">
+        </div>
+        <div class="field">
+          <label>Load Transfer Coeff., J</label>
+          <input type="number" class="w80" id="r-J" placeholder="——" min="2.2" max="4.5" step="0.1" oninput="calcRigid()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>CBR <em>(subgrade)</em></label>
+          <input type="number" class="w80" id="r-cbr" placeholder="——" min="0.5" max="100" step="0.5" oninput="calcRigid()">
+        </div>
+        <div class="field">
+          <label>Est. k <em id="rKLabel">≈ 1.5 × CBR (pci)</em></label>
+          <input type="text" class="w120 computed" id="r-kEst" readonly placeholder="——">
+        </div>
+        <div class="field">
+          <label>k Override <em>(pci, optional)</em></label>
+          <input type="number" class="w120" id="r-k" placeholder="——" min="10" max="1000" oninput="calcRigid()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> Required Slab Thickness <span style="font-size:10px;font-weight:400;font-style:italic;color:#7a9fc0;margin-left:4px">(AASHTO Eq. 4-1, 1993)</span></div>
+    <div class="card-body">
+      <div class="result-bar" style="align-items:flex-start">
+        <div class="result-pill" id="rigidPill">
+          <div class="result-pill-head">Required Slab Depth</div>
+          <div class="result-pill-val" id="rigidVal">——</div>
+          <div class="result-pill-sub" id="rigidSub">Enter design parameters above</div>
+        </div>
+        <div style="flex:1;min-width:0;padding-top:4px">
+          <div id="rigidEqSymbolicInline" style="display:none;font-size:11px;overflow-x:auto;margin-bottom:2px"></div>
+          <div id="rigidEqInline" style="display:none;font-size:11px;overflow-x:auto"></div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Notes</label>
+        <textarea id="r-notes" rows="2" style="width:100%;margin-top:4px;padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-family:var(--sans);font-size:12px;resize:vertical;color:var(--text)" placeholder="Additional notes..." oninput="markDirty()"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /rigid tab -->
+
+<!-- ═══════════════ REFERENCES TAB ═══════════════ -->
+<div class="tab-content tab-refs" id="tab-refs">
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> ESAL Equivalency Factors
+      <span style="font-size:9.5px;font-family:var(--mono);color:#7a9fc0;margin-left:8px">1993 AASHTO Guide for Design of Pavement Structures</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table class="ref-table">
+        <thead><tr><th class="l">Vehicle Type / Class</th><th class="r">ESAL Factor</th></tr></thead>
+        <tbody id="esalRefBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> Reliability / Z<sub>R</sub> Values
+      <span style="font-size:9.5px;font-family:var(--mono);color:#7a9fc0;margin-left:8px">1993 AASHTO</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table class="ref-table">
+        <thead><tr><th>R (%)</th><th class="r">Z<sub>R</sub></th><th>R (%)</th><th class="r">Z<sub>R</sub></th></tr></thead>
+        <tbody id="zrRefBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> MDOT Layer Coefficients &amp; Thickness Limits
+      <span style="font-size:9.5px;font-family:var(--mono);color:#7a9fc0;margin-left:8px">MDOT Pavement &amp; Geotechnical Design Guide</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table class="ref-table">
+        <thead><tr>
+          <th class="l">Material</th><th class="l">Course</th>
+          <th class="r">Coeff (a)</th><th class="r">Detr. Coeff</th>
+          <th class="r">Min (in)</th><th class="r">Desired (in)</th><th class="r">Max (in)</th>
+        </tr></thead>
+        <tbody id="mdotMatBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> Rigid Pavement Reference Values</div>
+    <div class="card-body">
+      <div class="info-box">
+        <strong>Concrete design values:</strong> E<sub>c</sub> = 57,000 × √f'c (psi) — for f'c = 4,000 psi → E<sub>c</sub> ≈ 3,600,000 psi; f'c = 4,500 → E<sub>c</sub> ≈ 3,820,000; f'c = 5,000 → E<sub>c</sub> ≈ 4,030,000.<br>
+        Modulus of Rupture S<sub>c</sub> = 9 × √f'c — for f'c = 4,000 psi → S<sub>c</sub> ≈ 570 psi; f'c = 5,000 → S<sub>c</sub> ≈ 636 psi.<br>
+        <strong>J factor:</strong> Doweled joints: 2.5–3.1 · Undoweled: 3.6–4.2 · Continuously reinforced: 2.2–2.6.<br>
+        <strong>C<sub>d</sub> factor:</strong> Excellent drainage: 1.25 · Good: 1.20 · Fair: 1.15 · Poor: 1.05 · Very poor: 0.90.
+      </div>
+      <table class="ref-table">
+        <thead><tr><th class="l">Subgrade CBR</th><th class="r">Est. k (pci)</th><th class="l">Quality</th></tr></thead>
+        <tbody>
+          <tr><td class="l">1–2</td><td class="r">15–30</td><td class="l">Very weak</td></tr>
+          <tr><td class="l">3–5</td><td class="r">45–75</td><td class="l">Weak to fair</td></tr>
+          <tr><td class="l">6–10</td><td class="r">90–150</td><td class="l">Fair to good</td></tr>
+          <tr><td class="l">11–20</td><td class="r">165–300</td><td class="l">Good</td></tr>
+          <tr><td class="l">20–30</td><td class="r">300–450</td><td class="l">Very good</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">k ≈ 1.5 × CBR is a simplified approximation. Use AASHTO Fig. 5.3 correlation charts for final design.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="dot"></span> Additional Agency Standards</div>
+    <div class="card-body">
+      <div class="warn-box">
+        <strong>Coming Soon:</strong> VDOT, PennDOT, and DelDOT layer coefficient and thickness standards are planned for a future update. VDOT truck ESAL factors are included in the equivalency table above.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /refs tab -->
+</div><!-- /container -->
+
+<script>
+/* ═══════ DATA ═══════ */
+const ZR_TABLE = {1:2.3264,2:2.0538,3:1.8808,4:1.7507,5:1.6449,6:1.5548,7:1.4758,8:1.4051,9:1.3408,10:1.2816,11:1.2265,12:1.175,13:1.1264,14:1.0803,15:1.0364,16:0.9945,17:0.9542,18:0.9154,19:0.8779,20:0.8416,21:0.8064,22:0.7722,23:0.7388,24:0.7063,25:0.6745,26:0.6433,27:0.6128,28:0.5828,29:0.5534,30:0.5244,31:0.4959,32:0.4677,33:0.4399,34:0.4125,35:0.3853,36:0.3585,37:0.3319,38:0.3055,39:0.2793,40:0.2533,41:0.2275,42:0.2019,43:0.1764,44:0.151,45:0.1257,46:0.1004,47:0.0753,48:0.0502,49:0.0251,50:0,51:-0.0251,52:-0.0502,53:-0.0753,54:-0.1004,55:-0.1257,56:-0.151,57:-0.1764,58:-0.2019,59:-0.2275,60:-0.2533,61:-0.2793,62:-0.3055,63:-0.3319,64:-0.3585,65:-0.3853,66:-0.4125,67:-0.4399,68:-0.4677,69:-0.4959,70:-0.5244,71:-0.5534,72:-0.5828,73:-0.6128,74:-0.6433,75:-0.6745,76:-0.7063,77:-0.7388,78:-0.7722,79:-0.8064,80:-0.8416,81:-0.8779,82:-0.9154,83:-0.9542,84:-0.9945,85:-1.0364,86:-1.0803,87:-1.1264,88:-1.175,89:-1.2265,90:-1.2816,91:-1.3408,92:-1.4051,93:-1.4758,94:-1.5548,95:-1.6449,96:-1.7507,97:-1.8808,98:-2.0538,99:-2.3264};
+
+const ESAL_TYPES = [
+  {name:'Class 02 – Passenger Cars', factor:0.00209},
+  {name:'Class 03 – Other Two-Axle (Trucks, Panel Vans, etc.)', factor:0.050},
+  {name:'Class 04 – Buses', factor:0.570},
+  {name:'Class 05 – Two-Axle, Six-Tire, Single Unit Trucks', factor:0.260},
+  {name:'Class 06 – Three-Axle Single Unit Trucks', factor:0.420},
+  {name:'Class 07 – Four+ Axle, Single Unit Trucks', factor:0.420},
+  {name:'Class 08 – Four or Less Axle, Single Trailer Trucks', factor:0.300},
+  {name:'Class 09 – Five-Axle Single Trailer Trucks', factor:1.200},
+  {name:'Class 10 – Six+ Axle Single Trailer Trucks', factor:0.930},
+  {name:'Class 11 – Five or Less Axle, Multi-Trailer Trucks', factor:0.820},
+  {name:'Class 12 – Six-Axle, Multi-Trailer Trucks', factor:1.060},
+  {name:'Class 13 – Seven+ Axle, Multi-Trailer Trucks', factor:1.390},
+  {name:'Single Unit Trucks (Classes 4–7 composite)', factor:0.703},
+  {name:'Combo Unit Trucks (Classes 8–13 composite)', factor:0.638},
+  {name:'VDOT Passenger Cars', factor:0.0002},
+  {name:'VDOT Trucks (Classes 4–7)', factor:0.460},
+  {name:'VDOT Trucks (Classes 8–13)', factor:1.050},
+  {name:'Custom', factor:null}
+];
+
+const MDOT_MATERIALS = [
+  {name:'HMA Superpave 9.5mm Gap Graded', course:'Surface', a:0.44, aDet:0.38, minT:1.0, desiredT:1.5, maxT:1.5},
+  {name:'HMA Superpave 9.5mm', course:'Surface', a:0.44, aDet:0.38, minT:1.0, desiredT:1.5, maxT:2.0},
+  {name:'HMA Superpave 12.5mm Gap Graded', course:'Surface', a:0.44, aDet:0.38, minT:1.5, desiredT:2.0, maxT:2.0},
+  {name:'HMA Superpave 12.5mm', course:'Surface', a:0.44, aDet:0.38, minT:1.5, desiredT:2.0, maxT:3.0},
+  {name:'HMA Superpave 19.0mm Gap Graded', course:'Surface', a:0.44, aDet:0.38, minT:2.0, desiredT:2.5, maxT:2.5},
+  {name:'HMA Superpave 19.0mm', course:'Surface', a:0.40, aDet:0.36, minT:2.0, desiredT:3.0, maxT:4.0},
+  {name:'PCC (Rigid Surface)', course:'Surface', a:null, aDet:null, minT:6.0, desiredT:null, maxT:14.0},
+  {name:'HMA Superpave 4.75mm', course:'Leveling', a:0.44, aDet:0.38, minT:0.5, desiredT:0.75, maxT:1.0},
+  {name:'HMA Superpave 9.5mm', course:'Leveling', a:0.44, aDet:0.38, minT:1.0, desiredT:1.5, maxT:2.0},
+  {name:'Break/Crack and Seat PCC', course:'Base', a:0.25, aDet:0.25, minT:6.0, desiredT:null, maxT:14.0},
+  {name:'Rubblized PCC', course:'Base', a:0.20, aDet:0.20, minT:6.0, desiredT:null, maxT:14.0},
+  {name:'HMA Superpave 19.0mm', course:'Base', a:0.40, aDet:0.36, minT:2.0, desiredT:3.0, maxT:4.0},
+  {name:'HMA Superpave 25.0mm', course:'Base', a:0.40, aDet:0.36, minT:3.0, desiredT:4.0, maxT:5.0},
+  {name:'HMA Superpave 37.5mm', course:'Base', a:0.38, aDet:0.34, minT:4.0, desiredT:5.0, maxT:6.0},
+  {name:'Graded Aggregate Base (GAB)', course:'Base', a:0.12, aDet:0.11, minT:3.0, desiredT:6.0, maxT:6.0},
+  {name:'Asphalt Treated Aggregate Base', course:'Base', a:0.20, aDet:0.20, minT:4.0, desiredT:6.0, maxT:6.0},
+  {name:'Penetration Macadam', course:'Base', a:0.20, aDet:0.20, minT:3.0, desiredT:6.0, maxT:8.0},
+  {name:'Macadam', course:'Base', a:0.15, aDet:0.15, minT:3.0, desiredT:6.0, maxT:8.0},
+  {name:'Soil Cement Base Course', course:'Base', a:0.20, aDet:0.20, minT:4.0, desiredT:6.0, maxT:6.0},
+  {name:'Bank Run Gravel', course:'Base', a:0.10, aDet:0.10, minT:3.0, desiredT:6.0, maxT:6.0},
+  {name:'GSS w/ GAB', course:'Base', a:0.10, aDet:0.08, minT:3.0, desiredT:6.0, maxT:12.0},
+  {name:'Soil Contaminated Aggregate Base', course:'Base', a:0.08, aDet:0.08, minT:3.0, desiredT:6.0, maxT:6.0},
+  {name:'Select Borrow', course:'Subbase', a:0.05, aDet:0.05, minT:3.0, desiredT:6.0, maxT:8.0},
+  {name:'Capping Borrow', course:'Subbase', a:0.06, aDet:0.06, minT:3.0, desiredT:6.0, maxT:8.0},
+  {name:'Modified Borrow', course:'Subbase', a:0.07, aDet:0.07, minT:3.0, desiredT:6.0, maxT:8.0}
+];
+
+const COURSE_BADGE = {Surface:'badge-surf',Leveling:'badge-lev',Base:'badge-base',Subbase:'badge-sub'};
+const COURSE_ROW   = {Surface:'row-surf',  Leveling:'row-lev',  Base:'row-base',  Subbase:'row-sub'};
+
+/* ═══════ VDOT DATA ═══════ */
+// Flexible pavement defaults by highway classification
+// Ru = reliability urban, Rr = reliability rural; So = 0.49 all classes
+const VDOT_FLEX = {
+  'Interstate':            {life:12, Ru:95, Rr:95, Pi:4.2, Pt:3.0, So:0.49},
+  'Divided Primary':       {life:12, Ru:90, Rr:90, Pi:4.2, Pt:2.9, So:0.49},
+  'Undivided Primary':     {life:12, Ru:90, Rr:85, Pi:4.2, Pt:2.8, So:0.49},
+  'High-Volume Secondary': {life:12, Ru:90, Rr:85, Pi:4.2, Pt:2.8, So:0.49},
+  'Farm-to-Market':        {life:10, Ru:85, Rr:75, Pi:4.0, Pt:2.5, So:0.49}
+};
+// Rigid pavement defaults; Ru/Rr same as flex per VDOT §3.4.3
+// Farm-to-Market not listed for rigid in VDOT manual
+const VDOT_RIGID = {
+  'Interstate':            {So:0.39, Ru:95, Rr:95, Pi:4.5, Pt:3.0, Sc:650, Ec:5000000, k:250, Cd:1.0, J:3.2},
+  'Divided Primary':       {So:0.39, Ru:90, Rr:90, Pi:4.5, Pt:2.9, Sc:650, Ec:5000000, k:250, Cd:1.0, J:3.2},
+  'Undivided Primary':     {So:0.39, Ru:90, Rr:85, Pi:4.5, Pt:2.8, Sc:650, Ec:5000000, k:250, Cd:1.0, J:3.2},
+  'High-Volume Secondary': {So:0.39, Ru:90, Rr:85, Pi:4.5, Pt:2.8, Sc:650, Ec:5000000, k:250, Cd:1.0, J:3.2}
+};
+// VDOT layer coefficients per VDOT §3.4.2 (rehabilitation values)
+// minT / desiredT / maxT in inches per VDOT mix description guidance
+const VDOT_MATERIALS = [
+  {name:'SM-4.75 (Surface Mix)',                course:'Surface',  a:0.44, aDet:null, minT:0.75, desiredT:1.0,  maxT:1.0},
+  {name:'SM-9.0 (Surface Mix)',                 course:'Surface',  a:0.44, aDet:null, minT:1.0,  desiredT:1.0,  maxT:1.0},
+  {name:'SM-9.5 (Surface Mix)',                 course:'Surface',  a:0.44, aDet:null, minT:1.5,  desiredT:1.5,  maxT:2.0},
+  {name:'SM-12.5 (Surface Mix)',                course:'Surface',  a:0.44, aDet:null, minT:2.0,  desiredT:2.0,  maxT:3.0},
+  {name:'SM-19.0 (Surface Mix)',                course:'Surface',  a:0.44, aDet:null, minT:2.0,  desiredT:2.0,  maxT:2.0},
+  {name:'SMA-9.5 (Stone Matrix Asphalt)',       course:'Surface',  a:0.44, aDet:null, minT:1.5,  desiredT:2.0,  maxT:2.5},
+  {name:'SMA-12.5 (Stone Matrix Asphalt)',      course:'Surface',  a:0.44, aDet:null, minT:2.0,  desiredT:2.5,  maxT:3.0},
+  {name:'SMA-19.0 (Stone Matrix Asphalt)',      course:'Surface',  a:0.44, aDet:null, minT:2.0,  desiredT:2.5,  maxT:3.0},
+  {name:'IM-19.0 (Intermediate Mix)',           course:'Base',     a:0.44, aDet:null, minT:2.0,  desiredT:2.0,  maxT:4.0},
+  {name:'BM-25.0 (Base Mix)',                   course:'Base',     a:0.44, aDet:null, minT:3.0,  desiredT:3.0,  maxT:6.0},
+  {name:'CCPR / CIR (Recycled Materials)',      course:'Base',     a:0.35, aDet:null, minT:3.0,  desiredT:4.0,  maxT:8.0},
+  {name:'Full Depth Reclamation (FDR)',         course:'Base',     a:0.25, aDet:null, minT:4.0,  desiredT:6.0,  maxT:8.0},
+  {name:'Graded Aggregate Base – 21A or 21B',  course:'Base',     a:0.12, aDet:null, minT:3.0,  desiredT:6.0,  maxT:8.0},
+  {name:'Cement Treated Aggregate Base',        course:'Base',     a:0.20, aDet:null, minT:4.0,  desiredT:6.0,  maxT:8.0},
+  {name:'Break & Seat / Crack & Seat PCC',     course:'Base',     a:0.25, aDet:null, minT:6.0,  desiredT:null, maxT:14.0},
+  {name:'Rubblized PCC',                        course:'Base',     a:0.18, aDet:null, minT:6.0,  desiredT:null, maxT:14.0},
+  {name:'Cement Treated Soil (Soil Cement)',    course:'Subbase',  a:0.18, aDet:null, minT:4.0,  desiredT:6.0,  maxT:8.0},
+  {name:'Lime Treated Soil',                    course:'Subbase',  a:0.18, aDet:null, minT:4.0,  desiredT:6.0,  maxT:8.0},
+  {name:'Gravel',                               course:'Subbase',  a:0.10, aDet:null, minT:3.0,  desiredT:6.0,  maxT:8.0},
+  {name:'Open Graded Drainage Layer – Bound',  course:'Subbase',  a:0.10, aDet:null, minT:2.0,  desiredT:4.0,  maxT:6.0},
+  {name:'Open Graded Drainage Layer – Unbound',course:'Subbase',  a:0.05, aDet:null, minT:2.0,  desiredT:4.0,  maxT:6.0}
+];
+
+/* ═══════ STATE ═══════ */
+let trafRows = [], layerRows = [], rowId = 0, layId = 0;
+let currentESAL = null, currentSN = null, flexMode = 'new', isDirty = false;
+let flexAgency = 'mdot', rigidAgency = 'mdot', layerAgency = 'mdot';
+
+/* ═══════ HELPERS ═══════ */
+function gv(id){ const e=document.getElementById(id); return e?e.value:''; }
+// Smart set: uses .value for inputs/textareas/selects, .innerHTML for everything else
+function sv(id, val){
+  const e=document.getElementById(id); if(!e) return;
+  if(['INPUT','TEXTAREA','SELECT'].includes(e.tagName)) e.value=(val===null||val===undefined)?'':val;
+  else e.innerHTML=(val===null||val===undefined)?'':val;
+}
+function fmtN(n,d){ return (n===null||n===undefined||isNaN(n))?'——':n.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d}); }
+function getZr(R){ R=Math.max(1,Math.min(99,Math.round(R))); return ZR_TABLE[R]??null; }
+function markDirty(){ isDirty=true; }
+window.addEventListener('beforeunload',e=>{ if(isDirty){e.preventDefault();e.returnValue='';} });
+
+/* ═══════ TABS ═══════ */
+function showTab(name, btn){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ═══════ AGENCY SUB-TABS ═══════ */
+function showFlexAgency(agency, btn){
+  flexAgency = agency;
+  layerAgency = agency;
+  document.getElementById('flexAgencyMDOT').classList.toggle('active', agency==='mdot');
+  document.getElementById('flexAgencyVDOT').classList.toggle('active', agency==='vdot');
+  document.getElementById('vdotFlexCard').style.display = agency==='vdot' ? '' : 'none';
+  // Update Pavement Section Builder label and info text only — never rebuild existing rows
+  const stdLbl = document.getElementById('layerStdLabel');
+  const infoBox = document.getElementById('layerInfoBox');
+  const existDisplay = flexMode==='exist' ? 'inline' : 'none';
+  const existSpan = `<span id="existCoeffNote" style="display:${existDisplay}"> For rehabilitation, check <strong>Deteriorated</strong> to apply reduced layer coefficients to existing layers.</span>`;
+  if(agency==='vdot'){
+    if(stdLbl) stdLbl.innerHTML = 'SN<sub>i</sub> = a<sub>i</sub> × D<sub>i</sub> × m<sub>i</sub> · VDOT Standards';
+    if(infoBox) infoBox.innerHTML = 'Layer coefficients per <strong>VDOT Geotechnical &amp; Pavement Design Manual §3.4.2</strong>. VDOT mix designations: SM = surface, IM = intermediate, BM = base. New layers added will use VDOT materials; existing rows retain their current values.' + existSpan;
+  } else {
+    if(stdLbl) stdLbl.innerHTML = 'SN<sub>i</sub> = a<sub>i</sub> × D<sub>i</sub> × m<sub>i</sub> · MDOT Standards';
+    if(infoBox) infoBox.innerHTML = 'Layer coefficients and thickness limits per <strong>MDOT Pavement &amp; Geotechnical Design Guide</strong>. New layers added will use MDOT materials; existing rows retain their current values.' + existSpan;
+  }
+  calcFlex();
+}
+
+function showRigidAgency(agency, btn){
+  rigidAgency = agency;
+  document.getElementById('rigidAgencyMDOT').classList.toggle('active', agency==='mdot');
+  document.getElementById('rigidAgencyVDOT').classList.toggle('active', agency==='vdot');
+  document.getElementById('vdotRigidCard').style.display = agency==='vdot' ? '' : 'none';
+  const lbl = document.getElementById('rKLabel');
+  if(lbl) lbl.innerHTML = agency==='vdot' ? '= M<sub>R</sub>/19.4, capped 500 pci (VDOT)' : '≈ 1.5 × CBR (pci)';
+  calcRigid();
+}
+
+function showLayerAgency(agency, btn){
+  // Retained for loadJSON compatibility only; direct use is via showFlexAgency
+  layerAgency = agency;
+}
+
+function applyVdotFlexDefaults(){
+  const cls = document.getElementById('vdot-flex-class')?.value;
+  const area = document.getElementById('vdot-flex-area')?.value;
+  if(!cls) return;
+  const p = VDOT_FLEX[cls];
+  if(!p) return;
+  const R = area==='rural' ? p.Rr : p.Ru;
+  sv('f-R', R);
+  sv('f-So', p.So);
+  sv('f-Pi', p.Pi);
+  sv('f-Pt', p.Pt);
+  const apDiv = document.getElementById('vdotFlexApplied');
+  const apText = document.getElementById('vdotFlexAppliedText');
+  if(apDiv && apText){
+    apText.textContent = `Applied: ${cls} (${area}) — R=${R}%, So=${p.So}, Pi=${p.Pi}, Pt=${p.Pt}, Design Life=${p.life} yr`;
+    apDiv.style.display = '';
+  }
+  calcFlex(); markDirty();
+}
+
+function applyVdotRigidDefaults(){
+  const cls = document.getElementById('vdot-rigid-class')?.value;
+  const area = document.getElementById('vdot-rigid-area')?.value;
+  if(!cls) return;
+  const p = VDOT_RIGID[cls];
+  if(!p) return;
+  const R = area==='rural' ? p.Rr : p.Ru;
+  sv('r-R', R);
+  sv('r-So', p.So);
+  sv('r-Pi', p.Pi);
+  sv('r-Pt', p.Pt);
+  sv('r-Sc', p.Sc);
+  sv('r-Ec', p.Ec);
+  sv('r-Cd', p.Cd);
+  sv('r-J', p.J);
+  // clear CBR-derived k so user sees the VDOT default
+  const kOvrEl = document.getElementById('r-k');
+  if(kOvrEl && (kOvrEl.value==='' || kOvrEl.value==='0')) sv('r-k','');
+  const apDiv = document.getElementById('vdotRigidApplied');
+  const apText = document.getElementById('vdotRigidAppliedText');
+  if(apDiv && apText){
+    apText.textContent = `Applied: ${cls} (${area}) — R=${R}%, So=${p.So}, Pi=${p.Pi}, Pt=${p.Pt}, Sc=${p.Sc}psi, Ec=${p.Ec.toLocaleString()}psi, k=${p.k}pci, Cd=${p.Cd}, J=${p.J}`;
+    apDiv.style.display = '';
+  }
+  calcRigid(); markDirty();
+}
+
+/* ═══════ ESAL ═══════ */
+function addTrafRow(data){
+  const id=rowId++;
+  const d=data||{typeIdx:-1,factor:'',dir:'',lane:'',pct:''};
+  trafRows.push({id});
+  const tbody=document.getElementById('trafBody');
+  const tr=document.createElement('tr');
+  tr.id='traf-'+id;
+  const typeOpts='<option value="-1" disabled'+(d.typeIdx===-1?' selected':'')+'>— Select Vehicle Type —</option>'+
+    ESAL_TYPES.map((t,i)=>`<option value="${i}"${i===d.typeIdx?' selected':''}>${t.name}</option>`).join('');
+  tr.innerHTML=`
+    <td style="color:var(--muted);font-family:var(--mono);font-size:11px;text-align:center">${trafRows.length}</td>
+    <td><select id="ttype-${id}" onchange="onTypeChange(${id})">${typeOpts}</select></td>
+    <td><input type="number" id="tfac-${id}" value="${d.factor!==''?d.factor:''}" placeholder="——" min="0" max="10" step="0.001" oninput="calcESAL()"></td>
+    <td><input type="number" id="tdir-${id}" value="${d.dir!==''?d.dir:''}" placeholder="——" min="0" max="100" step="1" oninput="calcESAL()"></td>
+    <td><input type="number" id="tlane-${id}" value="${d.lane!==''?d.lane:''}" placeholder="——" min="0" max="100" step="1" oninput="calcESAL()"></td>
+    <td><input type="number" id="tpct-${id}" value="${d.pct!==''?d.pct:''}" placeholder="——" min="0" max="100" step="0.1" oninput="calcESAL()"></td>
+    <td><div class="traf-val" id="tcont-${id}">——</div></td>
+    <td><button class="del-btn" onclick="delTrafRow(${id})">×</button></td>`;
+  tbody.appendChild(tr);
+  if(d.typeIdx>=0) onTypeChange(id, d.factor);
+  calcESAL();
+}
+
+function onTypeChange(id, forceFactor){
+  const idx=parseInt(gv('ttype-'+id));
+  if(idx===-1){sv('tfac-'+id,''); calcESAL(); return;}
+  const t=ESAL_TYPES[idx];
+  if(forceFactor!==undefined && forceFactor!=='') sv('tfac-'+id, forceFactor);
+  else if(t&&t.factor!==null) sv('tfac-'+id, t.factor);
+  else{sv('tfac-'+id,''); document.getElementById('tfac-'+id).focus();}
+  calcESAL();
+}
+
+function delTrafRow(id){
+  trafRows=trafRows.filter(r=>r.id!==id);
+  document.getElementById('traf-'+id)?.remove();
+  renumberRows('trafBody',trafRows);
+  calcESAL();
+}
+
+function renumberRows(tbodyId, arr){
+  document.querySelectorAll('#'+tbodyId+' tr').forEach((tr,i)=>{tr.cells[0].textContent=i+1;});
+}
+
+function calcESAL(){
+  const startYear=parseInt(gv('e-startYear'))||null;
+  const aadt=parseFloat(gv('e-aadt'))||null;
+  const growth=parseFloat(gv('e-growth'))||0; // 0% is valid
+  const life=parseInt(gv('e-life'))||null;
+  const hasGrowth=gv('e-growth').trim()!=='';
+
+  if(startYear&&life) sv('e-futureYear', startYear+life);
+  else sv('e-futureYear','——');
+
+  let tgf=null;
+  if(life!==null&&hasGrowth){
+    const r=growth/100;
+    tgf=r===0?life:((Math.pow(1+r,life)-1)/r);
+    sv('e-tgf', tgf.toFixed(4));
+    renderTGFEq();
+  } else if(life!==null&&!hasGrowth){
+    sv('e-tgf','——');
+    const panel=document.getElementById('tgfEqPanel'); if(panel) panel.style.display='none';
+  } else {
+    sv('e-tgf','——');
+    const panel=document.getElementById('tgfEqPanel'); if(panel) panel.style.display='none';
+  }
+
+  if(!aadt||!tgf){
+    sv('esalVal','——'); sv('esalLog','log₁₀(ESAL) = ——');
+    currentESAL=null; updateESALPill(null); return;
+  }
+
+  let totalESAL=0, pctSum=0;
+  document.querySelectorAll('#trafBody tr').forEach(tr=>{
+    const tid=tr.id.replace('traf-','');
+    const fac=parseFloat(gv('tfac-'+tid))||0;
+    const dir=(parseFloat(gv('tdir-'+tid))||0)/100;
+    const lane=(parseFloat(gv('tlane-'+tid))||0)/100;
+    const pct=parseFloat(gv('tpct-'+tid))||0;
+    pctSum+=pct;
+    const contrib=aadt*(pct/100)*dir*lane*fac*365*tgf;
+    totalESAL+=contrib;
+    const el=document.getElementById('tcont-'+tid);
+    if(el) el.textContent=contrib>0?fmtN(contrib,0):'——';
+  });
+
+  const pw=document.getElementById('pctWarn');
+  document.getElementById('pctSum').textContent=pctSum.toFixed(1);
+  pw.style.display=(Math.abs(pctSum-100)>0.5&&pctSum>0)?'block':'none';
+
+  currentESAL=totalESAL>0?totalESAL:null;
+  updateESALPill(currentESAL);
+  calcFlex(); calcRigid(); markDirty();
+}
+
+function updateESALPill(esal){
+  const pill=document.getElementById('esalPill');
+  if(!esal){
+    sv('esalVal','——'); sv('esalLog','log₁₀(ESAL) = ——');
+    pill.className='result-pill';
+    const el=document.getElementById('esalEqInline'); if(el) el.style.display='none';
+    return;
+  }
+  sv('esalVal', fmtN(esal,0));
+  sv('esalLog','log₁₀(ESAL) = '+Math.log10(esal).toFixed(3));
+  pill.className='result-pill pill-green';
+  renderESALEq();
+}
+
+/* ═══════ FLEXIBLE ═══════ */
+function setFlexMode(mode){
+  flexMode=mode;
+  document.getElementById('flexNew').classList.toggle('active',mode==='new');
+  document.getElementById('flexExist').classList.toggle('active',mode==='exist');
+  const box=document.getElementById('flexModeBox');
+  const detCol=document.getElementById('detColHead');
+  // existCoeffNote lives inside layerInfoBox innerHTML; re-query each call
+  const detNote=document.getElementById('existCoeffNote');
+  if(mode==='new'){
+    box.innerHTML='<strong>New Pavement:</strong> Design for full structural number using new-material layer coefficients. Typical reliability: 75–95%.';
+    if(detCol) detCol.style.display='none';
+    if(detNote) detNote.style.display='none';
+    document.querySelectorAll('.det-col').forEach(el=>el.style.display='none');
+  } else {
+    box.innerHTML='<strong>Overlay / Rehabilitation:</strong> Existing layer coefficients may be reduced to account for deterioration. Typical reliability: 50–80%. Check <em>Deteriorated</em> for existing layers.';
+    if(detCol) detCol.style.display='';
+    if(detNote) detNote.style.display='inline';
+    document.querySelectorAll('.det-col').forEach(el=>el.style.display='');
+  }
+  updateLayerSN(); markDirty();
+}
+
+function linkESAL(fieldId){
+  if(currentESAL!==null){ sv(fieldId, Math.round(currentESAL)); if(fieldId==='f-esal')calcFlex(); else calcRigid(); }
+  else alert('Calculate ESAL first in the ESAL Calculator tab.');
+}
+
+function calcFlex(){
+  const W18=parseFloat(gv('f-esal'))||null;
+  const R=parseFloat(gv('f-R'))||null;
+  const So=parseFloat(gv('f-So'))||null;
+  const Pi=parseFloat(gv('f-Pi'))||null;
+  const Pt=parseFloat(gv('f-Pt'))||null;
+  const CBR=parseFloat(gv('f-cbr'))||null;
+
+  sv('f-Zr', R!==null ? getZr(R).toFixed(4) : '——');
+  sv('f-dPSI', (Pi!==null&&Pt!==null) ? (Pi-Pt).toFixed(2) : '——');
+  let MR=null;
+  if(CBR!==null){
+    if(flexAgency==='vdot'){
+      // VDOT §3.4.2: fine-grained (CBR ≤ 10) use 1500×CBR; non-fine-grained (CBR > 10) use 3000×CBR^0.65; cap 15,000 psi
+      const raw = CBR<=10 ? 1500*CBR : 3000*Math.pow(CBR,0.65);
+      MR = Math.min(raw, 15000);
+      const lbl = document.getElementById('fMrLabel');
+      if(lbl) lbl.innerHTML = CBR<=10 ? '= 1,500 × CBR, psi (VDOT)' : '= 3,000 × CBR<sup>0.65</sup>, psi (VDOT)';
+      if(MR===15000) sv('f-MR', fmtN(MR,0)+' (capped)'); else sv('f-MR', fmtN(MR,0));
+    } else {
+      MR=1500*CBR;
+      const lbl = document.getElementById('fMrLabel');
+      if(lbl) lbl.innerHTML = '= 1,500 × CBR (psi)';
+      sv('f-MR', fmtN(MR,0));
+    }
+  } else { sv('f-MR','——'); }
+
+  const pill=document.getElementById('snPill');
+  if(!W18||!R||!So||!Pi||!Pt||!MR){
+    sv('snVal','——'); sv('snSub','Enter all design parameters');
+    pill.className='result-pill'; currentSN=null;
+    clearFlexEq(); updateLayerSN(); return;
+  }
+  const ZR=getZr(R), dPSI=Pi-Pt;
+  if(dPSI<=0){ sv('snVal','Error'); sv('snSub','Pt must be less than Pi'); pill.className='result-pill pill-red'; clearFlexEq(); return; }
+
+  const SN=solveSN(W18,ZR,So,dPSI,MR);
+  currentSN=SN;
+  if(SN===null||isNaN(SN)||SN<0){
+    sv('snVal','——'); sv('snSub','No solution — check parameters'); pill.className='result-pill pill-red';
+    clearFlexEq(); updateLayerSN(); return;
+  }
+  sv('snVal', SN.toFixed(2)); sv('snSub','log₁₀(W₁₈) = '+Math.log10(W18).toFixed(3));
+  pill.className='result-pill pill-green';
+  renderFlexEq(ZR, So, SN, dPSI, MR, Math.log10(W18));
+  updateLayerSN(); markDirty();
+}
+
+function solveSN(W18,ZR,So,dPSI,MR){
+  const logW=Math.log10(W18);
+  function f(SN){ if(SN<=0)return -999;
+    return ZR*So+9.36*Math.log10(SN+1)-0.20+Math.log10(dPSI/2.7)/(0.40+1094/Math.pow(SN+1,5.19))+2.32*Math.log10(MR)-8.07-logW; }
+  let lo=0.01,hi=25;
+  if(f(lo)*f(hi)>0) return null;
+  for(let i=0;i<120;i++){ const m=(lo+hi)/2; if((hi-lo)<0.0001)return m; if(f(lo)*f(m)<=0)hi=m; else lo=m; }
+  return (lo+hi)/2;
+}
+
+/* ═══════ LAYER BUILDER ═══════ */
+function getMatsForCourse(course){ 
+  return (layerAgency === 'vdot' ? VDOT_MATERIALS : MDOT_MATERIALS).filter(m=>m.course===course);
+}
+
+function addLayerRow(data){
+  const id=layId++;
+  const d=data||{course:'Surface',matIdx:0,thick:'',a:'',m:'',deteriorated:false};
+  layerRows.push({id});
+  const tbody=document.getElementById('layerBody');
+  const tr=document.createElement('tr');
+  tr.id='lay-'+id;
+  const courseOpts=['Surface','Leveling','Base','Subbase'].map(c=>`<option value="${c}"${c===d.course?' selected':''}>${c}</option>`).join('');
+  tr.innerHTML=`
+    <td style="color:var(--muted);font-family:var(--mono);font-size:11px;text-align:center" id="laynum-${id}">${layerRows.length}</td>
+    <td><select id="lcourse-${id}" onchange="onCourseChange(${id})">${courseOpts}</select></td>
+    <td><select id="lmat-${id}" onchange="onMatChange(${id})" style="max-width:220px;width:100%"></select></td>
+    <td><input type="number" id="lthick-${id}" value="${d.thick!==''?d.thick:''}" placeholder="——" min="0" max="36" step="0.25" oninput="updateLayerSN()"></td>
+    <td><input type="number" id="la-${id}" value="${d.a!==''?d.a:''}" placeholder="——" min="0" max="1" step="0.01" oninput="updateLayerSN()"></td>
+    <td><input type="number" id="lm-${id}" value="${d.m!==''?d.m:''}" placeholder="1.0" min="0.5" max="1.25" step="0.05" oninput="updateLayerSN()"></td>
+    <td class="det-col" style="display:${flexMode==='exist'?'':'none'};text-align:center"><input type="checkbox" id="ldet-${id}"${d.deteriorated?' checked':''} onchange="onDetChange(${id})"></td>
+    <td class="layer-val" id="lsn-${id}">——</td>
+    <td class="warn-cell warn-na" id="lwarn-${id}">——</td>
+    <td><button class="del-btn" onclick="delLayerRow(${id})">×</button></td>`;
+  tbody.appendChild(tr);
+  populateMatOptions(id, d.course, d.matIdx);
+  if(d.a!=='') onMatChange(id, d.a); else onMatChange(id);
+  applyRowTint(id, d.course);
+  updateLayerSN();
+}
+
+function applyRowTint(id, course){
+  const tr=document.getElementById('lay-'+id);
+  if(!tr) return;
+  tr.className=COURSE_ROW[course]||'';
+}
+
+function populateMatOptions(id,course,selectedIdx){
+  const sel=document.getElementById('lmat-'+id);
+  const mats=getMatsForCourse(course);
+  sel.innerHTML=mats.map((m,i)=>`<option value="${i}"${i===(selectedIdx||0)?' selected':''}>${m.name}</option>`).join('');
+}
+
+function onCourseChange(id){
+  const course=gv('lcourse-'+id);
+  populateMatOptions(id,course,0);
+  applyRowTint(id,course);
+  onMatChange(id);
+}
+
+function onDetChange(id){
+  const course=gv('lcourse-'+id);
+  const matIdx=parseInt(gv('lmat-'+id));
+  const mat=getMatsForCourse(course)[matIdx];
+  const det=document.getElementById('ldet-'+id)?.checked;
+  if(mat) sv('la-'+id, det&&mat.aDet!==null?mat.aDet:(mat.a!==null?mat.a:''));
+  updateLayerSN();
+}
+
+function onMatChange(id, forceA){
+  const course=gv('lcourse-'+id);
+  const matIdx=parseInt(gv('lmat-'+id));
+  const mat=getMatsForCourse(course)[matIdx];
+  const det=document.getElementById('ldet-'+id)?.checked;
+  if(forceA!==undefined&&forceA!=='') sv('la-'+id,forceA);
+  else if(mat) sv('la-'+id, det&&mat.aDet!==null?mat.aDet:(mat.a!==null?mat.a:''));
+  updateLayerSN();
+}
+
+function delLayerRow(id){
+  layerRows=layerRows.filter(r=>r.id!==id);
+  document.getElementById('lay-'+id)?.remove();
+  document.querySelectorAll('#layerBody tr').forEach((tr,i)=>{
+    const el=tr.querySelector('[id^="laynum-"]'); if(el) el.textContent=i+1;
+  });
+  layerRows.forEach((_,i)=>layerRows[i]);
+  updateLayerSN();
+}
+
+function updateLayerSN(){
+  let totalSN=0;
+  document.querySelectorAll('#layerBody tr').forEach(tr=>{
+    const tid=tr.id.replace('lay-','');
+    const course=gv('lcourse-'+tid);
+    const matIdx=parseInt(gv('lmat-'+tid));
+    const mat=getMatsForCourse(course)[matIdx];
+    const thick=parseFloat(gv('lthick-'+tid));
+    const a=parseFloat(gv('la-'+tid))||0;
+    const m=parseFloat(gv('lm-'+tid))||1.0;
+    const snEl=document.getElementById('lsn-'+tid);
+    const wEl=document.getElementById('lwarn-'+tid);
+    if(!thick||!a){ if(snEl)snEl.textContent='——'; if(wEl){wEl.textContent='——';wEl.className='warn-cell warn-na';} return; }
+    const sni=a*thick*m; totalSN+=sni;
+    if(snEl) snEl.textContent=sni.toFixed(3);
+    if(wEl&&mat){
+      if(thick<mat.minT){ wEl.innerHTML=`⚠ < ${mat.minT}" min`; wEl.className='warn-cell warn-err'; }
+      else if(thick>mat.maxT){ wEl.innerHTML=`⚠ > ${mat.maxT}" max`; wEl.className='warn-cell warn-err'; }
+      else { wEl.innerHTML=`✓ ${mat.minT}"–${mat.maxT}"`; wEl.className='warn-cell warn-ok'; }
+    }
+  });
+
+  const reqSN=currentSN;
+  const calcLabel=document.getElementById('snCalcLabel');
+  const reqLabel=document.getElementById('snReqLabel');
+  const barInner=document.getElementById('snBarInner');
+  const barReq=document.getElementById('snBarReq');
+  const statusChip=document.getElementById('snStatusChip');
+  const deltaLabel=document.getElementById('snDeltaLabel');
+
+  if(calcLabel) calcLabel.textContent=totalSN>0?totalSN.toFixed(3):'——';
+
+  if(reqSN!==null&&reqSN>0){
+    if(reqLabel) reqLabel.textContent=reqSN.toFixed(3);
+    barReq.style.display='';
+    // anchor required line at 70% of bar; scale filled portion accordingly
+    const fill=Math.min((totalSN/reqSN)*70,100);
+    barInner.style.width=fill+'%';
+    if(totalSN>=reqSN){
+      barInner.className='sn-bar-inner bar-ok';
+      statusChip.textContent=`✓ Adequate — SN = ${totalSN.toFixed(3)} ≥ ${reqSN.toFixed(3)} required`;
+      statusChip.className='sn-chip sn-chip-ok';
+      if(deltaLabel) deltaLabel.textContent=`Excess SN = +${(totalSN-reqSN).toFixed(3)}`;
+    } else {
+      barInner.className='sn-bar-inner bar-short';
+      statusChip.textContent=`✗ Deficient — SN = ${totalSN.toFixed(3)} < ${reqSN.toFixed(3)} required`;
+      statusChip.className='sn-chip sn-chip-short';
+      if(deltaLabel) deltaLabel.textContent=`Deficit = ${(reqSN-totalSN).toFixed(3)}`;
+    }
+  } else {
+    if(reqLabel) reqLabel.textContent='——';
+    barInner.style.width='0%'; barInner.className='sn-bar-inner';
+    barReq.style.display='none';
+    statusChip.textContent='Enter layers and design parameters to check adequacy';
+    statusChip.className='sn-chip sn-chip-na';
+    if(deltaLabel) deltaLabel.textContent='';
+  }
+  markDirty();
+}
+
+/* ═══════ RIGID ═══════ */
+function calcRigid(){
+  const W18=parseFloat(gv('r-esal'))||null;
+  const R=parseFloat(gv('r-R'))||null;
+  const So=parseFloat(gv('r-So'))||null;
+  const Pi=parseFloat(gv('r-Pi'))||null;
+  const Pt=parseFloat(gv('r-Pt'))||null;
+  const Ec=parseFloat(gv('r-Ec'))||null;
+  const Sc=parseFloat(gv('r-Sc'))||null;
+  const Cd=parseFloat(gv('r-Cd'))||null;
+  const J=parseFloat(gv('r-J'))||null;
+  const CBR=parseFloat(gv('r-cbr'))||null;
+  const kOvr=parseFloat(gv('r-k'))||null;
+
+  sv('r-Zr', R!==null?getZr(R).toFixed(4):'——');
+  sv('r-dPSI',(Pi!==null&&Pt!==null)?(Pi-Pt).toFixed(2):'——');
+  let k=kOvr;
+  if(CBR!==null){
+    let kEst;
+    if(rigidAgency==='vdot'){
+      // VDOT §3.4.3: k = Mr/19.4 where Mr uses VDOT CBR correlation; cap at 500 pci
+      const rawMr = CBR<=10 ? 1500*CBR : 3000*Math.pow(CBR,0.65);
+      const mr = Math.min(rawMr, 15000);
+      kEst = Math.min(mr/19.4, 500);
+      const lbl = document.getElementById('rKLabel');
+      if(lbl) lbl.innerHTML = '= M<sub>R</sub>/19.4, capped 500 pci (VDOT)';
+      sv('r-kEst', kEst.toFixed(1)+' pci (VDOT est.)');
+    } else {
+      kEst=1.5*CBR;
+      const lbl = document.getElementById('rKLabel');
+      if(lbl) lbl.innerHTML = '≈ 1.5 × CBR (pci)';
+      sv('r-kEst',kEst.toFixed(1)+' pci (est.)');
+    }
+    if(!k) k=kEst;
+  } else sv('r-kEst','——');
+
+  const pill=document.getElementById('rigidPill');
+  if(!W18||!R||!So||!Pi||!Pt||!Ec||!Sc||!Cd||!J||!k){
+    sv('rigidVal','——'); sv('rigidSub','Enter all design parameters');
+    pill.className='result-pill'; clearRigidEq(); return;
+  }
+  const ZR=getZr(R), dPSI=Pi-Pt;
+  if(dPSI<=0){ sv('rigidVal','Error'); sv('rigidSub','Pt must be less than Pi'); pill.className='result-pill pill-red'; clearRigidEq(); return; }
+
+  const D=solveD(W18,ZR,So,dPSI,Pt,Sc,Cd,J,Ec,k);
+  if(D===null||isNaN(D)||D<0){
+    sv('rigidVal','——'); sv('rigidSub','No solution — check parameters'); pill.className='result-pill pill-red'; clearRigidEq(); return;
+  }
+  document.getElementById('rigidVal').innerHTML=D.toFixed(2)+'<span class="unit">in</span>';
+  sv('rigidSub',`≈ ${(D/12).toFixed(3)} ft · Suggest ${(Math.ceil(D*2)/2).toFixed(1)}" nominal`);
+  pill.className='result-pill pill-green';
+  renderRigidEq(ZR, So, D, dPSI, Pt, Sc, Cd, J, Ec, k, Math.log10(W18));
+  markDirty();
+}
+
+function solveD(W18,ZR,So,dPSI,Pt,Sc,Cd,J,Ec,k){
+  const logW=Math.log10(W18);
+  function f(D){
+    if(D<=0) return -999;
+    const inner=Math.pow(D,0.75)-18.42/Math.pow(Ec/k,0.25);
+    if(inner<=0) return -999;
+    const logArg=(Sc*Cd*(Math.pow(D,0.75)-1.132))/(215.63*J*inner);
+    if(logArg<=0) return -999;
+    return ZR*So+7.35*Math.log10(D+1)-0.06+Math.log10(dPSI/3.0)/(1+1.624e7/Math.pow(D+1,8.46))+(4.22-0.32*Pt)*Math.log10(logArg)-logW;
+  }
+  let lo=3,hi=36;
+  while(f(lo)<=-900&&lo<hi) lo+=0.5;
+  if(f(lo)*f(hi)>0){ for(let d=lo;d<=hi;d+=0.5){ if(f(d)>-900&&f(d)*f(hi)<=0){lo=d;break;} } }
+  if(f(lo)*f(hi)>0) return null;
+  for(let i=0;i<120;i++){ const m=(lo+hi)/2; if((hi-lo)<0.0001)return m; if(f(lo)*f(m)<=0)hi=m; else lo=m; }
+  return (lo+hi)/2;
+}
+
+/* ═══════ PRINT ═══════ */
+function openPrintModal(){ document.getElementById('printModal').classList.add('open'); }
+function closePrintModal(){ document.getElementById('printModal').classList.remove('open'); }
+
+function doPrint(){
+  const sel=[];
+  if(document.getElementById('pESAL').checked) sel.push('esal');
+  if(document.getElementById('pFlex').checked) sel.push('flex');
+  if(document.getElementById('pRigid').checked) sel.push('rigid');
+  if(document.getElementById('pRefs').checked) sel.push('refs');
+  if(!sel.length){ alert('Please select at least one section to print.'); return; }
+  closePrintModal();
+  // Mark visible sections; inject page-break-before on all but the first
+  let first=true;
+  document.querySelectorAll('.tab-content').forEach(el=>{
+    const show=sel.some(s=>el.classList.contains('tab-'+s));
+    if(show){
+      el.classList.add('print-show');
+      el.style.breakBefore = first ? 'auto' : 'page';
+      first=false;
+    } else {
+      el.classList.remove('print-show');
+      el.style.breakBefore='';
+    }
+  });
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{
+      document.querySelectorAll('.tab-content').forEach(el=>{
+        el.classList.remove('print-show');
+        el.style.breakBefore='';
+      });
+    },600);
+  },150);
+}
+
+/* ═══════ SAVE / LOAD ═══════ */
+function saveJSON(){
+  const trafData=[];
+  document.querySelectorAll('#trafBody tr').forEach(tr=>{
+    const tid=tr.id.replace('traf-','');
+    trafData.push({typeIdx:parseInt(gv('ttype-'+tid)),factor:gv('tfac-'+tid),dir:gv('tdir-'+tid),lane:gv('tlane-'+tid),pct:gv('tpct-'+tid)});
+  });
+  const layData=[];
+  document.querySelectorAll('#layerBody tr').forEach(tr=>{
+    const tid=tr.id.replace('lay-','');
+    const detEl=document.getElementById('ldet-'+tid);
+    layData.push({course:gv('lcourse-'+tid),matIdx:parseInt(gv('lmat-'+tid))||0,thick:gv('lthick-'+tid),a:gv('la-'+tid),m:gv('lm-'+tid),deteriorated:detEl?detEl.checked:false});
+  });
+  const data={
+    _tool:'ESAL & Pavement Design Calculator',_version:'1.2',
+    project:{name:gv('pi-name'),num:gv('pi-num'),by:gv('pi-by'),date:gv('pi-date'),chk:gv('pi-chk'),chkdate:gv('pi-chkdate'),loc:gv('pi-loc')},
+    esal:{startYear:gv('e-startYear'),aadt:gv('e-aadt'),growth:gv('e-growth'),life:gv('e-life'),notes:gv('e-notes'),rows:trafData},
+    flex:{mode:flexMode,agency:flexAgency,layerAgency:layerAgency,esal:gv('f-esal'),R:gv('f-R'),So:gv('f-So'),Pi:gv('f-Pi'),Pt:gv('f-Pt'),cbr:gv('f-cbr'),notes:gv('f-notes'),layers:layData,vdotClass:gv('vdot-flex-class'),vdotArea:gv('vdot-flex-area')},
+    rigid:{agency:rigidAgency,esal:gv('r-esal'),R:gv('r-R'),So:gv('r-So'),Pi:gv('r-Pi'),Pt:gv('r-Pt'),Ec:gv('r-Ec'),Sc:gv('r-Sc'),Cd:gv('r-Cd'),J:gv('r-J'),cbr:gv('r-cbr'),k:gv('r-k'),notes:gv('r-notes'),vdotClass:gv('vdot-rigid-class'),vdotArea:gv('vdot-rigid-area')}
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=(gv('pi-name')||'pavement-design').replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_pavement.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href); isDirty=false;
+}
+
+function loadJSON(evt){
+  const file=evt.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(!d._tool||!d._tool.includes('ESAL')){ alert('Unrecognized file format.'); return; }
+      const p=d.project||{};
+      ['name','num','by','date','chk','chkdate','loc'].forEach(k=>sv('pi-'+k, p[k]||''));
+      const es=d.esal||{};
+      sv('e-startYear',es.startYear||''); sv('e-aadt',es.aadt||''); sv('e-growth',es.growth||''); sv('e-life',es.life||'');
+      sv('e-notes',es.notes||'');
+      document.getElementById('trafBody').innerHTML=''; trafRows=[]; rowId=0;
+      (es.rows||[]).forEach(r=>addTrafRow(r));
+      const fl=d.flex||{};
+      if(fl.agency) showFlexAgency(fl.agency, null);
+      else if(fl.layerAgency) showFlexAgency(fl.layerAgency, null); // backward compat
+      if(fl.vdotClass) sv('vdot-flex-class', fl.vdotClass);
+      if(fl.vdotArea) sv('vdot-flex-area', fl.vdotArea);
+      setFlexMode(fl.mode||'new');
+      sv('f-esal',fl.esal||''); sv('f-R',fl.R||''); sv('f-So',fl.So||''); sv('f-Pi',fl.Pi||''); sv('f-Pt',fl.Pt||'');
+      sv('f-cbr',fl.cbr||''); sv('f-notes',fl.notes||'');
+      document.getElementById('layerBody').innerHTML=''; layerRows=[]; layId=0;
+      (fl.layers||[]).forEach(l=>addLayerRow(l));
+      const rg=d.rigid||{};
+      if(rg.agency) showRigidAgency(rg.agency, document.getElementById(rg.agency==='vdot'?'rigidAgencyVDOT':'rigidAgencyMDOT'));
+      if(rg.vdotClass) sv('vdot-rigid-class', rg.vdotClass);
+      if(rg.vdotArea) sv('vdot-rigid-area', rg.vdotArea);
+      sv('r-esal',rg.esal||''); sv('r-R',rg.R||''); sv('r-So',rg.So||''); sv('r-Pi',rg.Pi||''); sv('r-Pt',rg.Pt||'');
+      sv('r-Ec',rg.Ec||''); sv('r-Sc',rg.Sc||''); sv('r-Cd',rg.Cd||''); sv('r-J',rg.J||'');
+      sv('r-cbr',rg.cbr||''); sv('r-k',rg.k||''); sv('r-notes',rg.notes||'');
+      calcESAL(); calcFlex(); calcRigid();
+      isDirty=false; evt.target.value='';
+    } catch(err){ alert('Error loading file: '+err.message); }
+  };
+  reader.readAsText(file);
+}
+
+/* ═══════ REFERENCE TABLE POPULATION ═══════ */
+function populateRefTables(){
+  // ESAL
+  const eb=document.getElementById('esalRefBody');
+  ESAL_TYPES.filter(t=>t.factor!==null).forEach(t=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="l">${t.name}</td><td class="r">${t.factor}</td>`;
+    eb.appendChild(tr);
+  });
+  // Zr (common design values)
+  const zrKeys=[50,60,70,75,80,85,90,91,92,93,94,95,96,97,98,99];
+  const zb=document.getElementById('zrRefBody');
+  for(let i=0;i<zrKeys.length;i+=2){
+    const r1=zrKeys[i],r2=zrKeys[i+1],z1=ZR_TABLE[r1],z2=ZR_TABLE[r2];
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="r">${r1}%</td><td class="r">${z1.toFixed(4)}</td>`+
+      (r2!==undefined?`<td class="r">${r2}%</td><td class="r">${z2.toFixed(4)}</td>`:'<td></td><td></td>');
+    zb.appendChild(tr);
+  }
+  // MDOT
+  const mb=document.getElementById('mdotMatBody');
+  MDOT_MATERIALS.forEach(m=>{
+    const tr=document.createElement('tr');
+    const badge=`<span class="section-badge ${COURSE_BADGE[m.course]}">${m.course}</span>`;
+    tr.innerHTML=`<td class="l">${m.name}</td><td>${badge}</td>`+
+      `<td class="r">${m.a!==null?m.a:'—'}</td><td class="r">${m.aDet!==null?m.aDet:'—'}</td>`+
+      `<td class="r">${m.minT}"</td><td class="r">${m.desiredT!==null?m.desiredT+'"':'N/A'}</td><td class="r">${m.maxT}"</td>`;
+    mb.appendChild(tr);
+  });
+}
+
+/* ═══════ KATEX EQUATION RENDERS ═══════ */
+function ktx(n, dec=0){ return fmtN(n,dec).replace(/,/g,'{,}'); }
+
+// TGF formula — lives in Initial Design Parameters whitespace
+function renderTGFEq(){
+  const panel=document.getElementById('tgfEqPanel');
+  const div=document.getElementById('tgfEqDiv');
+  if(!panel||!div) return;
+  const growth=parseFloat(gv('e-growth')), life=parseInt(gv('e-life')), tgf=parseFloat(gv('e-tgf'));
+  if(!life||isNaN(tgf)||gv('e-growth').trim()===''){ panel.style.display='none'; return; }
+  panel.style.display='block';
+  const r=(growth||0)/100, rDisp=r.toFixed(4);
+  const latex = r===0
+    ? `\\mathrm{TGF} = n = ${life}`
+    : `\\mathrm{TGF} = \\frac{(1+r)^{n}-1}{r} = \\frac{(1+${rDisp})^{${life}}-1}{${rDisp}} = ${tgf.toFixed(4)}`;
+  katex.render(latex, div, {displayMode:true, throwOnError:false});
+}
+
+// ESAL formula — lives inline to the right of the ESAL result pill
+function renderESALEq(){
+  const el=document.getElementById('esalEqInline');
+  if(!el) return;
+  if(!currentESAL){ el.style.display='none'; return; }
+  const aadt=parseFloat(gv('e-aadt')), tgf=parseFloat(gv('e-tgf'));
+  if(!aadt||isNaN(tgf)){ el.style.display='none'; return; }
+  let factorSum=0;
+  document.querySelectorAll('#trafBody tr').forEach(tr=>{
+    const tid=tr.id.replace('traf-','');
+    const fac=parseFloat(gv('tfac-'+tid))||0;
+    const dir=(parseFloat(gv('tdir-'+tid))||0)/100;
+    const lane=(parseFloat(gv('tlane-'+tid))||0)/100;
+    const pct=(parseFloat(gv('tpct-'+tid))||0)/100;
+    factorSum+=fac*dir*lane*pct;
+  });
+  const latex=`\\mathrm{ESAL} = \\mathrm{AADT} \\times 365 \\times \\mathrm{TGF} \\times \\textstyle\\sum_i(f_i D_i L_i V_i) = ${ktx(aadt)} \\times 365 \\times ${tgf.toFixed(4)} \\times ${factorSum.toFixed(5)} = ${ktx(currentESAL)}`;
+  el.style.display='block';
+  katex.render(latex, el, {displayMode:true, throwOnError:false});
+}
+
+// Flexible AASHTO — symbolic + substituted values inline to the right of the SN pill
+function renderFlexEq(ZR, So, SN, dPSI, MR, logW){
+  const elSymb=document.getElementById('flexEqSymbolicInline');
+  const elSubst=document.getElementById('flexEqInline');
+  if(!elSymb||!elSubst) return;
+
+  // Symbolic
+  const symb=
+    `\\log_{10}(W_{18}) = Z_R S_o + 9.36\\log_{10}(SN+1) - 0.20 + `+
+    `\\dfrac{\\log_{10}\\!\\left(\\dfrac{\\Delta PSI}{2.7}\\right)}{0.40 + \\dfrac{1094}{(SN+1)^{5.19}}} `+
+    `+ 2.32\\log_{10}(M_R) - 8.07`;
+  elSymb.style.display='block';
+  katex.render(symb, elSymb, {displayMode:true, throwOnError:false});
+
+  // Substituted
+  const ZRd=ZR<0?`(${ZR.toFixed(4)})`:ZR.toFixed(4);
+  const subst=
+    `\\log_{10}(${ktx(Math.round(Math.pow(10,logW)))}) = ${ZRd}(${So}) + 9.36\\log_{10}(${SN.toFixed(2)}+1) - 0.20 + `+
+    `\\dfrac{\\log_{10}\\!\\left(\\dfrac{${dPSI.toFixed(2)}}{2.7}\\right)}{0.40 + \\dfrac{1094}{(${SN.toFixed(2)}+1)^{5.19}}} `+
+    `+ 2.32\\log_{10}(${ktx(MR)}) - 8.07 = ${logW.toFixed(3)}`;
+  elSubst.style.display='block';
+  katex.render(subst, elSubst, {displayMode:true, throwOnError:false});
+}
+
+function clearFlexEq(){
+  const elSymb=document.getElementById('flexEqSymbolicInline');
+  const elSubst=document.getElementById('flexEqInline');
+  if(elSymb) elSymb.style.display='none';
+  if(elSubst) elSubst.style.display='none';
+}
+
+// Rigid AASHTO — substituted values inline to the right of the depth pill
+function renderRigidEq(ZR, So, D, dPSI, Pt, Sc, Cd, J, Ec, k, logW){
+  const elSymb=document.getElementById('rigidEqSymbolicInline');
+  const elSubst=document.getElementById('rigidEqInline');
+  if(!elSymb||!elSubst) return;
+
+  // Symbolic — split after the PSI fraction
+  const symb=
+    `\\begin{aligned}`+
+    `\\log_{10}(W_{18}) = \\;&Z_R S_o + 7.35\\log_{10}(D+1) - 0.06 + `+
+    `\\dfrac{\\log_{10}\\!\\left(\\dfrac{\\Delta PSI}{3.0}\\right)}{1 + \\dfrac{1.624 \\times 10^7}{(D+1)^{8.46}}} \\\\[4pt]`+
+    `&+ (4.22 - 0.32\\,P_t)\\log_{10}\\!\\left[\\dfrac{S_c\\,C_d\\,(D^{0.75}-1.132)}{215.63\\,J\\!\\left(D^{0.75}-\\dfrac{18.42}{(E_c/k)^{0.25}}\\right)}\\right]`+
+    `\\end{aligned}`;
+  elSymb.style.display='block';
+  katex.render(symb, elSymb, {displayMode:true, throwOnError:false});
+
+  // Substituted — split the same way
+  const EcOverK=Math.round(Ec/k);
+  const ZRd=ZR<0?`(${ZR.toFixed(4)})`:ZR.toFixed(4);
+  const Pt_coeff=(4.22-0.32*Pt).toFixed(3);
+  const subst=
+    `\\begin{aligned}`+
+    `\\log_{10}(${ktx(Math.round(Math.pow(10,logW)))}) = \\;&${ZRd}(${So}) + 7.35\\log_{10}(${D.toFixed(2)}+1) - 0.06 + `+
+    `\\dfrac{\\log_{10}\\!\\left(\\dfrac{${dPSI.toFixed(2)}}{3.0}\\right)}{1 + \\dfrac{1.624 \\times 10^7}{(${D.toFixed(2)}+1)^{8.46}}} \\\\[4pt]`+
+    `&+ ${Pt_coeff}\\,\\log_{10}\\!\\left[\\dfrac{(${Sc})(${Cd})\\bigl((${D.toFixed(2)})^{0.75}-1.132\\bigr)}{215.63(${J})\\bigl((${D.toFixed(2)})^{0.75}-\\dfrac{18.42}{(${ktx(EcOverK)})^{0.25}}\\bigr)}\\right] = ${logW.toFixed(3)}`+
+    `\\end{aligned}`;
+  elSubst.style.display='block';
+  katex.render(subst, elSubst, {displayMode:true, throwOnError:false});
+}
+
+function clearRigidEq(){
+  const elSymb=document.getElementById('rigidEqSymbolicInline');
+  const elSubst=document.getElementById('rigidEqInline');
+  if(elSymb) elSymb.style.display='none';
+  if(elSubst) elSubst.style.display='none';
+}
+
+/* ═══════ INIT ═══════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  populateRefTables();
+  isDirty=false;
+});
+</script>
+</body>
+</html>

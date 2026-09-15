@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drilled Shaft Capacity Calculator</title>
+<link rel="manifest" href="manifest.json">
+<link href="fonts/fonts.css" rel="stylesheet"><!-- P1-4: self-hosted IBM Plex (was Google Fonts CDN) -->
+<style>
+:root {
+  --navy:#0c1f35;--navy2:#152d4a;--blue:#1d5fa8;--blue2:#2471c9;
+  --steel:#4a7daa;--green:#166534;--red:#991b1b;--orange:#c2410c;
+  --bg:#f0f4f8;--bg2:#ffffff;--border:#c8d6e5;--text:#1a2b3c;--muted:#5a738a;
+  --mono:'IBM Plex Mono','Courier New',monospace;
+  --sans:'IBM Plex Sans','Segoe UI',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--text);line-height:1.5}
+
+/* HEADER */
+.header{background:var(--navy);color:#fff;border-bottom:3px solid var(--blue2)}
+  .breadcrumb{padding:6px 24px;font-size:11px;font-family:var(--mono);color:var(--muted);background:#fff;border-bottom:1px solid var(--border)}.breadcrumb a{color:var(--blue2);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.header-inner{max-width:1200px;margin:0 auto;padding:15px 24px 12px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.header h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.header h1 span{color:#6db3f5}
+.header-sub{font-size:10.5px;color:#7a9fc0;margin-top:3px;font-family:var(--mono)}
+.hdr-actions{display:flex;gap:7px;align-items:center;flex-shrink:0}
+.hdr-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:3px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#c8ddf0;cursor:pointer;transition:background .15s;white-space:nowrap}
+.hdr-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.32)}
+.hdr-btn.save{border-color:#4ade80aa;color:#4ade80}
+.hdr-btn.save:hover{background:rgba(74,222,128,.12)}
+.hdr-btn.print{border-color:#93c5fdaa;color:#93c5fd}
+.hdr-btn.print:hover{background:rgba(147,197,253,.1)}
+
+.container{max-width:1200px;margin:0 auto;padding:20px 20px 60px}
+
+/* PROJECT CARD */
+.proj-card{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+.proj-head{background:var(--navy2);color:#fff;padding:7px 16px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.proj-row{display:flex;gap:0;border-bottom:1px solid var(--border)}
+.proj-row:last-child{border-bottom:none}
+.proj-cell{display:flex;align-items:center;gap:10px;padding:9px 16px;flex:1;min-width:0}
+.proj-cell:not(:first-child){border-left:1px solid var(--border)}
+.proj-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.proj-input{border:none;border-bottom:1px solid var(--border);background:transparent;font-family:var(--sans);font-size:13px;color:var(--text);padding:1px 4px;flex:1;min-width:0;outline:none}
+.proj-input:focus{border-bottom-color:var(--blue2)}
+
+/* PHASE SECTIONS */
+.phase{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+.phase-head{display:flex;align-items:center;gap:12px;padding:11px 20px;background:var(--navy2);color:#fff}
+.phase-num{font-family:var(--mono);font-size:17px;font-weight:600;color:#6db3f5;line-height:1;flex-shrink:0}
+.phase-title{font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.phase-sub{font-family:var(--mono);font-size:10px;color:#7a9fc0;margin-top:1px}
+.phase-ref{font-family:var(--mono);font-size:10px;color:#5a8ab0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:2px 7px;border-radius:2px;margin-left:auto;white-space:nowrap}
+.phase-body{padding:20px 22px}
+
+/* CARDS */
+.card{background:#f7f9fc;border:1px solid var(--border);border-radius:3px;margin-bottom:14px;overflow:hidden}
+.card-head{background:var(--navy);color:#fff;padding:7px 14px;font-size:10.5px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.card-head-right{margin-left:auto;display:flex;gap:6px;align-items:center}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--blue2);flex-shrink:0}
+.card-body{padding:16px 18px}
+
+/* FORM */
+.field-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px}
+.field-row:last-child{margin-bottom:0}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.field label em{font-style:italic;text-transform:none;letter-spacing:0;font-weight:400}
+select,input[type=number],input[type=text]{padding:6px 9px;border:1px solid var(--border);border-radius:3px;font-size:13px;font-family:var(--sans);color:var(--text);background:#fff}
+select:focus,input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(36,113,201,.12)}
+input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--blue2)}
+.w48{width:48px}
+.w64{width:64px}
+.w80{width:80px}
+.w96{width:96px}
+.w120{width:120px}
+.w160{width:160px}
+.w200{width:200px}
+
+/* STRATA */
+.stratum-card{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:10px;overflow:hidden}
+.stratum-head{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--navy2);color:#fff}
+.stratum-num{font-family:var(--mono);font-size:12px;font-weight:600;color:#6db3f5}
+.stratum-name-display{font-size:12px;font-weight:600;flex:1}
+.stratum-type-badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:2px;border:1px solid rgba(255,255,255,.2);color:#c8ddf0;background:rgba(255,255,255,.06)}
+.stratum-del{background:none;border:none;color:#7a9fc0;cursor:pointer;font-size:15px;padding:0 2px;line-height:1}
+.stratum-del:hover{color:#f87171}
+.stratum-body{padding:14px 18px}
+.stratum-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;align-items:end}
+.add-stratum-btn{background:none;border:1px dashed var(--border);border-radius:3px;width:100%;padding:10px;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--blue2);cursor:pointer;transition:border-color .15s,background .15s}
+.add-stratum-btn:hover{border-color:var(--blue2);background:rgba(29,95,168,.05)}
+
+/* RESISTANCE FACTOR TABLE */
+.rf-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:10px}
+.rf-table th{background:var(--navy2);color:#fff;padding:6px 10px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.rf-table td{padding:5px 10px;border-bottom:1px solid var(--border)}
+.rf-table tr:nth-child(even) td{background:#f0f4f8}
+.rf-table tr:last-child td{border-bottom:none}
+.rf-table td:last-child{text-align:center;font-family:var(--mono);font-weight:600;color:var(--navy)}
+.rf-input{width:60px;padding:4px 7px;border:1px solid var(--border);border-radius:3px;font-family:var(--mono);font-size:12px;text-align:center;font-weight:600}
+.rf-highlight{background:#dbeafe !important;font-weight:700;color:var(--navy)}
+
+/* CALC OUTPUT */
+.calc-section{margin-bottom:18px}
+.calc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:12px}
+.eq-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:7px;font-family:var(--mono);font-size:12px;justify-content:space-between}
+.eq-main{display:flex;align-items:baseline;gap:8px;flex:1;flex-wrap:wrap;min-width:0}
+.eq-label{color:var(--muted);min-width:110px;flex-shrink:0}
+.eq-val{font-weight:600;color:var(--navy);flex-shrink:0}
+.eq-ref{font-size:9.5px;color:#fff;background:var(--steel);padding:2px 7px;border-radius:2px;font-weight:600;white-space:nowrap;font-family:var(--sans);flex-shrink:0;align-self:flex-start;margin-top:1px}
+.eq-note{font-size:10.5px;color:var(--muted);font-family:var(--sans);font-style:italic}
+.stratum-calc-card{background:#f7f9fc;border:1px solid var(--border);border-left:3px solid var(--blue2);border-radius:0 3px 3px 0;padding:12px 16px;margin-bottom:10px}
+.stratum-calc-title{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--navy);margin-bottom:10px}
+.sig-v-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-bottom:8px}
+
+/* RESULTS TABLE */
+.res-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.res-table th{background:var(--navy2);color:#fff;padding:7px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.res-table th:first-child{text-align:left}
+.res-table td{padding:6px 12px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--mono)}
+.res-table td:first-child{text-align:left;font-family:var(--sans);font-weight:600}
+.res-table tr:last-child td{border-bottom:none;font-weight:700;background:#f0f4f8}
+.na-cell{color:var(--muted);font-style:italic;font-family:var(--sans)}
+
+/* CDR SUMMARY */
+.cdr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:4px}
+.cdr-card{border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.cdr-head{padding:8px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#fff}
+.cdr-body{padding:14px;background:var(--bg2)}
+.cdr-value{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+.cdr-label{font-size:10.5px;color:var(--muted)}
+.cdr-status{font-size:12px;font-weight:700;margin-top:8px;padding:5px 10px;border-radius:2px;text-align:center}
+.cdr-green .cdr-head{background:var(--green)}
+.cdr-green .cdr-value{color:var(--green)}
+.cdr-green .cdr-status{background:#dcfce7;color:var(--green)}
+.cdr-red .cdr-head{background:var(--red)}
+.cdr-red .cdr-value{color:var(--red)}
+.cdr-red .cdr-status{background:#fee2e2;color:var(--red)}
+.cdr-orange .cdr-head{background:var(--orange)}
+.cdr-orange .cdr-value{color:var(--orange)}
+.cdr-orange .cdr-status{background:#ffedd5;color:var(--orange)}
+.cdr-muted .cdr-head{background:var(--muted)}
+.cdr-muted .cdr-value{color:var(--muted)}
+.cdr-muted .cdr-status{background:#f0f4f8;color:var(--muted)}
+
+/* SETTLEMENT CHART */
+.chart-wrap{background:#fff;border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:16px;display:flex;justify-content:center}
+canvas#settlementChart{max-width:100%;height:auto}
+.settlement-result{background:#f7f9fc;border:1px solid var(--border);border-left:3px solid var(--blue2);border-radius:0 3px 3px 0;padding:12px 16px;font-family:var(--mono);font-size:12px}
+.settlement-result .big{font-size:20px;font-weight:700;color:var(--navy);display:block;margin-top:4px}
+
+/* INFO BOX */
+.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:3px;padding:10px 14px;font-size:11.5px;color:#1e3a5f;margin-bottom:14px}
+
+/* TOGGLE ROW */
+.toggle-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.toggle-btn{padding:6px 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;color:var(--muted);transition:all .15s}
+.toggle-btn.active{background:var(--navy2);color:#fff;border-color:var(--navy2)}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* PRINT */
+@media print {
+  body{background:#fff;font-size:11px}
+  .header{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hdr-actions,.add-stratum-btn,.stratum-del{display:none!important}
+  .container{padding:10px}
+  /* Sections flow naturally across page breaks — no forced new pages */
+  .phase,.proj-card{box-shadow:none}
+  /* Smaller units stay intact */
+  .card,.stratum-card,.cdr-card,.stratum-calc-card{box-shadow:none;break-inside:avoid}
+  .phase-head,.card-head,.stratum-head,.proj-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .cdr-head,.cdr-status{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .chart-wrap{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>Drilled Shaft <span>Capacity Calculator</span></h1>
+      <div class="header-sub">AASHTO LRFD 9th Ed. §10.8.3 · β-method (Sand) · α-method (Clay)</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="hdr-btn save" onclick="saveJSON()">↓ Save JSON</button>
+      <button class="hdr-btn" onclick="document.getElementById('loadInput').click()">↑ Load JSON</button>
+      <input type="file" id="loadInput" accept=".json" style="display:none" onchange="loadJSON(event)">
+      <button class="hdr-btn print" onclick="window.print()">⎙ Print / PDF</button>
+    </div>
+  </div>
+</div>
+<div class="breadcrumb">
+  <a href="index.html">← Geotech Tools</a> &nbsp;/&nbsp; Drilled Shaft Capacity Calculator
+</div>
+
+<div class="container">
+
+<!-- PROJECT INFO -->
+<div class="proj-card">
+  <div class="proj-head">Project Information</div>
+  <div class="proj-row">
+    <div class="proj-cell" style="flex:3">
+      <span class="proj-label">Project / Subject</span>
+      <input class="proj-input" id="proj-subject" type="text" placeholder="Project Name">
+    </div>
+    <div class="proj-cell" style="flex:1.5">
+      <span class="proj-label">Project No.</span>
+      <input class="proj-input" id="proj-number" type="text" placeholder="XXXXX.XXX">
+    </div>
+    <div class="proj-cell" style="flex:1">
+      <span class="proj-label">Prepared By</span>
+      <input class="proj-input" id="proj-by" type="text" placeholder="Initials">
+    </div>
+    <div class="proj-cell" style="flex:1">
+      <span class="proj-label">Date</span>
+      <input class="proj-input" id="proj-date" type="text" placeholder="YYYY-MM-DD">
+    </div>
+  </div>
+  <div class="proj-row">
+    <div class="proj-cell" style="flex:3">
+      <span class="proj-label">Boring / Design Basis</span>
+      <input class="proj-input" id="proj-boring" type="text" placeholder="e.g. SS-03">
+    </div>
+    <div class="proj-cell" style="flex:1.5">
+      <span class="proj-label">Shaft ID / Location</span>
+      <input class="proj-input" id="proj-shaft-id" type="text" placeholder="e.g. DS-1">
+    </div>
+    <div class="proj-cell" style="flex:1">
+      <span class="proj-label">Checked By</span>
+      <input class="proj-input" id="proj-checked" type="text" placeholder="Initials">
+    </div>
+    <div class="proj-cell" style="flex:1">
+      <span class="proj-label">Check Date</span>
+      <input class="proj-input" id="proj-check-date" type="text" placeholder="YYYY-MM-DD">
+    </div>
+  </div>
+</div>
+
+<!-- SOIL CONDITIONS -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">1</span>
+    <div>
+      <div class="phase-title">Soil Conditions</div>
+      <div class="phase-sub">Add strata from shallow to deep — elevations in ft (NAVD or project datum)</div>
+    </div>
+  </div>
+  <div class="phase-body">
+    <div id="strata-container"></div>
+    <button class="add-stratum-btn" onclick="addStratum()">+ Add Stratum</button>
+  </div>
+</div>
+
+<!-- GROUNDWATER -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">2</span>
+    <div><div class="phase-title">Groundwater</div></div>
+  </div>
+  <div class="phase-body">
+    <div class="field-row">
+      <div class="field">
+        <label>GWT Elevation <em>(ft)</em></label>
+        <input type="number" id="gwt-el" class="w96" value="47" step="0.5" oninput="recalc()">
+      </div>
+      <div class="field">
+        <label>Unit Weight of Water, γ<em>w</em> <em>(pcf)</em></label>
+        <input type="number" id="gamma-w" class="w80" value="62.4" step="0.1" oninput="recalc()">
+      </div>
+      <div class="field" style="flex:1;max-width:380px">
+        <label>Notes</label>
+        <input type="text" id="gwt-notes" style="width:100%" placeholder="e.g. use upper groundwater for design">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DESIGN CRITERIA -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">3</span>
+    <div>
+      <div class="phase-title">Design Criteria</div>
+      <div class="phase-sub">Shaft geometry and design loads</div>
+    </div>
+  </div>
+  <div class="phase-body">
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Shaft Geometry</div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Shaft Diameter, D <em>(in)</em></label>
+            <input type="number" id="d-shaft-in" class="w80" value="60" step="1" oninput="recalc()">
+          </div>
+          <div class="field">
+            <label>Top of Shaft EL <em>(ft)</em></label>
+            <input type="number" id="top-el" class="w96" value="57" step="0.5" oninput="recalc()">
+          </div>
+          <div class="field">
+            <label>Shaft Stickup <em>(ft)</em></label>
+            <input type="number" id="stickup" class="w80" value="0.5" step="0.5" oninput="recalc()">
+          </div>
+          <div class="field">
+            <label>Zero Friction Length, z<em>fl</em> <em>(ft)</em></label>
+            <input type="number" id="zfl" class="w80" value="5" step="0.5" oninput="recalc()">
+          </div>
+          <div class="field">
+            <label>Shaft Length, L <em>(ft, from LPile)</em></label>
+            <input type="number" id="length" class="w96" value="25" step="0.5" oninput="recalc()">
+          </div>
+          <div class="field">
+            <label>Concrete f'<em>c</em> <em>(psi)</em></label>
+            <input type="number" id="fc-concrete" class="w80" value="4000" step="500" min="0" oninput="recalc()" title="Used to cap rock side resistance per AASHTO §10.8.3.5.4b when qu exceeds shaft concrete strength">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Embed EL = Top − Stickup − z<em>fl</em></label>
+            <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--navy);padding:6px 9px;border:1px solid var(--border);border-radius:3px;background:#f0f4f8;min-width:80px" id="embed-el-display">51.5 ft</div>
+          </div>
+          <div class="field">
+            <label>Tip EL = Top − L</label>
+            <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--navy);padding:6px 9px;border:1px solid var(--border);border-radius:3px;background:#f0f4f8;min-width:80px" id="tip-el-display">32.0 ft</div>
+          </div>
+          <div class="field">
+            <label>Shaft Diameter, D <em>(ft)</em></label>
+            <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--navy);padding:6px 9px;border:1px solid var(--border);border-radius:3px;background:#f0f4f8;min-width:80px" id="d-ft-display">5.00 ft</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Resistance Mode &amp; Applied Load</div>
+      <div class="card-body">
+        <div class="field-row" style="margin-bottom:14px">
+          <div class="field">
+            <label>Resistance components to include:</label>
+            <div class="toggle-row" style="margin-top:6px;margin-bottom:0">
+              <button class="toggle-btn active" id="mode-side" onclick="setMode('side')">Side Only</button>
+              <button class="toggle-btn" id="mode-tip" onclick="setMode('tip')">Tip Only</button>
+              <button class="toggle-btn" id="mode-both" onclick="setMode('both')">Side + Tip</button>
+            </div>
+          </div>
+          <div class="field" id="tip-util-field" style="display:none">
+            <label>Tip Resistance Utilized <em>(%, of computed R<sub>p</sub>)</em></label>
+            <input type="number" id="tip-util-pct" class="w96" placeholder="100" min="0" max="100" step="1" oninput="recalc()">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Applied Axial Load, F<em>y</em> <em>(kip)</em></label>
+            <input type="number" id="fy" class="w96" value="30" step="1" oninput="recalc()">
+          </div>
+          <div class="field">
+            <label>Settlement Check Load <em>(kip, for settlement check)</em></label>
+            <input type="number" id="fy-settle" class="w120" value="30" step="1" oninput="recalc()">
+          </div>
+          <div class="field">
+            <label>Settlement Check Basis</label>
+            <select id="settle-basis" onchange="recalc()">
+              <option value="drained">Rs Drained</option>
+              <option value="undrained">Rs Undrained</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DESIGN REQUIREMENTS -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">4</span>
+    <div>
+      <div class="phase-title">Design Requirements</div>
+      <div class="phase-sub">Resistance factors per AASHTO LRFD Table 10.5.5.2.4-1</div>
+    </div>
+    <span class="phase-ref">AASHTO §10.5.5.2.4</span>
+  </div>
+  <div class="phase-body">
+    <div class="info-box">
+      Edit resistance factors below to match the applicable method and soil type for this design. AASHTO reference values are shown in the table for guidance.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Side Resistance Factors, φ<em>stat</em></div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Sand / Cohesionless (β-method)</label>
+              <input type="number" id="phi-side-sand" class="rf-input" value="0.55" step="0.05" min="0" max="1" oninput="recalc()">
+            </div>
+            <div class="field">
+              <label>Clay / Cohesive (α-method, undrained)</label>
+              <input type="number" id="phi-side-clay" class="rf-input" value="0.45" step="0.05" min="0" max="1" oninput="recalc()">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Clay / Cohesive (β-method, drained)</label>
+              <input type="number" id="phi-side-clay-drained" class="rf-input" value="0.45" step="0.05" min="0" max="1" oninput="recalc()">
+            </div>
+            <div class="field">
+              <label>Rock (Kulhawy et al. 2005)</label>
+              <input type="number" id="phi-side-rock" class="rf-input" value="0.55" step="0.05" min="0" max="1" oninput="recalc()">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Tip Resistance Factors, φ<em>tip</em></div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Sand / Cohesionless (Brown et al. 2010)</label>
+              <input type="number" id="phi-tip-sand" class="rf-input" value="0.50" step="0.05" min="0" max="1" oninput="recalc()">
+            </div>
+            <div class="field">
+              <label>Clay / Cohesive (Total Stress, Brown et al.)</label>
+              <input type="number" id="phi-tip-clay" class="rf-input" value="0.40" step="0.05" min="0" max="1" oninput="recalc()">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Rock (Canadian Geotech. Soc. / Brown et al.)</label>
+              <input type="number" id="phi-tip-rock" class="rf-input" value="0.50" step="0.05" min="0" max="1" oninput="recalc()">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="rf-table">
+      <thead>
+        <tr>
+          <th>Load Type</th>
+          <th>Method / Soil / Condition</th>
+          <th style="text-align:center">φ (AASHTO)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Side resistance in clay</td><td>α-method (Brown et al., 2010)</td><td>0.45</td></tr>
+        <tr><td>Tip resistance in clay</td><td>Total Stress (Brown et al., 2010)</td><td>0.40</td></tr>
+        <tr class="rf-highlight"><td>Side resistance in sand</td><td>β-method (Brown et al., 2010)</td><td>0.55</td></tr>
+        <tr class="rf-highlight"><td>Tip resistance in sand</td><td>Brown et al. (2010)</td><td>0.50</td></tr>
+        <tr><td>Side resistance in cohesive IGMs</td><td>Brown et al. (2010)</td><td>0.60</td></tr>
+        <tr><td>Tip resistance in cohesive IGMs</td><td>Brown et al. (2010)</td><td>0.55</td></tr>
+        <tr class="rf-highlight"><td>Side resistance in rock</td><td>Kulhawy et al. (2005) / Brown et al. (2010)</td><td>0.55</td></tr>
+        <tr><td>Side resistance in rock</td><td>Carter and Kulhawy (1988) — not implemented</td><td>0.50</td></tr>
+        <tr class="rf-highlight"><td>Tip resistance in rock</td><td>Canadian Geotech. Soc. / Brown et al. (2010)</td><td>0.50</td></tr>
+        <tr><td>Static load test (compression)</td><td>All materials</td><td>0.70</td></tr>
+        <tr><td>Static load test (uplift)</td><td>All materials</td><td>0.60</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CALCULATIONS -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">5</span>
+    <div>
+      <div class="phase-title">Calculations</div>
+      <div class="phase-sub">AASHTO LRFD 9th Ed. §10.8.3.5 — Nominal Axial Compression Resistance</div>
+    </div>
+  </div>
+  <div class="phase-body" id="calc-output">
+    <div style="color:var(--muted);font-style:italic;font-size:12px">Configure soil strata and design criteria above to generate calculations.</div>
+  </div>
+</div>
+
+<!-- CDR SUMMARY -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">6</span>
+    <div><div class="phase-title">Capacity Demand Ratio (CDR)</div></div>
+  </div>
+  <div class="phase-body" id="cdr-output">
+    <div style="color:var(--muted);font-style:italic;font-size:12px">CDR will appear here after calculations are complete.</div>
+  </div>
+</div>
+
+<!-- SETTLEMENT CHECK -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">7</span>
+    <div>
+      <div class="phase-title">Settlement Check</div>
+      <div class="phase-sub">Normalized Load Transfer — O'Neill &amp; Reese (1999) · AASHTO Fig. 10.8.2.2.2-3</div>
+    </div>
+    <span class="phase-ref">AASHTO §10.8.2.2.2</span>
+  </div>
+  <div class="phase-body">
+    <div class="field-row" id="settle-inputs">
+      <div class="field">
+        <label>Side Load Transfer (service load, kip)</label>
+        <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--navy);padding:6px 9px;border:1px solid var(--border);border-radius:3px;background:#f0f4f8;min-width:100px" id="settle-load-display">—</div>
+      </div>
+      <div class="field">
+        <label>Ult. Side Load Transfer (factored Rs, kip)</label>
+        <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--navy);padding:6px 9px;border:1px solid var(--border);border-radius:3px;background:#f0f4f8;min-width:100px" id="settle-ult-display">—</div>
+      </div>
+      <div class="field">
+        <label>Load Ratio</label>
+        <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--navy);padding:6px 9px;border:1px solid var(--border);border-radius:3px;background:#f0f4f8;min-width:80px" id="settle-ratio-display">—</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="settlementChart" width="620" height="380"></canvas>
+    </div>
+    <div class="settlement-result" id="settle-result">
+      Run calculations above to generate settlement estimate.
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DATA MODEL
+// ═══════════════════════════════════════════════════════════
+const STRATUM_COLORS = ['#2471c9','#059669','#d97706','#7c3aed','#dc2626','#0891b2','#65a30d','#c2410c'];
+
+// AASHTO LRFD 9th Ed. Table 10.4.6.4-1 — Hoek-Brown intact-rock constant mi
+// by rock group (after Marinos & Hoek 2000; updated values Rocscience 2007).
+// Value shown is the tabulated mean; the field remains editable so the user
+// can enter a site-specific value within the table's +/- range.
+const MI_TABLE = {
+  '':               { label: '— Select rock type (or enter mi manually) —', mi: null },
+  'conglomerate':   { label: 'Conglomerate (21 ± 3)',        mi: 21 },
+  'sandstone':      { label: 'Sandstone (17 ± 4)',           mi: 17 },
+  'siltstone':      { label: 'Siltstone (7 ± 2)',            mi: 7 },
+  'claystone':      { label: 'Claystone (4 ± 2)',            mi: 4 },
+  'breccia_sed':    { label: 'Breccia, sedimentary (19 ± 5)',mi: 19 },
+  'greywacke':      { label: 'Greywacke (18 ± 3)',           mi: 18 },
+  'shale':          { label: 'Shale (6 ± 2)',                mi: 6 },
+  'marl':           { label: 'Marl (7 ± 2)',                 mi: 7 },
+  'limestone_cryst':{ label: 'Limestone, crystalline (12 ± 3)', mi: 12 },
+  'limestone_spar': { label: 'Limestone, sparitic (10 ± 5)', mi: 10 },
+  'limestone_micr': { label: 'Limestone, micritic (8 ± 3)',  mi: 8 },
+  'dolomite':       { label: 'Dolomite (9 ± 3)',             mi: 9 },
+  'gypsum':         { label: 'Gypsum (10 ± 2)',              mi: 10 },
+  'anhydrite':      { label: 'Anhydrite (12 ± 2)',           mi: 12 },
+  'chalk':          { label: 'Chalk (7 ± 2)',                mi: 7 },
+  'marble':         { label: 'Marble (9 ± 3)',               mi: 9 },
+  'hornfels':       { label: 'Hornfels (19 ± 4)',            mi: 19 },
+  'quartzite':      { label: 'Quartzite (20 ± 3)',           mi: 20 },
+  'metasandstone':  { label: 'Metasandstone (19 ± 3)',       mi: 19 },
+  'migmatite':      { label: 'Migmatite (29 ± 3)',           mi: 29 },
+  'amphibolite':    { label: 'Amphibolite (26 ± 6)',         mi: 26 },
+  'gneiss':         { label: 'Gneiss (28 ± 5)',              mi: 28 },
+  'schist':         { label: 'Schist (10 ± 3)',              mi: 10 },
+  'phyllite':       { label: 'Phyllite (7 ± 3)',             mi: 7 },
+  'slate':          { label: 'Slate (7 ± 4)',                mi: 7 },
+  'granite':        { label: 'Granite (32 ± 3)',             mi: 32 },
+  'granodiorite':   { label: 'Granodiorite (29 ± 3)',        mi: 29 },
+  'diorite':        { label: 'Diorite (25 ± 5)',             mi: 25 },
+  'gabbro':         { label: 'Gabbro (27 ± 3)',              mi: 27 },
+  'dolerite':       { label: 'Dolerite (16 ± 5)',            mi: 16 },
+  'norite':         { label: 'Norite (20 ± 5)',              mi: 20 },
+  'porphyry':       { label: 'Porphyries (20 ± 5)',          mi: 20 },
+  'rhyolite':       { label: 'Rhyolite (25 ± 5)',            mi: 25 },
+  'dacite':         { label: 'Dacite (25 ± 3)',              mi: 25 },
+  'andesite':       { label: 'Andesite (25 ± 5)',            mi: 25 },
+  'basalt':         { label: 'Basalt (25 ± 5)',              mi: 25 },
+  'agglomerate':    { label: 'Agglomerate (19 ± 3)',         mi: 19 },
+  'volcanic_breccia':{label: 'Volcanic Breccia (19 ± 5)',    mi: 19 },
+  'tuff':           { label: 'Tuff (13 ± 5)',                mi: 13 },
+  'diabase':        { label: 'Diabase (15 ± 5)',             mi: 15 },
+  'peridotite':     { label: 'Peridotite (25 ± 5)',          mi: 25 }
+};
+let strata = [];
+let stratumCount = 0;
+let resistMode = 'side';
+const pa = 2.12; // ksf (atmospheric pressure)
+
+// Reads a numeric input field, falling back to `def` only when the field is
+// blank/non-numeric — NOT when the user has legitimately entered 0.
+// (`+el.value || def` silently discards a real 0, e.g. Top of Shaft EL = 0
+// or Stickup = 0, both common inputs.)
+function numField(id, def) {
+  const el = document.getElementById(id);
+  if (!el) return def;
+  const v = parseFloat(el.value);
+  return isNaN(v) ? def : v;
+}
+
+function newStratum(n) {
+  return {
+    id: ++stratumCount,
+    name: 'Stratum ' + n,
+    type: 'coarse', // 'coarse', 'fine', or 'rock'
+    gamma: 120,
+    N60: 20,
+    N1_60: 20,
+    Su: 1000,
+    qu: 5000, // psi — uniaxial compressive strength of rock (rock strata only)
+    socketCondition: 'normal', // 'normal' (Eq. 10.8.3.5.4b-1) or 'fractured' (Eq. 10.8.3.5.4b-2) — rock strata only
+    RQD: 70,                   // % — Rock Quality Designation, used only when socketCondition === 'fractured'
+    jointCondition: 'closed',  // 'closed' or 'open' — joint condition for αE lookup, used only when fractured
+    lithology: '',              // AASHTO Table 10.4.6.4-1 rock group key — populates mi; used only when fractured
+    mi: 10,                     // Hoek-Brown intact-rock constant — editable, seeded from lithology dropdown
+    GSI: 50,                    // Geological Strength Index (AASHTO Fig. 10.4.6.4-1) — engineer judgment, 0-100
+    D: 0,                       // Disturbance factor (0 rock coring \u2013 1 blasting in confined excavation)
+    m: '0.8',
+    gravelly: false,
+    top_EL: 60,
+    bot_EL: 40
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STRATUM RENDERING
+// ═══════════════════════════════════════════════════════════
+function renderStrata() {
+  const cont = document.getElementById('strata-container');
+  cont.innerHTML = '';
+  strata.forEach((s, i) => {
+    const col = STRATUM_COLORS[i % STRATUM_COLORS.length];
+    const isFine = s.type === 'fine';
+    const isRock = s.type === 'rock';
+    const badge = isRock ? 'ROCK' : isFine ? 'FINE-GRAINED' : 'COARSE-GRAINED';
+    cont.innerHTML += `
+    <div class="stratum-card" id="scard-${s.id}">
+      <div class="stratum-head" style="border-left:3px solid ${col}">
+        <span class="stratum-num">STRATUM ${i+1}</span>
+        <span class="stratum-name-display" id="sname-${s.id}">${s.name}</span>
+        <span class="stratum-type-badge">${badge}</span>
+        <button class="stratum-del" onclick="deleteStratum(${s.id})" title="Delete stratum">×</button>
+      </div>
+      <div class="stratum-body">
+        <div class="stratum-grid">
+          <div class="field" style="grid-column:span 2">
+            <label>Stratum Name</label>
+            <input type="text" value="${s.name}" style="width:100%" onchange="updateStratum(${s.id},'name',this.value)">
+          </div>
+          <div class="field">
+            <label>Soil Type</label>
+            <select onchange="updateStratumType(${s.id},this.value)">
+              <option value="coarse" ${!isFine&&!isRock?'selected':''}>Coarse-Grained</option>
+              <option value="fine" ${isFine?'selected':''}>Fine-Grained</option>
+              <option value="rock" ${isRock?'selected':''}>Rock</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>γ <em>(pcf)</em></label>
+            <input type="number" class="w80" value="${s.gamma}" step="1" onchange="updateStratum(${s.id},'gamma',+this.value)">
+          </div>
+          ${!isRock ? `
+          <div class="field">
+            <label>SPT N<em>60</em></label>
+            <input type="number" class="w64" value="${s.N60}" step="1" min="1" onchange="updateStratum(${s.id},'N60',+this.value)">
+          </div>
+          <div class="field">
+            <label>(N₁)<em>60</em></label>
+            <input type="number" class="w64" value="${s.N1_60}" step="1" min="1" onchange="updateStratum(${s.id},'N1_60',+this.value)">
+          </div>` : ''}
+          ${isFine ? `
+          <div class="field">
+            <label>S<em>u</em> <em>(psf)</em></label>
+            <input type="number" class="w96" value="${s.Su}" step="100" onchange="updateStratum(${s.id},'Su',+this.value)">
+          </div>` : ''}
+          ${isRock ? `
+          <div class="field">
+            <label>q<em>u</em> <em>(psi)</em></label>
+            <input type="number" class="w96" value="${s.qu}" step="250" min="0" onchange="updateStratum(${s.id},'qu',+this.value)">
+          </div>
+          <div class="field">
+            <label>Socket Condition</label>
+            <select onchange="updateSocketCondition(${s.id},this.value)">
+              <option value="normal" ${s.socketCondition!=='fractured'?'selected':''}>Normal (intact, no caving)</option>
+              <option value="fractured" ${s.socketCondition==='fractured'?'selected':''}>Fractured / caving (RQD-based)</option>
+            </select>
+          </div>
+          ${s.socketCondition==='fractured' ? `
+          <div class="field">
+            <label>RQD <em>(%)</em></label>
+            <input type="number" class="w64" value="${s.RQD}" step="5" min="0" max="100" onchange="updateStratum(${s.id},'RQD',+this.value)">
+          </div>
+          <div class="field">
+            <label>Joint Condition</label>
+            <select onchange="updateStratum(${s.id},'jointCondition',this.value)">
+              <option value="closed" ${s.jointCondition!=='open'?'selected':''}>Closed Joints</option>
+              <option value="open" ${s.jointCondition==='open'?'selected':''}>Open / Gouge-Filled Joints</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Rock Type <em>(m<sub>i</sub> lookup)</em></label>
+            <select title="AASHTO Table 10.4.6.4-1 — seeds mi below; mi stays editable after selection" onchange="updateLithology(${s.id},this.value)">
+              ${Object.entries(MI_TABLE).map(([k,v])=>`<option value="${k}" ${s.lithology===k?'selected':''}>${v.label}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>m<em>i</em></label>
+            <input type="number" class="w64" title="Hoek-Brown intact-rock constant" value="${s.mi}" step="1" min="1" onchange="updateStratum(${s.id},'mi',+this.value)">
+          </div>
+          <div class="field">
+            <label>GSI</label>
+            <input type="number" class="w64" title="Geological Strength Index, AASHTO Fig. 10.4.6.4-1 (0-100)" value="${s.GSI}" step="1" min="0" max="100" onchange="updateStratum(${s.id},'GSI',+this.value)">
+          </div>
+          <div class="field">
+            <label>D</label>
+            <input type="number" class="w64" title="Disturbance factor: 0 = rock coring, 1 = blasting in confined excavation" value="${s.D}" step="0.1" min="0" max="1" onchange="updateStratum(${s.id},'D',+this.value)">
+          </div>` : ''}` : ''}
+          <div class="field">
+            <label>Top EL <em>(ft)</em>${i>0 ? '<span style="font-size:9px;color:var(--steel);margin-left:4px;font-weight:600">↑ auto</span>' : ''}</label>
+            <input type="number" id="s${s.id}-top-el" class="w80" value="${s.top_EL}" step="0.5"
+              style="${i>0 ? 'background:#f0f7ff;border-color:#93c5fd' : ''}" onchange="updateStratum(${s.id},'top_EL',+this.value)">
+          </div>
+          <div class="field">
+            <label>Bottom EL <em>(ft)</em></label>
+            <input type="number" id="s${s.id}-bot-el" class="w80" value="${s.bot_EL}" step="0.5" onchange="updateStratum(${s.id},'bot_EL',+this.value)">
+          </div>
+          ${(!isFine && !isRock) ? `
+          <div class="field">
+            <label>Soil Gradation <em>(m)</em></label>
+            <select onchange="updateStratum(${s.id},'m',this.value)">
+              <option value="0.6" ${s.m==='0.6'?'selected':''}>Clean Sand (m=0.6)</option>
+              <option value="0.8" ${s.m==='0.8'?'selected':''}>Silty Sand / Sandy Silt (m=0.8)</option>
+              <option value="gravel" ${s.m==='gravel'?'selected':''}>Gravelly Soil (Eq. 10.8.3.5.2b-5)</option>
+            </select>
+          </div>` : ''}
+        </div>
+        ${isRock ? `<div style="margin-top:8px;font-size:10.5px;color:var(--muted);font-style:italic">${
+          s.socketCondition==='fractured'
+            ? `Fractured rock socket — unit side resistance per AASHTO Eq. 10.8.3.5.4b-2, with α<sub>E</sub> from Table 10.8.3.5.4b-1 (O'Neill &amp; Reese 1999) based on RQD and joint condition.`
+            : `Normal rock socket (Eq. 10.8.3.5.4b-1) — clean sidewalls, no caving.`
+        }</div>` : ''}
+      </div>
+    </div>`;
+  });
+  recalc();
+}
+
+function addStratum() {
+  const n = strata.length + 1;
+  const s = newStratum(n);
+  if (strata.length > 0) {
+    const prev = strata[strata.length-1];
+    s.top_EL = prev.bot_EL;
+    s.bot_EL = prev.bot_EL - 10;
+    s.gamma = prev.gamma;
+  }
+  strata.push(s);
+  renderStrata();
+}
+
+function deleteStratum(id) {
+  if (strata.length <= 1) return;
+  if (!confirm('Delete this stratum?')) return;
+  strata = strata.filter(s => s.id !== id);
+  renderStrata();
+}
+
+function updateStratum(id, key, val) {
+  const s = strata.find(x => x.id === id);
+  if (!s) return;
+  s[key] = val;
+  if (key === 'name') {
+    const el = document.getElementById('sname-' + id);
+    if (el) el.textContent = val;
+  }
+  // Auto-link: propagate bot_EL change to the next stratum's top_EL
+  if (key === 'bot_EL') {
+    const idx = strata.indexOf(s);
+    if (idx >= 0 && idx < strata.length - 1) {
+      const next = strata[idx + 1];
+      next.top_EL = val;
+      const topInput = document.getElementById('s' + next.id + '-top-el');
+      if (topInput) topInput.value = val;
+    }
+  }
+  recalc();
+}
+
+function updateStratumType(id, type) {
+  const s = strata.find(x => x.id === id);
+  if (!s) return;
+  s.type = type;
+  renderStrata();
+}
+
+function updateSocketCondition(id, val) {
+  const s = strata.find(x => x.id === id);
+  if (!s) return;
+  s.socketCondition = val;
+  renderStrata();
+}
+
+// Rock-type dropdown seeds mi from AASHTO Table 10.4.6.4-1; the mi field
+// itself stays independently editable afterward (same pattern as the
+// φ resistance-factor dropdowns elsewhere in the suite).
+function updateLithology(id, key) {
+  const s = strata.find(x => x.id === id);
+  if (!s) return;
+  s.lithology = key;
+  if (MI_TABLE[key] && MI_TABLE[key].mi !== null) s.mi = MI_TABLE[key].mi;
+  renderStrata();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODE TOGGLE
+// ═══════════════════════════════════════════════════════════
+function setMode(m) {
+  resistMode = m;
+  ['side','tip','both'].forEach(x => {
+    document.getElementById('mode-'+x).classList.toggle('active', x===m);
+  });
+  const utilField = document.getElementById('tip-util-field');
+  if (utilField) utilField.style.display = (m === 'side') ? 'none' : '';
+  recalc();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EFFECTIVE STRESS — σv (ksf) at mid-depth of each stratum's
+//  contributing (embedded) segment.
+//
+//  Convention (AASHTO §10.8.3.5.2b):
+//
+//    σv_i = [accumulated stress from ground surface down to
+//             seg_top_EL = min(Top_EL_i, embed_EL)]
+//          + ½ × γ_eff_i × h_i
+//
+//  where:
+//    h_i       = seg_top_EL − seg_bot_EL,
+//                seg_bot_EL = max(Bottom_EL_i, Tip_EL)  (CLIPPED at Tip_EL)
+//    seg_top_EL = min(Top_EL_i, embed_EL)
+//
+//  h_i is the same contributing (embedded) segment used for the side
+//  resistance area calc — σ'v is evaluated at the mid-depth of that
+//  segment only. A stratum's thickness below the shaft tip does not
+//  contribute side resistance and must not inflate h_i or pull the
+//  mid-depth point deeper than the tip. (Fixed 2026-08-28: previously
+//  used the stratum's full un-clipped bottom elevation here, which for
+//  strata extending well below the tip produced a mid-depth far below
+//  the actual embedded segment — e.g. a nominal "50-ft-thick" fill/
+//  residual stratum with only 6.5 ft actually embedded above the tip
+//  was pulling in ~45 ft of thickness instead of the correct 6.5 ft.)
+//
+//  Accumulated stress includes:
+//    • Full thickness of all strata above the current stratum
+//    • The portion of the current stratum above embed_EL (if any)
+//  γ_eff for each portion uses the midpoint of that portion vs. GWT.
+//
+//  gwt_EL must be an ELEVATION in the same datum as Top_EL/Bottom_EL.
+// ═══════════════════════════════════════════════════════════
+function sigmaVforStratum(s, sorted, embed_EL, tip_EL, gwt_EL, gamma_w) {
+  // Top of contributing segment (clipped at embed_EL)
+  const seg_top_EL = Math.min(s.top_EL, embed_EL);
+  // Bottom of contributing segment (clipped at tip_EL) — mirrors the
+  // seg_bot_EL already used in the main loop for the side-resistance h.
+  const seg_bot_EL = Math.max(s.bot_EL, tip_EL);
+  // h = embedded/contributing portion only, clipped at Tip_EL
+  const h = seg_top_EL - seg_bot_EL;
+  if (h <= 0) return { sigma: 0, accumulated: 0, h: 0, gamma_eff: 0 };
+
+  // Accumulated effective stress from ground surface down to seg_top_EL.
+  // For all strata above s: include their FULL thickness.
+  // For stratum s itself: include only the portion above seg_top_EL
+  //   (i.e., the part above embed_EL, if s extends above embed_EL).
+  let accumulated = 0;
+  for (const j of sorted) { // sorted shallowest-first
+    if (j === s) {
+      // Add s's above-embed portion (only if s.top_EL > embed_EL)
+      const h_above = Math.max(0, s.top_EL - seg_top_EL);
+      if (h_above > 0) {
+        const mid_above = (s.top_EL + seg_top_EL) / 2;
+        const g_above = (s.type === 'coarse' && mid_above < gwt_EL)
+          ? (s.gamma - gamma_w) / 1000 : s.gamma / 1000;
+        accumulated += g_above * h_above;
+      }
+      break;
+    }
+    // j is entirely above s — add its full stratum thickness
+    const h_j = j.top_EL - j.bot_EL;
+    if (h_j <= 0) continue;
+    const mid_j = (j.top_EL + j.bot_EL) / 2;
+    const g_j = (j.type === 'coarse' && mid_j < gwt_EL)
+      ? (j.gamma - gamma_w) / 1000 : j.gamma / 1000;
+    accumulated += g_j * h_j;
+  }
+
+  // γ_eff for the embedded portion: compare midpoint of embedded segment to GWT
+  const mid_emb = (seg_top_EL + seg_bot_EL) / 2;
+  const gamma_eff = (s.type === 'coarse' && mid_emb < gwt_EL)
+    ? (s.gamma - gamma_w) / 1000 : s.gamma / 1000;
+
+  return { sigma: accumulated + 0.5 * gamma_eff * h, accumulated, h, gamma_eff };
+}
+
+// σ'vb — vertical effective stress AT the tip elevation (bottom of the
+// tip stratum's contributing segment), for AASHTO Eq. 10.8.3.5.4c-3.
+// Reuses sigmaVforStratum()'s accumulated-above-stratum term and adds the
+// tip stratum's own full embedded-segment weight (not the mid-depth term
+// sigmaVforStratum() itself returns, which is for side-resistance qs).
+// NOTE: like sigmaVforStratum(), buoyant unit weight is only applied when
+// s.type==='coarse'; a rock stratum below GWT is treated at total unit
+// weight here, consistent with existing side-resistance behavior elsewhere
+// in this file. Flag to Ryan if a submerged rock case needs this revisited.
+function sigmaVAtTip(tip_stratum, sorted, embed_EL, tip_EL, gwt_EL, gamma_w) {
+  const r = sigmaVforStratum(tip_stratum, sorted, embed_EL, tip_EL, gwt_EL, gamma_w);
+  return r.accumulated + r.gamma_eff * r.h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ROCK — JOINT MODIFICATION FACTOR αE (fractured/caving sockets)
+//  AASHTO Table 10.8.3.5.4b-1 (O'Neill and Reese, 1999), used with
+//  Eq. 10.8.3.5.4b-2. Linearly interpolated between the tabulated RQD
+//  breakpoints. RQD is clamped to the table's defined range [20,100]%;
+//  a stratum with RQD < 20% uses the RQD=20% row as a floor and raises
+//  a warning, since the table does not extend below 20% RQD.
+// ═══════════════════════════════════════════════════════════
+function alphaE(RQD, jointCondition) {
+  // [RQD%, αE] pairs, high-to-low, per Table 10.8.3.5.4b-1
+  const CLOSED = [[100,1.00],[70,0.85],[50,0.60],[30,0.50],[20,0.45]];
+  const OPEN   = [[100,0.85],[70,0.55],[50,0.55],[30,0.50],[20,0.45]];
+  const table = jointCondition === 'open' ? OPEN : CLOSED;
+  const rqd = Math.max(20, Math.min(100, RQD));
+  for (let i = 0; i < table.length - 1; i++) {
+    const [rHi, aHi] = table[i];
+    const [rLo, aLo] = table[i + 1];
+    if (rqd <= rHi && rqd >= rLo) {
+      const frac = (rqd - rLo) / (rHi - rLo);
+      return aLo + frac * (aHi - aLo);
+    }
+  }
+  return table[table.length - 1][1];
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ROCK — GSI / GENERALIZED HOEK-BROWN TIP RESISTANCE
+//  AASHTO Eq. 10.8.3.5.4c-2/-3 (Turner & Ramey, 2010), for tip strata
+//  where the rock to 2B below the base is jointed with random orientation
+//  (i.e. socketCondition === 'fractured'). Hoek-Brown mass parameters
+//  s, a, mb per Eq. 10.4.6.4-2/-3/-4, all in ksf. Returns qp (ksf) — the
+//  caller takes min(qp, 2.5*qu) per the AASHTO upper-bound provision.
+// ═══════════════════════════════════════════════════════════
+function hoekBrownTipQp(qu_ksf, sigma_vb_ksf, GSI, mi, D) {
+  const s  = Math.exp((GSI - 100) / (9 - 3 * D));
+  const a  = 0.5 + (1 / 6) * (Math.exp(-GSI / 15) - Math.exp(-20 / 3));
+  const mb = mi * Math.exp((GSI - 100) / (28 - 14 * D));
+  const A  = sigma_vb_ksf + qu_ksf * Math.pow(mb * (sigma_vb_ksf / qu_ksf) + s, a);
+  const qp = A + qu_ksf * Math.pow(mb * (A / qu_ksf) + s, a);
+  return { s, a, mb, A, qp };
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MAIN CALCULATION ENGINE
+// ═══════════════════════════════════════════════════════════
+function recalc() {
+  // Geometry
+  const D_in  = numField('d-shaft-in', 60);
+  const D_ft  = D_in / 12;
+  const top_EL = numField('top-el', 57);
+  const stickup = numField('stickup', 0.5);
+  const zfl   = numField('zfl', 5);
+  const L     = numField('length', 25);
+  const gwt_EL = +document.getElementById('gwt-el').value;
+  const gamma_w = numField('gamma-w', 62.4);
+
+  const embed_EL = top_EL - stickup - zfl;
+  const tip_EL   = top_EL - L;
+  const Ap = Math.PI * D_ft * D_ft / 4; // ft²
+
+  document.getElementById('embed-el-display').textContent = embed_EL.toFixed(1) + ' ft';
+  document.getElementById('tip-el-display').textContent   = tip_EL.toFixed(1)   + ' ft';
+  document.getElementById('d-ft-display').textContent     = D_ft.toFixed(2)      + ' ft';
+
+  // Resistance factors
+  const phi_side_sand   = numField('phi-side-sand', 0.55);
+  const phi_side_clay   = numField('phi-side-clay', 0.45);
+  const phi_side_clay_d = numField('phi-side-clay-drained', 0.45);
+  const phi_tip_sand    = numField('phi-tip-sand', 0.50);
+  const phi_tip_clay    = numField('phi-tip-clay', 0.40);
+  const phi_side_rock   = numField('phi-side-rock', 0.55);
+  const phi_tip_rock    = numField('phi-tip-rock', 0.50);
+  const fc_psi = numField('fc-concrete', 4000);
+  const fc_ksf = fc_psi * 0.144; // psi -> ksf
+
+  const Fy = numField('fy', 30);
+  const Fy_settle = (() => { const v = numField('fy-settle', NaN); return isNaN(v) ? Fy : v; })();
+
+  // Sort strata shallow-to-deep
+  const sorted = [...strata].sort((a,b) => b.top_EL - a.top_EL);
+
+  // Check for fine-grained strata in embedded zone
+  const hasFine = sorted.some(s => {
+    if (s.type !== 'fine') return false;
+    return s.top_EL > tip_EL && s.bot_EL < embed_EL;
+  });
+
+  // Per-stratum calculations
+  let stratumResults = [];
+  let Rs_side_undrained = 0;
+  let Rs_side_drained   = 0;
+  let tip_stratum = null;
+  let rockWarnings = [];
+
+  for (const s of sorted) {
+    // Find embedded segment
+    if (s.top_EL <= tip_EL || s.bot_EL >= embed_EL) {
+      // Check if this stratum contains the tip
+      if (s.top_EL >= tip_EL && s.bot_EL <= tip_EL) tip_stratum = s;
+      continue;
+    }
+    // h_emb = embedded portion (used for side resistance area calculation)
+    const seg_top_EL = Math.min(s.top_EL, embed_EL);
+    const seg_bot_EL = Math.max(s.bot_EL, tip_EL);
+    const h = seg_top_EL - seg_bot_EL; // ft — embedded portion only
+    if (h <= 0) continue;
+
+    // σv per AASHTO §10.8.3.5.2b β-method convention:
+    //   accumulated full-γ stress + ½ × γ_eff × h_full
+    //   where h_full = min(Top_EL, embed_EL) − max(Bottom_EL, Tip_EL)
+    //   i.e. σ'v is evaluated at the mid-depth of the embedded/contributing
+    //   segment only (clipped to Tip_EL) — same segment as h above.
+    const sv      = sigmaVforStratum(s, sorted, embed_EL, tip_EL, gwt_EL, gamma_w);
+    const sigma_v = sv.sigma;
+    const h_full  = sv.h;       // embedded stratum h used in σv formula (= h above)
+    const Su_ksf  = s.Su / 1000;
+
+    let res = { stratum: s, h, h_full, seg_top_EL, seg_bot_EL, sigma_v,
+                accumulated: sv.accumulated, gamma_eff: sv.gamma_eff };
+
+    if (s.type === 'coarse') {
+      // φf from N1_60
+      const phi_f_deg = 27.5 + 9.2 * Math.log10(Math.max(s.N1_60, 1));
+      const phi_f = phi_f_deg * Math.PI / 180;
+
+      // σp from N60
+      let sigma_p;
+      if (s.m === 'gravel') {
+        sigma_p = 0.15 * pa * s.N60; // Eq. 10.8.3.5.2b-5
+      } else {
+        const m = parseFloat(s.m);
+        sigma_p = 0.47 * pa * Math.pow(s.N60, m); // Eq. 10.8.3.5.2b-4
+      }
+
+      // β (Eq. 10.8.3.5.2b-2)
+      let beta = 0;
+      if (sigma_v > 0) {
+        beta = (1 - Math.sin(phi_f))
+          * Math.pow(sigma_p / sigma_v, Math.sin(phi_f))
+          * Math.tan(phi_f);
+      }
+
+      const qs = beta * sigma_v; // ksf
+
+      res = { ...res, phi_f_deg, sigma_p, beta, qs_coarse: qs };
+
+      // Side resistance contribution
+      const Rs_contrib = qs * Math.PI * D_ft * h;
+      Rs_side_undrained += phi_side_sand * Rs_contrib;
+      Rs_side_drained   += phi_side_sand * Rs_contrib;
+    } else if (s.type === 'fine') {
+      // Fine-grained — α (undrained) + β (drained)
+      const phi_f_deg = 27.5 + 9.2 * Math.log10(Math.max(s.N1_60, 1));
+      const phi_f = phi_f_deg * Math.PI / 180;
+      const m = parseFloat(s.m) || 0.8;
+      const sigma_p = 0.47 * pa * Math.pow(s.N60, m);
+
+      // α-method (undrained)
+      const ratio = Su_ksf / pa;
+      let alpha;
+      if (ratio <= 1.5) alpha = 0.55;
+      else if (ratio <= 2.5) alpha = 0.55 - 0.1 * (ratio - 1.5);
+      else alpha = 0.45;
+
+      const qs_und = alpha * Su_ksf; // ksf
+
+      // β-method (drained)
+      let beta = 0;
+      if (sigma_v > 0) {
+        beta = (1 - Math.sin(phi_f))
+          * Math.pow(sigma_p / sigma_v, Math.sin(phi_f))
+          * Math.tan(phi_f);
+      }
+      const qs_dr = beta * sigma_v; // ksf
+
+      res = { ...res, phi_f_deg, sigma_p, alpha, ratio, qs_und, beta, qs_dr };
+
+      Rs_side_undrained += phi_side_clay   * qs_und * Math.PI * D_ft * h;
+      Rs_side_drained   += phi_side_clay_d * qs_dr  * Math.PI * D_ft * h;
+    } else if (s.type === 'rock') {
+      // Rock — side resistance per AASHTO §10.8.3.5.4b.
+      // If qu > f'c, substitute f'c for qu per AASHTO commentary. Applied to
+      // both the normal-socket and fractured-rock equations below, since the
+      // "concrete governs the interface" rationale is the same either way.
+      const qu_ksf_raw = s.qu * 0.144; // psi -> ksf
+      const qu_capped  = qu_ksf_raw > fc_ksf;
+      const qu_used    = qu_capped ? fc_ksf : qu_ksf_raw;
+      const fractured  = s.socketCondition === 'fractured';
+
+      let qs_rock, C, aE;
+      if (fractured) {
+        // Fractured/caving socket (AASHTO Eq. 10.8.3.5.4b-2)
+        aE = alphaE(s.RQD, s.jointCondition);
+        qs_rock = 0.65 * aE * pa * Math.sqrt(qu_used / pa); // ksf
+        if (s.RQD < 20) {
+          rockWarnings.push(`<strong>${s.name}</strong>: RQD (${s.RQD}%) is below the range of AASHTO Table 10.8.3.5.4b-1 (20%–100%). α<sub>E</sub> = ${fmt(aE,2)} was floored at the RQD = 20% row — for highly fractured/decomposed rock, confirm this method still applies or consult a specialist.`);
+        }
+      } else {
+        // Normal socket, clean sidewalls, no caving (AASHTO Eq. 10.8.3.5.4b-1)
+        C = 1.0;
+        qs_rock = C * pa * Math.sqrt(qu_used / pa); // ksf
+      }
+
+      res = { ...res, qu_ksf_raw, qu_capped, qu_used, C, aE, fractured, qs_rock };
+
+      const Rs_contrib = qs_rock * Math.PI * D_ft * h;
+      Rs_side_undrained += phi_side_rock * Rs_contrib;
+      Rs_side_drained   += phi_side_rock * Rs_contrib;
+    }
+
+    stratumResults.push(res);
+
+    // Check if tip is in this stratum
+    if (seg_bot_EL === tip_EL && !tip_stratum) tip_stratum = s;
+  }
+
+  // If tip_stratum not found via embedded, find containing stratum
+  if (!tip_stratum) {
+    tip_stratum = sorted.find(s => s.top_EL >= tip_EL && s.bot_EL <= tip_EL) || null;
+  }
+
+  // TIP RESISTANCE
+  let Rp_und = 0, Rp_dr = 0;
+  let tipInfo = null;
+  if ((resistMode === 'tip' || resistMode === 'both') && tip_stratum) {
+    const Z = embed_EL - tip_EL; // penetration from embed_EL (ft)
+    if (tip_stratum.type === 'coarse') {
+      const qp = Math.min(1.2 * tip_stratum.N60, 60); // ksf, Eq. 10.8.3.5.2c-1
+      Rp_dr = phi_tip_sand * qp * Ap;
+      Rp_und = Rp_dr;
+      tipInfo = { type:'coarse', qp, Rp: phi_tip_sand * qp * Ap, phi: phi_tip_sand };
+    } else if (tip_stratum.type === 'rock') {
+      const qu_ksf = tip_stratum.qu * 0.144; // psi -> ksf
+      const qp_c1 = 2.5 * qu_ksf; // ksf, Eq. 10.8.3.5.4c-1 (intact/tightly jointed rock) — always the upper bound
+      let qp = qp_c1, hb = null, governs = 'c1';
+      if (tip_stratum.socketCondition === 'fractured') {
+        const sigma_vb = sigmaVAtTip(tip_stratum, sorted, embed_EL, tip_EL, gwt_EL, gamma_w); // ksf
+        hb = hoekBrownTipQp(qu_ksf, sigma_vb, tip_stratum.GSI, tip_stratum.mi, tip_stratum.D);
+        hb.sigma_vb = sigma_vb;
+        if (hb.qp < qp_c1) { qp = hb.qp; governs = 'c2'; }
+        if (tip_stratum.GSI >= 100 - 1e-6 || tip_stratum.mi <= 0) {
+          rockWarnings.push(`<strong>${tip_stratum.name}</strong> (tip stratum): GSI/m<sub>i</sub> values look out of the intended range for the Hoek-Brown tip method (Eq. 10.8.3.5.4c-2) — confirm GSI is 0–100 and m<sub>i</sub> is set from Table 10.4.6.4-1 or the rock-type dropdown.`);
+        }
+      }
+      Rp_dr = phi_tip_rock * qp * Ap;
+      Rp_und = Rp_dr;
+      tipInfo = { type:'rock', qu_ksf, qp, qp_c1, hb, governs, Rp: phi_tip_rock * qp * Ap, phi: phi_tip_rock };
+      if (tip_stratum.socketCondition === 'fractured' && governs === 'c1') {
+        rockWarnings.push(`<strong>${tip_stratum.name}</strong> (tip stratum): the GSI-based Eq. 10.8.3.5.4c-2 result (${fmt(hb.qp,1)} ksf) exceeds the Eq. 10.8.3.5.4c-1 upper bound (${fmt(qp_c1,1)} ksf), so the upper bound governs per AASHTO — confirm this is consistent with the actual rock mass condition rather than assuming intact rock by default.`);
+      }
+    } else {
+      const Su_ksf = tip_stratum.Su / 1000;
+      let Nc = 6 * (1 + 0.2 * (Z / D_ft));
+      if (Nc > 9) Nc = 9;
+      if (Su_ksf < 0.50) Nc *= 0.67;
+      const qp = Math.min(Nc * Su_ksf, 80); // ksf, Eq. 10.8.3.5.1c-1
+      Rp_und = phi_tip_clay * qp * Ap;
+      Rp_dr  = Rp_und;
+      tipInfo = { type:'fine', Nc, qp, Rp: phi_tip_clay * qp * Ap, phi: phi_tip_clay, Z, Su_ksf };
+    }
+  }
+
+  // Tip resistance utilization — user-specified % of computed R_p credited
+  // toward capacity. This is an engineer-judgment override applied on top of
+  // the code-computed φ×qp×Ap value (e.g. partial credit for construction QA,
+  // strain-compatibility conservatism, or sensitivity checks). It does not
+  // alter φ or qp themselves. Default 100% (full credit; current behavior).
+  let tipUtilPct = 100;
+  if (resistMode !== 'side') {
+    tipUtilPct = numField('tip-util-pct', 100);
+    if (tipUtilPct < 0) tipUtilPct = 0;
+    if (tipUtilPct > 100) tipUtilPct = 100;
+  }
+  const tipUtilFrac = tipUtilPct / 100;
+  const Rp_und_used = Rp_und * tipUtilFrac;
+  const Rp_dr_used  = Rp_dr  * tipUtilFrac;
+
+  // Total factored resistance
+  let Rn_und = 0, Rn_dr = 0;
+  if (resistMode === 'side') { Rn_und = Rs_side_undrained; Rn_dr = Rs_side_drained; }
+  else if (resistMode === 'tip') { Rn_und = Rp_und_used; Rn_dr = Rp_dr_used; }
+  else { Rn_und = Rs_side_undrained + Rp_und_used; Rn_dr = Rs_side_drained + Rp_dr_used; }
+
+  // Settlement basis
+  const settleBasis = document.getElementById('settle-basis').value;
+  const Rs_settle = settleBasis === 'drained' ? Rs_side_drained : Rs_side_undrained;
+
+  // Geometry validation
+  const maxStratumTop = strata.length ? Math.max(...strata.map(s => s.top_EL)) : embed_EL;
+  const minStratumBot = strata.length ? Math.min(...strata.map(s => s.bot_EL)) : tip_EL;
+  const warnings = [...rockWarnings];
+  if (embed_EL > maxStratumTop + 0.5)
+    warnings.push(`Embed EL (${embed_EL.toFixed(1)} ft) is ${(embed_EL - maxStratumTop).toFixed(1)} ft above the top of your highest stratum (EL ${maxStratumTop.toFixed(1)} ft). Update <strong>Top of Shaft EL</strong> and/or <strong>Shaft Length</strong> in Design Criteria to match this site's elevation datum.`);
+  if (tip_EL < minStratumBot + 0.5)
+    warnings.push(`Tip EL (${tip_EL.toFixed(1)} ft) is below the bottom of all defined strata. Extend the deepest stratum or reduce shaft length.`);
+  if (stratumResults.length === 0 && strata.length > 0)
+    warnings.push(`No strata intersect the embedded zone [Tip EL ${tip_EL.toFixed(1)} ft → Embed EL ${embed_EL.toFixed(1)} ft]. Check that shaft geometry matches the stratigraphy datum.`);
+
+  renderWarnings(warnings);
+
+  // Render
+  renderCalcs(stratumResults, Rs_side_undrained, Rs_side_drained, Rp_und, Rp_dr,
+              Rn_und, Rn_dr, hasFine, D_ft, embed_EL, tip_EL, tipInfo, tip_stratum,
+              tipUtilPct, Rp_dr_used, Rp_und_used);
+  renderCDR(Rn_und, Rn_dr, Fy, hasFine);
+  renderSettlement(Fy_settle, Rs_settle, D_ft, D_in);
+}
+
+function renderWarnings(warnings) {
+  // Inject warning banner just above the Calculations section
+  let el = document.getElementById('geometry-warnings');
+  if (!el) {
+    const calc = document.getElementById('calc-output').closest('.phase');
+    el = document.createElement('div');
+    el.id = 'geometry-warnings';
+    calc.parentNode.insertBefore(el, calc);
+  }
+  if (!warnings.length) { el.innerHTML = ''; return; }
+  el.innerHTML = warnings.map(w => `
+    <div style="background:#fef3c7;border:1px solid #f59e0b;border-left:4px solid #d97706;border-radius:3px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#92400e;display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:16px;flex-shrink:0">⚠</span>
+      <span>${w}</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER CALCULATIONS
+// ═══════════════════════════════════════════════════════════
+function fmt(v, dec=3) { return typeof v === 'number' ? v.toFixed(dec) : '—'; }
+
+// Build a calculation row with the eq-ref badge hugging the right edge
+function eqRow(label, value, note, ref) {
+  const refHtml = ref
+    ? `<span class="eq-ref">${ref}</span>`
+    : '';
+  const noteHtml = note
+    ? `<span class="eq-note">${note}</span>`
+    : '';
+  return `<div class="eq-row">
+    <div class="eq-main">
+      <span class="eq-label">${label} =</span>
+      <span class="eq-val">${value}</span>
+      ${noteHtml}
+    </div>
+    ${refHtml}
+  </div>`;
+}
+
+function renderCalcs(results, Rs_und, Rs_dr, Rp_und, Rp_dr, Rn_und, Rn_dr, hasFine,
+                     D_ft, embed_EL, tip_EL, tipInfo, tip_stratum,
+                     tipUtilPct=100, Rp_dr_used=Rp_dr, Rp_und_used=Rp_und) {
+  const out = document.getElementById('calc-output');
+  if (!results.length) {
+    out.innerHTML = '<div style="color:var(--muted);font-style:italic;font-size:12px">No embedded strata found. Check that strata elevations intersect the shaft embedded zone.</div>';
+    return;
+  }
+
+  let html = '';
+
+  // ─── GENERAL METHOD NOTES ───
+  html += `<div class="calc-section">
+    <div class="calc-title">Method &amp; Parameters</div>
+    ${eqRow('p<sub>a</sub>', '2.12 ksf', 'atmospheric pressure', 'AASHTO §10.8.3.5.2b')}
+    ${eqRow('Embed EL', embed_EL.toFixed(1) + ' ft', 'top of contributing resistance zone')}
+    ${eqRow('Tip EL', tip_EL.toFixed(1) + ' ft')}
+    ${eqRow('D', D_ft.toFixed(2) + ' ft')}
+  </div>`;
+
+  // ─── SIDE RESISTANCE ───
+  if (resistMode !== 'tip') {
+    html += `<div class="calc-section"><div class="calc-title">Side Resistance</div>`;
+
+    for (const r of results) {
+      const s = r.stratum;
+      const col = STRATUM_COLORS[results.indexOf(r) % STRATUM_COLORS.length];
+      const typeLabel = s.type === 'coarse' ? 'Coarse-Grained' : s.type === 'rock' ? 'Rock' : 'Fine-Grained';
+      html += `<div class="stratum-calc-card" style="border-left-color:${col}">
+        <div class="stratum-calc-title">${s.name} (${typeLabel}) — EL ${r.seg_top_EL.toFixed(1)} to EL ${r.seg_bot_EL.toFixed(1)} ft (h = ${r.h.toFixed(1)} ft)</div>`;
+
+      if (s.type === 'rock') {
+        const quNote = r.qu_capped
+          ? `${fmt(r.qu_ksf_raw,1)} ksf &gt; f'c = ${fmt(r.qu_used,1)} ksf → using f'c per AASHTO §10.8.3.5.4b`
+          : `${s.qu} psi × 0.144 = ${fmt(r.qu_ksf_raw,1)} ksf`;
+        html += eqRow(`q<sub>u</sub>`, `${fmt(r.qu_used,1)} ksf`, quNote);
+        if (r.fractured) {
+          const jointLabel = s.jointCondition === 'open' ? 'Open/Gouge-Filled Joints' : 'Closed Joints';
+          html += eqRow(`α<sub>E</sub>`, fmt(r.aE,3),
+                    `RQD = ${s.RQD}% · ${jointLabel} (Table 10.8.3.5.4b-1, interpolated)`)
+                + eqRow(`q<sub>s</sub> = 0.65·α<sub>E</sub>·p<sub>a</sub>·√(q<sub>u</sub>/p<sub>a</sub>)`, `${fmt(r.qs_rock,3)} ksf`,
+                    `0.65 × ${fmt(r.aE,3)} × ${pa} × √(${fmt(r.qu_used,1)}/${pa}) = ${fmt(r.qs_rock,3)} ksf`, 'Eq. 10.8.3.5.4b-2');
+        } else {
+          html += eqRow(`q<sub>s</sub> = C·p<sub>a</sub>·√(q<sub>u</sub>/p<sub>a</sub>)`, `${fmt(r.qs_rock,3)} ksf`,
+                    `1.0 × ${pa} × √(${fmt(r.qu_used,1)}/${pa}) = ${fmt(r.qs_rock,3)} ksf`, 'Eq. 10.8.3.5.4b-1');
+        }
+      } else if (s.type === 'coarse') {
+        const sinPhi = Math.sin(r.phi_f_deg * Math.PI/180);
+        const gammaLabel = r.gamma_eff < s.gamma/1000 - 0.001
+          ? `(${(s.gamma).toFixed(0)}−${(r.gamma_eff*1000+62.4).toFixed(0)}) pcf`
+          : `${s.gamma.toFixed(0)} pcf`;
+        const sigmaVnote = `${fmt(r.accumulated,3)} + ½ × (${(r.gamma_eff*1000).toFixed(1)} pcf ÷ 1000) × ${r.h_full.toFixed(1)} ft = ${fmt(r.sigma_v,3)} ksf`;
+        const sigmaP_eqref = s.m === 'gravel' ? 'Eq. 10.8.3.5.2b-5' : 'Eq. 10.8.3.5.2b-4';
+        const sigmaP_note = s.m === 'gravel'
+          ? `0.15 × ${pa} × ${s.N60} = ${fmt(r.sigma_p/pa,3)} pa → σ'p = ${fmt(r.sigma_p,3)} ksf`
+          : `0.47 × ${pa} × ${s.N60}^${s.m} = ${fmt(r.sigma_p/pa,3)} pa → σ'p = ${fmt(r.sigma_p,3)} ksf`;
+        const betaNote = `(1−sin ${fmt(r.phi_f_deg,1)}°)(${fmt(r.sigma_p,3)}∕${fmt(r.sigma_v,3)})^${sinPhi.toFixed(3)} × tan ${fmt(r.phi_f_deg,1)}° = ${fmt(r.beta,3)}`;
+        const qsNote   = `${fmt(r.beta,3)} × ${fmt(r.sigma_v,3)} = ${fmt(r.qs_coarse,3)} ksf`;
+        html += eqRow(`φ'f`, `${fmt(r.phi_f_deg,1)}°`,
+                  `27.5 + 9.2 × log(${s.N1_60}) = ${fmt(r.phi_f_deg,1)}°`, 'Eq. 10.8.3.5.2b-3')
+              + eqRow(`σ'v`, `${fmt(r.sigma_v,3)} ksf`, sigmaVnote)
+              + eqRow(`σ'p`, `${fmt(r.sigma_p,3)} ksf`, sigmaP_note, sigmaP_eqref)
+              + eqRow(`β`, fmt(r.beta,3), betaNote, 'Eq. 10.8.3.5.2b-2')
+              + eqRow(`q<sub>s</sub> = β σ'v`, `${fmt(r.qs_coarse,3)} ksf`, qsNote, 'Eq. 10.8.3.5.2b-1');
+      } else {
+        // Fine — undrained
+        html += `<div class="eq-row" style="color:var(--blue);font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px"><div class="eq-main">Undrained (α-method)</div></div>`;
+        const alphaRule = r.ratio<=1.5 ? `Su/pa ≤ 1.5 → α = 0.55`
+                        : r.ratio<=2.5 ? `1.5 < Su/pa ≤ 2.5 → α = 0.55 − 0.1(${fmt(r.ratio,3)} − 1.5) = ${fmt(r.alpha,3)}`
+                        :                `Su/pa > 2.5 → α = 0.45`;
+        html += eqRow(`S<sub>u</sub>/p<sub>a</sub>`, fmt(r.ratio,3),
+                  `Su = ${fmt(r.stratum.Su/1000,3)} ksf ÷ pa 2.12 ksf = ${fmt(r.ratio,3)}`)
+              + eqRow(`α`, fmt(r.alpha,3), alphaRule, 'Eq. 10.8.3.5.1b-2/3')
+              + eqRow(`q<sub>s,und</sub> = α S<sub>u</sub>`, `${fmt(r.qs_und,3)} ksf`,
+                  `${fmt(r.alpha,3)} × ${fmt(r.stratum.Su/1000,3)} ksf = ${fmt(r.qs_und,3)} ksf`, 'Eq. 10.8.3.5.1b-1');
+        // Fine — drained
+        html += `<hr class="divider"><div class="eq-row" style="color:var(--orange);font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px"><div class="eq-main">Drained (β-method)</div></div>`;
+        const sinPhiF = Math.sin(r.phi_f_deg * Math.PI/180);
+        const sigmaVnoteF = `${fmt(r.accumulated,3)} + ½ × (${(r.gamma_eff*1000).toFixed(1)} pcf ÷ 1000) × ${r.h_full.toFixed(1)} ft = ${fmt(r.sigma_v,3)} ksf`;
+        const betaNoteF = `(1−sin ${fmt(r.phi_f_deg,1)}°)(${fmt(r.sigma_p,3)}∕${fmt(r.sigma_v,3)})^${sinPhiF.toFixed(3)} × tan ${fmt(r.phi_f_deg,1)}° = ${fmt(r.beta,3)}`;
+        html += eqRow(`φ'f`, `${fmt(r.phi_f_deg,1)}°`,
+                  `27.5 + 9.2 × log(${s.N1_60}) = ${fmt(r.phi_f_deg,1)}°`, 'Eq. 10.8.3.5.2b-3')
+              + eqRow(`σ'v`, `${fmt(r.sigma_v,3)} ksf`, sigmaVnoteF)
+              + eqRow(`σ'p`, `${fmt(r.sigma_p,3)} ksf`,
+                  `0.47 × ${pa} × ${s.N60}^${s.m||'0.8'} = ${fmt(r.sigma_p/pa,3)} pa → ${fmt(r.sigma_p,3)} ksf`,
+                  'Eq. 10.8.3.5.2b-4')
+              + eqRow(`β`, fmt(r.beta,3), betaNoteF, 'Eq. 10.8.3.5.2b-2')
+              + eqRow(`q<sub>s,dr</sub> = β σ'v`, `${fmt(r.qs_dr,3)} ksf`,
+                  `${fmt(r.beta,3)} × ${fmt(r.sigma_v,3)} = ${fmt(r.qs_dr,3)} ksf`, 'Eq. 10.8.3.5.2b-1');
+      }
+      html += '</div>';
+    }
+
+    // Summary table
+    html += `<table class="res-table" style="margin-top:12px">
+      <thead><tr>
+        <th>Stratum</th><th>h (ft)</th>
+        ${hasFine?'<th>q<sub>s,und</sub> (ksf)</th>':''}
+        <th>q<sub>s,dr</sub> (ksf)</th>
+        ${hasFine?'<th>R<sub>s</sub> Und. (kip)</th>':''}
+        <th>R<sub>s</sub> Dr. (kip)</th>
+      </tr></thead><tbody>`;
+    let sumUnd = 0, sumDr = 0;
+    for (const r of results) {
+      const s = r.stratum;
+      let qs_und_str, qs_dr_str, rs_und_str, rs_dr_str;
+      const phi_s = document.getElementById('phi-side-sand').value;
+      const phi_c = document.getElementById('phi-side-clay').value;
+      const phi_cd = document.getElementById('phi-side-clay-drained').value;
+      const phi_r = document.getElementById('phi-side-rock').value;
+      if (s.type === 'coarse') {
+        qs_und_str = fmt(r.qs_coarse,3);
+        qs_dr_str  = fmt(r.qs_coarse,3);
+        const contrib = r.qs_coarse * Math.PI * D_ft * r.h;
+        rs_und_str = fmt(+phi_s * contrib, 1);
+        rs_dr_str  = fmt(+phi_s * contrib, 1);
+        sumUnd += +phi_s * contrib;
+        sumDr  += +phi_s * contrib;
+      } else if (s.type === 'rock') {
+        qs_und_str = fmt(r.qs_rock,3);
+        qs_dr_str  = fmt(r.qs_rock,3);
+        const contrib = r.qs_rock * Math.PI * D_ft * r.h;
+        rs_und_str = fmt(+phi_r * contrib, 1);
+        rs_dr_str  = fmt(+phi_r * contrib, 1);
+        sumUnd += +phi_r * contrib;
+        sumDr  += +phi_r * contrib;
+      } else {
+        qs_und_str = fmt(r.qs_und,3);
+        qs_dr_str  = fmt(r.qs_dr,3);
+        const rs_u = +phi_c * r.qs_und * Math.PI * D_ft * r.h;
+        const rs_d = +phi_cd * r.qs_dr * Math.PI * D_ft * r.h;
+        rs_und_str = fmt(rs_u,1);
+        rs_dr_str  = fmt(rs_d,1);
+        sumUnd += rs_u;
+        sumDr  += rs_d;
+      }
+      html += `<tr>
+        <td>${s.name}</td><td>${r.h.toFixed(1)}</td>
+        ${hasFine?`<td>${s.type==='coarse'?qs_und_str:qs_und_str}</td>`:''}
+        <td>${qs_dr_str}</td>
+        ${hasFine?`<td>${rs_und_str}</td>`:''}
+        <td>${rs_dr_str}</td>
+      </tr>`;
+    }
+    html += `<tr style="font-weight:700;background:#e8f0fe">
+      <td>Total R<sub>s</sub> (factored)</td><td>—</td>
+      ${hasFine?`<td>—</td>`:''}
+      <td>—</td>
+      ${hasFine?`<td>${fmt(Rs_und,1)} kip</td>`:''}
+      <td>${fmt(Rs_dr,1)} kip</td>
+    </tr></tbody></table>`;
+    html += '</div>';
+  }
+
+  // ─── TIP RESISTANCE ───
+  if (resistMode !== 'side' && tipInfo) {
+    html += `<div class="calc-section"><div class="calc-title">Tip Resistance</div>`;
+    const Ap = Math.PI * D_ft * D_ft / 4;
+    html += `<div class="eq-row"><span class="eq-label">A<sub>p</sub> =</span><span class="eq-val">${fmt(Ap,2)} ft²</span><span class="eq-note">π D² / 4 = π × ${D_ft.toFixed(2)}² / 4</span></div>`;
+    if (tipInfo.type === 'coarse') {
+      html += `
+        ${eqRow('q<sub>p</sub>', fmt(tipInfo.qp,1)+' ksf', '1.2 × N₆₀ = 1.2 × '+tip_stratum.N60+' = '+fmt(1.2*tip_stratum.N60,1)+' ksf (limit 60 ksf)', 'Eq. 10.8.3.5.2c-1')}
+        <div class="eq-row"><span class="eq-label">R<sub>p</sub> (factored) =</span><span class="eq-val">${fmt(tipInfo.Rp,1)} kip</span><span class="eq-note">φ × qp × Ap = ${tipInfo.phi} × ${fmt(tipInfo.qp,1)} × ${fmt(Ap,2)}</span></div>`;
+    } else if (tipInfo.type === 'rock') {
+      html += `
+        ${eqRow('q<sub>u</sub>', fmt(tipInfo.qu_ksf,1)+' ksf', tip_stratum.qu+' psi × 0.144')}
+        ${eqRow('q<sub>p,c1</sub> = 2.5 q<sub>u</sub>', fmt(tipInfo.qp_c1,1)+' ksf', '2.5 × '+fmt(tipInfo.qu_ksf,1)+' = '+fmt(tipInfo.qp_c1,1)+' ksf — upper bound (intact/tightly jointed)', 'Eq. 10.8.3.5.4c-1')}`;
+      if (tipInfo.hb) {
+        const hb = tipInfo.hb;
+        html += `
+        <div style="margin-top:6px;margin-bottom:2px;font-size:10.5px;font-weight:700;color:var(--navy)">Fractured rock — GSI / Generalized Hoek-Brown (Eq. 10.8.3.5.4c-2)</div>
+        ${eqRow('σ\'<sub>vb</sub>', fmt(hb.sigma_vb,2)+' ksf', 'effective stress at tip elevation')}
+        ${eqRow('s', fmt(hb.s,4), 'exp[(GSI\u2212100)/(9\u22123D)] = exp[('+tip_stratum.GSI+'\u2212100)/(9\u22123×'+tip_stratum.D+')]', 'Eq. 10.4.6.4-2')}
+        ${eqRow('a', fmt(hb.a,4), '½ + ⅙[exp(\u2212GSI/15) \u2212 exp(\u221220/3)]', 'Eq. 10.4.6.4-3')}
+        ${eqRow('m<sub>b</sub>', fmt(hb.mb,3), 'm<sub>i</sub>·exp[(GSI\u2212100)/(28\u221214D)] = '+tip_stratum.mi+' × exp[('+tip_stratum.GSI+'\u2212100)/(28\u221214×'+tip_stratum.D+')]', 'Eq. 10.4.6.4-4')}
+        ${eqRow('A', fmt(hb.A,2)+' ksf', 'σ\'vb + qu·[mb·(σ\'vb/qu) + s]^a', 'Eq. 10.8.3.5.4c-3')}
+        ${eqRow('q<sub>p,c2</sub>', fmt(hb.qp,1)+' ksf', 'A + qu·[mb·(A/qu) + s]^a', 'Eq. 10.8.3.5.4c-2')}
+        <div class="eq-row"><span class="eq-label">q<sub>p</sub> (governs) =</span><span class="eq-val" style="font-size:14px">${fmt(tipInfo.qp,1)} ksf</span><span class="eq-note">min(q<sub>p,c1</sub>, q<sub>p,c2</sub>) — ${tipInfo.governs==='c1' ? 'Eq. 10.8.3.5.4c-1 upper bound governs' : 'Eq. 10.8.3.5.4c-2 GSI method governs'}</span></div>`;
+      }
+      html += `
+        <div class="eq-row"><span class="eq-label">R<sub>p</sub> (factored) =</span><span class="eq-val">${fmt(tipInfo.Rp,1)} kip</span><span class="eq-note">φ × qp × Ap = ${tipInfo.phi} × ${fmt(tipInfo.qp,1)} × ${fmt(Ap,2)}</span></div>
+        <div style="margin-top:6px;font-size:10.5px;color:var(--muted);font-style:italic">${
+          tipInfo.hb
+            ? `Fractured rock socket (per Socket Condition above) — evaluated per both Eq. 10.8.3.5.4c-1 (intact upper bound) and Eq. 10.8.3.5.4c-2 (GSI method), governing value used above.`
+            : `Assumes intact/tightly jointed rock to 2B below tip, socket depth &gt; 1.5B, per AASHTO §10.8.3.5.4c. No solution cavities or voids below the base.`
+        }</div>`;
+    } else {
+      html += `
+        <div class="eq-row"><span class="eq-label">Z =</span><span class="eq-val">${fmt(tipInfo.Z,1)} ft</span><span class="eq-note">penetration from embed EL</span></div>
+        ${eqRow('N<sub>c</sub>', fmt(tipInfo.Nc,2), '6[1 + 0.2('+fmt(tipInfo.Z,1)+'/'+D_ft.toFixed(2)+')] ≤ 9' + (tipInfo.Su_ksf<0.5?' × 0.67 (Su < 0.50 ksf)' : ''), 'Eq. 10.8.3.5.1c-2')}
+        ${eqRow('q<sub>p</sub> = N<sub>c</sub> S<sub>u</sub>', fmt(tipInfo.qp,2)+' ksf', fmt(tipInfo.Nc,2)+' × '+fmt(tipInfo.Su_ksf,3)+' ksf = '+fmt(tipInfo.qp,2)+' ksf (limit 80 ksf)', 'Eq. 10.8.3.5.1c-1')}
+        <div class="eq-row"><span class="eq-label">R<sub>p</sub> (factored) =</span><span class="eq-val">${fmt(tipInfo.Rp,1)} kip</span><span class="eq-note">φ × qp × Ap = ${tipInfo.phi} × ${fmt(tipInfo.qp,2)} × ${fmt(Ap,2)}</span></div>`;
+    }
+    html += `<div class="eq-row"><span class="eq-label">Tip Resistance Utilized =</span><span class="eq-val">${fmt(tipUtilPct,0)}%</span><span class="eq-note">user-specified % of computed R<sub>p</sub> credited toward capacity</span></div>
+      <div class="eq-row"><span class="eq-label">R<sub>p</sub> (used) =</span><span class="eq-val" style="font-size:14px">${fmt(Rp_dr_used,1)} kip</span><span class="eq-note">${fmt(tipUtilPct,0)}% × ${fmt(tipInfo.Rp,1)} kip</span></div>`;
+    html += '</div>';
+  }
+
+  // ─── TOTAL ───
+  html += `<div class="calc-section">
+    <div class="calc-title">Total Factored Resistance</div>
+    ${resistMode!=='tip'?`<div class="eq-row"><span class="eq-label">R<sub>s</sub> (drained) =</span><span class="eq-val">${fmt(Rs_dr,1)} kip</span></div>`:''}
+    ${(resistMode!=='tip'&&hasFine)?`<div class="eq-row"><span class="eq-label">R<sub>s</sub> (undrained) =</span><span class="eq-val">${fmt(Rs_und,1)} kip</span></div>`:''}
+    ${resistMode!=='side'?`<div class="eq-row"><span class="eq-label">R<sub>p</sub> (used, ${fmt(tipUtilPct,0)}%) =</span><span class="eq-val">${fmt(tipInfo?Rp_dr_used:0,1)} kip</span></div>`:''}
+    <div class="eq-row"><span class="eq-label">R<sub>f</sub> (drained) =</span><span class="eq-val" style="font-size:14px">${fmt(Rn_dr,1)} kip</span></div>
+    ${hasFine?`<div class="eq-row"><span class="eq-label">R<sub>f</sub> (undrained) =</span><span class="eq-val" style="font-size:14px">${fmt(Rn_und,1)} kip</span></div>`:''}
+  </div>`;
+
+  out.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER CDR
+// ═══════════════════════════════════════════════════════════
+function renderCDR(Rn_und, Rn_dr, Fy, hasFine) {
+  const out = document.getElementById('cdr-output');
+  const cdrClass = v => v === null ? 'cdr-muted' : v >= 1.0 ? 'cdr-green' : 'cdr-red';
+  const cdrStatus = v => v === null ? 'N/A — No Fine-Grained Strata' : v >= 1.0 ? '✓ OK' : '✗ INADEQUATE';
+  const cdrLabel = v => v === null ? 'N/A' : v >= 1.0 ? 'Adequate capacity' : 'Increase shaft length';
+
+  const cdr_dr   = Fy > 0 ? Rn_dr / Fy : null;
+  const cdr_und  = (hasFine && Fy > 0) ? Rn_und / Fy : null;
+
+  function card(title, subtitle, cdr) {
+    const cls = cdrClass(cdr);
+    return `<div class="cdr-card ${cls}">
+      <div class="cdr-head">${title}</div>
+      <div class="cdr-body">
+        <div class="cdr-value">${cdr !== null ? cdr.toFixed(2) : '—'}</div>
+        <div class="cdr-label">${subtitle} ÷ F<sub>y</sub> = ${Fy.toFixed(0)} kip</div>
+        <div class="cdr-status">${cdrStatus(cdr)}</div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:6px">${cdrLabel(cdr)}</div>
+      </div>
+    </div>`;
+  }
+
+  let html = `<div class="cdr-grid">`;
+  html += card('CDR — Drained', `R<sub>f,dr</sub> = ${Rn_dr.toFixed(1)} kip`, cdr_dr);
+  if (hasFine) {
+    html += card('CDR — Undrained', `R<sub>f,und</sub> = ${Rn_und.toFixed(1)} kip`, cdr_und);
+  } else {
+    html += card('CDR — Undrained', 'No fine-grained strata present', null);
+  }
+  html += '</div>';
+
+  const govCDR = hasFine ? Math.min(cdr_dr || Infinity, cdr_und || Infinity) : cdr_dr;
+  if (govCDR && Fy > 0) {
+    html += `<div style="margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--muted)">
+      Governing CDR = ${govCDR.toFixed(2)} — Axial resistance is
+      <strong style="color:${govCDR>=1.0?'var(--green)':'var(--red)'}">
+        ${govCDR>=1.0?'ADEQUATE':'INADEQUATE'}
+      </strong>
+    </div>`;
+  }
+  out.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SETTLEMENT CHART (O'Neill & Reese 1999)
+// ═══════════════════════════════════════════════════════════
+// Data digitized from AASHTO Figure 10.8.2.2.2-3
+const TREND_LINE = [
+  [0,0],[0.05,0.17],[0.10,0.32],[0.15,0.43],[0.20,0.505],
+  [0.25,0.565],[0.30,0.615],[0.40,0.695],[0.50,0.755],
+  [0.60,0.800],[0.70,0.835],[0.80,0.860],[1.00,0.900],
+  [1.20,0.925],[1.50,0.950],[1.80,0.960],[2.00,0.965]
+];
+const SOFT_LO = [
+  [0,0],[0.1,0.23],[0.2,0.40],[0.3,0.51],[0.4,0.60],[0.6,0.72],
+  [0.8,0.80],[1.0,0.855],[1.2,0.895],[1.5,0.930],[1.8,0.935],[2.0,0.880]
+];
+const SOFT_HI = [
+  [0,0],[0.05,0.20],[0.1,0.38],[0.15,0.51],[0.2,0.60],[0.3,0.72],
+  [0.4,0.80],[0.6,0.900],[0.8,0.955],[1.0,1.000],[1.2,1.000],
+  [1.5,1.000],[1.8,0.980],[2.0,0.940]
+];
+const HARD_LO = [
+  [0,0],[0.05,0.32],[0.1,0.52],[0.15,0.66],[0.2,0.74],[0.3,0.845],
+  [0.4,0.900],[0.6,0.950],[0.8,0.970],[1.0,0.980],[1.5,0.990],[2.0,0.995]
+];
+const HARD_HI = [
+  [0,0],[0.05,0.50],[0.1,0.70],[0.15,0.815],[0.2,0.880],[0.3,0.940],
+  [0.4,0.970],[0.6,0.985],[0.8,0.990],[1.0,0.995],[2.0,1.000]
+];
+const GRAV_LO = [
+  [0,0],[0.2,0.115],[0.4,0.215],[0.6,0.300],[0.8,0.375],
+  [1.0,0.440],[1.2,0.495],[1.4,0.545],[1.6,0.590],[1.8,0.625],[2.0,0.655]
+];
+const GRAV_HI = [
+  [0,0],[0.2,0.200],[0.4,0.350],[0.6,0.460],[0.8,0.545],
+  [1.0,0.610],[1.2,0.660],[1.4,0.700],[1.6,0.735],[1.8,0.762],[2.0,0.785]
+];
+
+function interpTrend(ratio) {
+  for (let i = 1; i < TREND_LINE.length; i++) {
+    if (ratio <= TREND_LINE[i][0]) {
+      const t = (ratio - TREND_LINE[i-1][0]) / (TREND_LINE[i][0] - TREND_LINE[i-1][0]);
+      return TREND_LINE[i-1][1] + t * (TREND_LINE[i][1] - TREND_LINE[i-1][1]);
+    }
+  }
+  return TREND_LINE[TREND_LINE.length-1][1];
+}
+
+function inverseTrend(loadRatio) {
+  // Find s/D% that gives this load ratio
+  for (let i = 1; i < TREND_LINE.length; i++) {
+    if (loadRatio <= TREND_LINE[i][1]) {
+      const t = (loadRatio - TREND_LINE[i-1][1]) / (TREND_LINE[i][1] - TREND_LINE[i-1][1]);
+      return TREND_LINE[i-1][0] + t * (TREND_LINE[i][0] - TREND_LINE[i-1][0]);
+    }
+  }
+  if (loadRatio <= 0) return 0;
+  return 2.0; // off chart
+}
+
+function drawChart(loadRatio) {
+  const canvas = document.getElementById('settlementChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const PAD = { l:60, r:30, t:20, b:50 };
+  const cW = W - PAD.l - PAD.r;
+  const cH = H - PAD.t - PAD.b;
+  const xMax = 2.0, yMax = 1.2;
+
+  ctx.clearRect(0,0,W,H);
+
+  function cx(x) { return PAD.l + (x/xMax)*cW; }
+  function cy(y) { return PAD.t + cH - (y/yMax)*cH; }
+
+  // Grid
+  ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 0.8;
+  for (let x=0; x<=2; x+=0.2) {
+    ctx.beginPath(); ctx.moveTo(cx(x),PAD.t); ctx.lineTo(cx(x),PAD.t+cH); ctx.stroke();
+  }
+  for (let y=0; y<=1.2; y+=0.2) {
+    ctx.beginPath(); ctx.moveTo(PAD.l,cy(y)); ctx.lineTo(PAD.l+cW,cy(y)); ctx.stroke();
+  }
+
+  function polyPath(pts) {
+    ctx.beginPath();
+    ctx.moveTo(cx(pts[0][0]), cy(pts[0][1]));
+    for (let i=1;i<pts.length;i++) ctx.lineTo(cx(pts[i][0]),cy(pts[i][1]));
+  }
+
+  // Gravel band (dotted fill)
+  ctx.save();
+  polyPath(GRAV_HI);
+  for (let i=GRAV_LO.length-1;i>=0;i--) ctx.lineTo(cx(GRAV_LO[i][0]),cy(GRAV_LO[i][1]));
+  ctx.closePath();
+  ctx.fillStyle='rgba(150,130,100,0.15)'; ctx.fill();
+  ctx.restore();
+  // Gravel band border (dotted)
+  ctx.save();
+  ctx.setLineDash([3,3]); ctx.strokeStyle='#8b7355'; ctx.lineWidth=1;
+  polyPath(GRAV_LO); ctx.stroke();
+  polyPath(GRAV_HI); ctx.stroke();
+  ctx.restore();
+
+  // Softening band
+  ctx.save();
+  polyPath(SOFT_HI);
+  for (let i=SOFT_LO.length-1;i>=0;i--) ctx.lineTo(cx(SOFT_LO[i][0]),cy(SOFT_LO[i][1]));
+  ctx.closePath();
+  ctx.fillStyle='rgba(50,70,100,0.08)'; ctx.fill();
+  ctx.restore();
+  ctx.save(); ctx.strokeStyle='#334466'; ctx.lineWidth=1.2;
+  polyPath(SOFT_LO); ctx.stroke();
+  polyPath(SOFT_HI); ctx.stroke();
+  ctx.restore();
+
+  // Hardening band (dashed)
+  ctx.save(); ctx.setLineDash([6,3]); ctx.strokeStyle='#334466'; ctx.lineWidth=1.2;
+  polyPath(HARD_LO); ctx.stroke();
+  polyPath(HARD_HI); ctx.stroke();
+  ctx.restore();
+
+  // Trend line
+  ctx.save(); ctx.strokeStyle='#1d5fa8'; ctx.lineWidth=2.2;
+  ctx.setLineDash([8,4]);
+  polyPath(TREND_LINE); ctx.stroke();
+  ctx.restore();
+
+  // GRAVEL label
+  ctx.save(); ctx.font='italic 11px IBM Plex Sans, sans-serif'; ctx.fillStyle='#8b7355';
+  ctx.fillText('GRAVEL',cx(1.3),cy(0.67)); ctx.restore();
+
+  // Axes
+  ctx.strokeStyle='#1a2b3c'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(PAD.l,PAD.t); ctx.lineTo(PAD.l,PAD.t+cH); ctx.lineTo(PAD.l+cW,PAD.t+cH); ctx.stroke();
+
+  // Tick labels X
+  ctx.fillStyle='#1a2b3c'; ctx.font='11px IBM Plex Mono, monospace'; ctx.textAlign='center';
+  for (let x=0;x<=2;x+=0.2) {
+    const lbl = x===0?'0.0':x.toFixed(1);
+    ctx.fillText(lbl, cx(x), PAD.t+cH+16);
+  }
+  // Tick labels Y
+  ctx.textAlign='right';
+  for (let y=0;y<=1.2;y+=0.2) {
+    ctx.fillText(y.toFixed(1), PAD.l-6, cy(y)+4);
+  }
+
+  // Axis labels
+  ctx.save(); ctx.font='11px IBM Plex Sans, sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#1a2b3c';
+  ctx.fillText('Settlement / Diameter of Shaft, %', PAD.l + cW/2, H-6);
+  ctx.restore();
+
+  ctx.save(); ctx.font='11px IBM Plex Sans, sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#1a2b3c';
+  ctx.translate(16, PAD.t + cH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Side Load Transfer / Ultimate Side Load Transfer', 0, 0);
+  ctx.restore();
+
+  // Legend
+  const lx = PAD.l + 10, ly = PAD.t + 12;
+  ctx.save(); ctx.font='9.5px IBM Plex Sans, sans-serif'; ctx.fillStyle='#444';
+  const entries = [
+    { color:'#334466', dash:[], label:'Deflection-Softening Range' },
+    { color:'#334466', dash:[6,3], label:'Deflection-Hardening Range' },
+    { color:'#1d5fa8', dash:[8,4], label:'Trend Line' },
+    { color:'#8b7355', dash:[3,3], label:'Gravel Range' },
+  ];
+  entries.forEach((e,i) => {
+    const yy = ly + i*14;
+    ctx.strokeStyle = e.color; ctx.lineWidth=1.8; ctx.setLineDash(e.dash);
+    ctx.beginPath(); ctx.moveTo(lx,yy); ctx.lineTo(lx+24,yy); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.fillText(e.label, lx+28, yy+4);
+  });
+  ctx.restore();
+
+  // Operating point
+  if (loadRatio !== null && loadRatio > 0 && loadRatio <= 1.0) {
+    const sD = inverseTrend(loadRatio);
+    const px = cx(sD), py = cy(loadRatio);
+    // Crosshairs
+    ctx.save(); ctx.strokeStyle='rgba(220,38,38,0.5)'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(px,PAD.t); ctx.lineTo(px,PAD.t+cH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(PAD.l,py); ctx.lineTo(PAD.l+cW,py); ctx.stroke();
+    ctx.restore();
+    // Dot
+    ctx.save(); ctx.fillStyle='#dc2626'; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(px,py,6,0,2*Math.PI); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    // Label
+    ctx.save(); ctx.font='bold 10px IBM Plex Mono, monospace'; ctx.fillStyle='#dc2626';
+    ctx.textAlign = sD > 1.5 ? 'right' : 'left';
+    const lbx = sD > 1.5 ? px-10 : px+10;
+    ctx.fillText(`(${sD.toFixed(2)}%, ${loadRatio.toFixed(3)})`, lbx, py-10);
+    ctx.restore();
+  }
+
+  // Title
+  ctx.save(); ctx.font='10px IBM Plex Sans, sans-serif'; ctx.fillStyle='#5a738a'; ctx.textAlign='left';
+  ctx.fillText('Figure 10.8.2.2.2-3 — O\'Neill and Reese (1999)', PAD.l, 14); ctx.restore();
+}
+
+function renderSettlement(Fy_settle, Rs_settle, D_ft, D_in) {
+  document.getElementById('settle-load-display').textContent = Fy_settle.toFixed(1) + ' kip';
+  document.getElementById('settle-ult-display').textContent  = Rs_settle.toFixed(1) + ' kip';
+  let loadRatio = Rs_settle > 0 ? Fy_settle / Rs_settle : null;
+  const ratioStr = loadRatio !== null ? loadRatio.toFixed(3) : '—';
+  document.getElementById('settle-ratio-display').textContent = ratioStr;
+
+  if (loadRatio > 1.0) loadRatio = 1.0; // cap at 1.0 for chart
+
+  drawChart(loadRatio);
+
+  const res = document.getElementById('settle-result');
+  if (loadRatio === null || Rs_settle === 0) {
+    res.innerHTML = 'Run calculations above to generate settlement estimate.';
+    return;
+  }
+  const sD_pct = inverseTrend(Math.min(loadRatio, 0.965));
+  const settle_in = D_in * (sD_pct / 100);
+  res.innerHTML = `
+    <div style="margin-bottom:6px">Using Figure 10.8.2.2.2-3 (Trend Line — cohesionless soils):</div>
+    <div class="eq-row" style="font-family:var(--mono);font-size:12px">
+      <span class="eq-label">Load Ratio =</span><span class="eq-val">${Fy_settle.toFixed(1)} / ${Rs_settle.toFixed(1)} = ${(Fy_settle/Rs_settle).toFixed(3)}</span>
+    </div>
+    <div class="eq-row" style="font-family:var(--mono);font-size:12px">
+      <span class="eq-label">Settlement/D =</span><span class="eq-val">${sD_pct.toFixed(2)}%</span>
+    </div>
+    <div class="eq-row" style="font-family:var(--mono);font-size:12px">
+      <span class="eq-label">Anticipated Settlement =</span>
+      <span class="eq-val" style="font-size:16px">${settle_in.toFixed(3)} in</span>
+      <span class="eq-note">${D_in.toFixed(0)}-in shaft × ${sD_pct.toFixed(2)}%</span>
+    </div>
+    <div style="margin-top:8px;font-size:11.5px;color:var(--muted);font-style:italic">
+      Full side resistance is activated with approximately ${settle_in.toFixed(2)}-inches of vertical movement.
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SAVE / LOAD JSON
+// ═══════════════════════════════════════════════════════════
+function getState() {
+  const ids = ['proj-subject','proj-number','proj-by','proj-date','proj-boring','proj-shaft-id',
+    'proj-checked','proj-check-date','gwt-el','gamma-w','gwt-notes',
+    'd-shaft-in','top-el','stickup','zfl','length','fc-concrete','fy','fy-settle',
+    'phi-side-sand','phi-side-clay','phi-side-clay-drained','phi-side-rock','phi-tip-sand','phi-tip-clay','phi-tip-rock',
+    'settle-basis','tip-util-pct'];
+  const state = { strata, resistMode, fields:{} };
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) state.fields[id] = el.value;
+  });
+  return state;
+}
+
+function applyState(state) {
+  if (state.fields) {
+    Object.entries(state.fields).forEach(([id,val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+  }
+  if (state.strata) {
+    strata = state.strata;
+    stratumCount = Math.max(...strata.map(s=>s.id),0);
+    // Backward-compat repair: JSON files saved before the GSI/Hoek-Brown tip
+    // method existed won't have lithology/mi/GSI/D on their rock strata.
+    // Backfill with newStratum()'s defaults so hoekBrownTipQp() never runs
+    // on undefined inputs (NaN propagation) for an old project file.
+    // (newStratum() increments the module-level stratumCount as a side
+    // effect via ++stratumCount — save/restore it so this repair pass
+    // doesn't skip an id or collide with the next addStratum() call.)
+    const _savedCount = stratumCount;
+    const defaults = newStratum(0);
+    stratumCount = _savedCount;
+    strata.forEach(s => {
+      if (s.type !== 'rock') return;
+      if (s.lithology === undefined) s.lithology = defaults.lithology;
+      if (s.mi === undefined) s.mi = defaults.mi;
+      if (s.GSI === undefined) s.GSI = defaults.GSI;
+      if (s.D === undefined) s.D = defaults.D;
+    });
+  }
+  if (state.resistMode) { setMode(state.resistMode); } else { setMode('side'); }
+  renderStrata();
+}
+
+function saveJSON() {
+  const data = JSON.stringify(getState(), null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  const shaft = document.getElementById('proj-shaft-id').value || 'shaft';
+  a.download = `drilled-shaft-${shaft}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function loadJSON(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { applyState(JSON.parse(e.target.result)); }
+    catch { alert('Invalid JSON file.'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+function init() {
+  // Add default strata matching the MathCAD example
+  strata = [];
+  stratumCount = 0;
+
+  const s1 = newStratum(1); s1.name='Existing FILL';   s1.type='coarse'; s1.gamma=120; s1.N60=14; s1.N1_60=25; s1.m='0.8'; s1.top_EL=59; s1.bot_EL=50.5; strata.push(s1);
+  const s2 = newStratum(2); s2.name='Coarse-Grained 1'; s2.type='coarse'; s2.gamma=120; s2.N60=21; s2.N1_60=20; s2.m='0.8'; s2.top_EL=50.5; s2.bot_EL=43;   strata.push(s2);
+  const s3 = newStratum(3); s3.name='Fine-Grained 1';  s3.type='fine';   s3.gamma=120; s3.N60=13; s3.N1_60=13; s3.Su=1100; s3.m='0.8'; s3.top_EL=43; s3.bot_EL=20;   strata.push(s3);
+  const s4 = newStratum(4); s4.name='Coarse-Grained 2'; s4.type='coarse'; s4.gamma=120; s4.N60=21; s4.N1_60=20; s4.m='0.8'; s4.top_EL=20; s4.bot_EL=-41;  strata.push(s4);
+
+  document.getElementById('proj-date').value = new Date().toISOString().slice(0,10);
+
+  renderStrata();
+  drawChart(null);
+}
+
+window.addEventListener('load', init);
+</script>
+<script>
+// P1-3: every tool registers the service worker so the whole suite
+// gets pre-cached for offline use no matter which page is opened first.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('Geotech Tools: service worker registered'))
+    .catch(e => console.warn('Geotech Tools: SW registration failed', e));
+}
+</script>
+</body>
+</html>

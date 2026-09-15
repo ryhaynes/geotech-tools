@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json.schemastore.org/staticwebapp.config.json",
+
+  "routes": [
+    {
+      "route": "/.auth/login/aad",
+      "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
+      "route": "/.auth/*",
+      "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
+      "route": "/login",
+      "rewrite": "/.auth/login/aad",
+      "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
+      "route": "/logout",
+      "rewrite": "/.auth/logout",
+      "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
+      "route": "/*",
+      "allowedRoles": ["authenticated"]
+    }
+  ],
+
+  "responseOverrides": {
+    "401": {
+      "redirect": "/.auth/login/aad?post_login_redirect_uri=.referrer",
+      "statusCode": 302
+    }
+  },
+
+  "auth": {
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/80a0bca8-1d3e-4f0e-b5ca-802847aba996/v2.0",
+          "clientIdSettingName": "AAD_CLIENT_ID",
+          "clientSecretSettingName": "AAD_CLIENT_SECRET"
+        }
+      }
+    }
+  },
+
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(self), payment=()"
+  },
+
+  "mimeTypes": {
+    ".woff2": "font/woff2",
+    ".json": "application/json"
+  },
+
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/fonts/*", "/vendor/*", "/*.png", "/*.json", "/sw.js"]
+  }
+}

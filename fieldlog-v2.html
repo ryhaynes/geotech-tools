@@ -1,0 +1,3178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1b4f8a">
+<title>FieldLog v2</title>
+<link rel="manifest" href="manifest.json">
+<!-- P1-4: fonts self-hosted (no runtime CDN dependency) -->
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root {
+  --bg:        #f0f2f5;
+  --surface:   #ffffff;
+  --card:      #ffffff;
+  --border:    #d0d5de;
+  --border2:   #b8bfcc;
+  --accent:    #1b4f8a;
+  --accent-lt: #e8eef7;
+  --accent2:   #1a7a5e;
+  --accent2-lt:#e6f4ef;
+  --warn:      #c0392b;
+  --warn-lt:   #fdecea;
+  --amber:     #b45309;
+  --amber-lt:  #fef3c7;
+  --text:      #1a1f2e;
+  --text2:     #3d4562;
+  --muted:     #6b7490;
+  --label:     #4a5270;
+  --mono:      'IBM Plex Mono', monospace;
+  --sans:      'IBM Plex Sans', sans-serif;
+  --cond:      'IBM Plex Sans Condensed', sans-serif;
+  --shadow:    0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+}
+* { box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; min-height: 100vh; }
+
+/* ── HEADER ── */
+header {
+  background: var(--accent);
+  color: white;
+  padding: 11px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: var(--shadow-md);
+}
+.logo { font-family: var(--cond); font-weight: 700; font-size: 20px; letter-spacing: 1.5px; color: white; }
+.logo span { font-weight: 300; opacity: .8; }
+.logo-sub { font-size: 11px; opacity: .7; font-family: var(--mono); letter-spacing: .5px; margin-top: 1px; }
+.header-right { display:flex; gap:8px; align-items:center; }
+
+/* ── HEADER DROPDOWN MENUS ── */
+.hdr-menu { position:relative; }
+.hdr-menu-list {
+  position:absolute; top:calc(100% + 6px); right:0;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:6px; box-shadow:var(--shadow-md);
+  min-width:170px; z-index:210;
+  overflow:hidden; display:none;
+}
+.hdr-menu.open .hdr-menu-list { display:block; }
+.hdr-menu-item {
+  display:block; width:100%; padding:11px 14px;
+  font-size:12px; font-family:var(--cond); font-weight:600;
+  letter-spacing:.8px; text-transform:uppercase;
+  color:var(--text2); text-align:left;
+  background:none; border:none; cursor:pointer;
+  white-space:nowrap;
+}
+.hdr-menu-item:hover { background:var(--accent-lt); color:var(--accent); }
+.hdr-menu-item + .hdr-menu-item { border-top:1px solid var(--border); }
+.breadcrumb { padding: 6px 14px; font-size: 11px; font-family: var(--mono); color: var(--muted); background: var(--surface); border-bottom: 1px solid var(--border); }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+/* ── NAV TABS ── */
+.tabs {
+  display: flex; background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  overflow-x: auto; scrollbar-width: none;
+  position: sticky; top: 77px; z-index: 190;
+  box-shadow: var(--shadow);
+}
+.tabs::-webkit-scrollbar { display:none; }
+.tab {
+  flex: 0 0 auto; padding: 10px 16px;
+  font-family: var(--cond); font-weight: 600; font-size: 12px;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--muted);
+  cursor: pointer; border-bottom: 3px solid transparent;
+  margin-bottom: -2px; white-space: nowrap; transition: all .15s;
+  user-select: none;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-lt); }
+.tab:hover:not(.active) { color: var(--text2); }
+
+/* ── SECTION ── */
+.section { display:none; padding: 14px; padding-bottom: 64px; }
+.section.active { display:block; }
+
+/* ── CARD ── */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px; margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-family: var(--cond); font-weight: 700; font-size: 11px;
+  letter-spacing: 1.8px; text-transform: uppercase; color: var(--accent);
+  margin-bottom: 12px; display:flex; align-items:center; gap:8px;
+}
+.card-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── FORM ── */
+.field { margin-bottom: 11px; }
+.field label {
+  display:block; font-size:11px; font-family: var(--cond);
+  letter-spacing:1px; text-transform:uppercase; color: var(--label);
+  font-weight:600; margin-bottom:4px;
+}
+.field input, .field select, .field textarea {
+  width:100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 5px; color: var(--text); font-family: var(--sans);
+  font-size:15px; padding: 8px 11px; transition: border-color .15s, box-shadow .15s;
+  -webkit-appearance:none; appearance:none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline:none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(27,79,138,.12);
+}
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7490'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 11px center; padding-right:30px;
+}
+.field input[type="number"] { font-family: var(--mono); }
+.field textarea { resize:vertical; min-height:66px; }
+.field input[type="datetime-local"] { font-family: var(--mono); font-size:13px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
+  padding:9px 16px; border-radius:5px; border:none;
+  font-family:var(--cond); font-weight:700; font-size:12px;
+  letter-spacing:1.2px; text-transform:uppercase; cursor:pointer; transition:all .15s;
+}
+.btn-primary  { background:var(--accent); color:white; }
+.btn-primary:active { background:#153d6b; }
+.btn-green    { background:var(--accent2); color:white; }
+.btn-green:active { background:#145f49; }
+.btn-outline  { background:transparent; color:var(--accent); border:1.5px solid var(--accent); }
+.btn-outline:active { background:var(--accent-lt); }
+.btn-ghost    { background:var(--bg); color:var(--text2); border:1px solid var(--border); }
+.btn-ghost:active { background:var(--border); }
+.btn-danger   { background:transparent; color:var(--warn); border:1.5px solid var(--warn); }
+.btn-danger:active { background:var(--warn-lt); }
+.btn-amber    { background:var(--amber-lt); color:var(--amber); border:1px solid #f59e0b; }
+.btn-sm       { padding:5px 11px; font-size:11px; }
+.btn-xs       { padding:3px 8px; font-size:10px; }
+.btn-full     { width:100%; }
+
+/* ── BORING SELECTOR ── */
+.boring-selector {
+  background: var(--accent-lt); border: 1.5px solid var(--accent);
+  border-radius:6px; padding:10px 12px; margin-bottom:12px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.boring-selector select {
+  flex:1; border:none; background:transparent; font-family:var(--sans);
+  font-size:14px; font-weight:600; color:var(--accent);
+  -webkit-appearance:none; appearance:none; cursor:pointer;
+}
+.boring-selector select:focus { outline:none; }
+
+/* ── RUN / ENTRY CARDS ── */
+.entry-card {
+  background:var(--card); border:1px solid var(--border);
+  border-left:4px solid var(--border2);
+  border-radius:6px; padding:0; margin-bottom:10px;
+  box-shadow: var(--shadow); overflow:hidden; transition: border-left-color .2s;
+}
+.entry-card.expanded { border-left-color: var(--accent); }
+.entry-card.rock-card.expanded { border-left-color: #7c3aed; }
+.entry-card.lith-card.expanded { border-left-color: var(--accent2); }
+.entry-card.gw-card.expanded   { border-left-color: #0284c7; }
+
+.entry-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 13px; cursor:pointer; user-select:none;
+}
+.entry-header:active { background: var(--bg); }
+.entry-depth { font-family:var(--mono); font-size:15px; color:var(--accent); font-weight:500; }
+.entry-meta  { font-size:12px; color:var(--muted); margin-top:2px; }
+.entry-badge {
+  font-family:var(--cond); font-size:12px; font-weight:700;
+  padding:3px 8px; border-radius:3px; letter-spacing:.8px;
+  background:var(--bg); border:1px solid var(--border); color:var(--text2);
+}
+.entry-badge.n-badge { background:var(--accent-lt); color:var(--accent); border-color:var(--accent); }
+.entry-chevron { color:var(--muted); font-size:16px; margin-left:6px; transition: transform .2s; }
+.entry-card.expanded .entry-chevron { transform: rotate(90deg); }
+
+.entry-body { display:none; padding:13px; border-top:1px solid var(--border); }
+.entry-card.expanded .entry-body { display:block; }
+
+/* ── BLOW COUNT ROW ── */
+.blow-row { display:flex; align-items:center; gap:5px; }
+.blow-input {
+  flex:1; text-align:center; font-family:var(--mono); font-size:17px;
+  padding:9px 3px; border:1.5px solid var(--border); border-radius:5px;
+  background:var(--bg); color:var(--text); -webkit-appearance:none;
+}
+.blow-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(27,79,138,.12); }
+.blow-sep { color:var(--muted); font-family:var(--mono); font-size:16px; user-select:none; }
+.n-display {
+  font-family:var(--mono); font-size:21px; font-weight:500;
+  text-align:center; min-width:50px; padding:8px 4px;
+  background:var(--accent-lt); border:2px solid var(--accent);
+  border-radius:5px; color:var(--accent);
+}
+.blow-labels { display:flex; gap:5px; margin-bottom:4px; }
+.blow-labels span {
+  flex:1; text-align:center; font-size:10px; font-family:var(--cond);
+  letter-spacing:.8px; text-transform:uppercase; color:var(--muted);
+}
+.blow-labels .nl { min-width:50px; color:var(--accent); font-weight:700; }
+
+/* ── RECOVERY BAR ── */
+.rec-bar-bg { height:5px; background:var(--border); border-radius:3px; margin-top:6px; overflow:hidden; }
+.rec-bar-fill { height:100%; background:var(--accent2); border-radius:3px; transition:width .4s; }
+.rec-pct { font-size:11px; color:var(--muted); text-align:right; margin-top:2px; font-family:var(--mono); }
+
+/* ── TOGGLE ── */
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; }
+.toggle-label { font-size:14px; color:var(--text); }
+.toggle { position:relative; width:42px; height:22px; flex-shrink:0; }
+.toggle input { display:none; }
+.toggle-track {
+  position:absolute; inset:0; background:var(--border);
+  border-radius:11px; transition:background .2s; cursor:pointer;
+}
+.toggle input:checked + .toggle-track { background:var(--accent2); }
+.toggle-thumb {
+  position:absolute; top:3px; left:3px; width:16px; height:16px;
+  background:white; border-radius:50%; transition:left .2s; pointer-events:none;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.toggle input:checked ~ .toggle-thumb { left:23px; }
+
+/* ── DIVIDER ── */
+.divider { height:1px; background:var(--border); margin:12px 0; }
+
+/* ── INFO PILL ── */
+.pill {
+  display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px;
+  font-family:var(--cond); font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+}
+.pill-blue  { background:var(--accent-lt); color:var(--accent); }
+.pill-green { background:var(--accent2-lt); color:var(--accent2); }
+.pill-amber { background:var(--amber-lt); color:var(--amber); }
+.pill-red   { background:var(--warn-lt); color:var(--warn); }
+
+/* ── EMPTY STATE ── */
+.empty { text-align:center; padding:44px 16px; color:var(--muted); }
+.empty-icon { font-size:40px; margin-bottom:10px; opacity:.4; }
+.empty-text { font-family:var(--cond); font-size:14px; letter-spacing:.8px; text-transform:uppercase; }
+
+/* ── STATUS BAR ── */
+.status-bar {
+  position:fixed; bottom:0; left:0; right:0; background:var(--surface);
+  border-top:1px solid var(--border); padding:6px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:11px; color:var(--muted); font-family:var(--mono); z-index:200;
+  box-shadow: 0 -1px 3px rgba(0,0,0,.05);
+}
+.status-dot {
+  display:inline-block; width:7px; height:7px; border-radius:50%;
+  background:var(--accent2); margin-right:5px; animation:pulse 2.5s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:48px; left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:var(--accent); color:white;
+  font-family:var(--cond); font-weight:700; font-size:12px; letter-spacing:1px;
+  padding:9px 18px; border-radius:5px; opacity:0; transition:all .25s; z-index:300;
+  white-space:nowrap; box-shadow:var(--shadow-md);
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.success { background:var(--accent2); }
+.toast.warn    { background:var(--amber); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:400;
+  display:flex; align-items:flex-end; justify-content:center;
+}
+.modal-overlay.hidden { display:none; }
+.modal {
+  background:var(--surface); border-radius:12px 12px 0 0; padding:20px 16px 32px;
+  width:100%; max-width:480px; max-height:85vh; overflow-y:auto;
+  box-shadow: 0 -4px 20px rgba(0,0,0,.15);
+}
+.modal-title { font-family:var(--cond); font-weight:700; font-size:17px; letter-spacing:.8px; margin-bottom:16px; }
+
+/* ── SECTION HEADERS ── */
+.section-head {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+}
+.section-head h3 { font-family:var(--cond); font-weight:700; font-size:13px; letter-spacing:1px; text-transform:uppercase; color:var(--text2); }
+
+/* ── PROJECT SWITCHER ── */
+.project-bar {
+  background: var(--accent); color:white; padding:6px 14px;
+  font-size:12px; font-family:var(--mono); display:flex; align-items:center; gap:8px;
+}
+.project-bar .proj-name { font-weight:500; opacity:.9; }
+.project-bar .proj-num  { opacity:.6; }
+
+/* ── COMPLETION BADGE ── */
+.completion-badge {
+  padding:8px 12px; border-radius:6px; margin-bottom:12px;
+  font-family:var(--cond); font-size:13px; font-weight:600; letter-spacing:.5px;
+  display:flex; align-items:center; gap:8px;
+}
+.completion-badge.completed { background:var(--accent2-lt); color:var(--accent2); border:1px solid var(--accent2); }
+.completion-badge.terminated { background:var(--warn-lt); color:var(--warn); border:1px solid var(--warn); }
+
+/* ── RQD/RECOVERY TABLE ── */
+.metrics-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.metric-box {
+  background:var(--bg); border:1px solid var(--border); border-radius:5px;
+  padding:8px 10px; text-align:center;
+}
+.metric-val { font-family:var(--mono); font-size:22px; font-weight:500; }
+.metric-lbl { font-family:var(--cond); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+.metric-desc { font-size:11px; color:var(--muted); margin-top:3px; }
+
+/* ── SEARCHABLE SELECT ── */
+.ss-wrap { position:relative; }
+.ss-input {
+  width:100%; background:var(--bg); border:1px solid var(--border);
+  border-radius:5px; color:var(--text); font-family:var(--sans);
+  font-size:15px; padding:8px 30px 8px 11px;
+  transition:border-color .15s, box-shadow .15s; cursor:pointer;
+  -webkit-appearance:none; appearance:none;
+}
+.ss-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(27,79,138,.12); }
+.ss-caret {
+  position:absolute; right:11px; top:50%; transform:translateY(-50%);
+  pointer-events:none; width:10px; height:6px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7490'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:center;
+}
+#ss-portal {
+  position:fixed; z-index:9000;
+  background:var(--surface); border:1.5px solid var(--accent);
+  border-radius:6px; overflow-y:auto;
+  box-shadow:0 4px 16px rgba(0,0,0,.18); display:none;
+}
+.ss-opt { padding:8px 11px; cursor:pointer; font-size:14px; font-family:var(--sans); color:var(--text); }
+.ss-opt:hover, .ss-opt.hi { background:var(--accent-lt); color:var(--accent); }
+.ss-grp {
+  padding:5px 11px 3px; font-size:10px; font-family:var(--cond); font-weight:700;
+  letter-spacing:1px; text-transform:uppercase; color:var(--muted);
+  background:var(--bg); border-top:1px solid var(--border); cursor:default;
+}
+.ss-grp:first-child { border-top:none; }
+.ss-none { padding:8px 11px; font-size:14px; color:var(--muted); font-style:italic; cursor:default; }
+.ss-opt strong { font-weight:700; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Field<span>Log</span></div>
+    <div class="logo-sub" id="hdr-proj">No project loaded</div>
+  </div>
+  <div class="header-right">
+    <button class="btn btn-ghost btn-sm" onclick="switchTabById('tab-boring')" style="background:rgba(255,255,255,.15);color:white;border-color:rgba(255,255,255,.3)">+ Boring</button>
+    <div class="hdr-menu" id="menu-gint">
+      <button class="btn btn-ghost btn-sm" onclick="toggleHdrMenu('menu-gint')" style="background:rgba(255,255,255,.15);color:white;border-color:rgba(255,255,255,.3)">gINT ▾</button>
+      <div class="hdr-menu-list">
+        <button class="hdr-menu-item" onclick="closeHdrMenus();exportGINT()">&#8659; Export gINT</button>
+        <button class="hdr-menu-item" onclick="closeHdrMenus();importGINT()">&#8657; Import gINT</button>
+      </div>
+    </div>
+    <div class="hdr-menu" id="menu-json">
+      <button class="btn btn-ghost btn-sm" onclick="toggleHdrMenu('menu-json')" style="background:rgba(255,255,255,.15);color:white;border-color:rgba(255,255,255,.3)">JSON ▾</button>
+      <div class="hdr-menu-list">
+        <button class="hdr-menu-item" onclick="closeHdrMenus();saveJSON()">&#8659; Save JSON</button>
+        <button class="hdr-menu-item" onclick="closeHdrMenus();loadJSON()">&#8657; Load JSON</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="index.html">← Geotech Tools</a> &nbsp;/&nbsp; FieldLog v2
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-section="tab-project" onclick="switchTab(this)">Project</div>
+  <div class="tab" data-section="tab-boring" onclick="switchTab(this)">Boring Info</div>
+  <div class="tab" data-section="tab-spt" onclick="switchTab(this)">SPT Runs</div>
+  <div class="tab" data-section="tab-lith" onclick="switchTab(this)">Lithology</div>
+  <div class="tab" data-section="tab-gw" onclick="switchTab(this)">Groundwater</div>
+  <div class="tab" data-section="tab-rock" onclick="switchTab(this)">Rock Coring</div>
+  <div class="tab" data-section="tab-notes" onclick="switchTab(this)">Notes</div>
+  <div class="tab" data-section="tab-saved" onclick="switchTab(this)">Saved</div>
+</div>
+
+<!-- ══ ACTIVE BORING INDICATOR ══ -->
+<div style="background:var(--accent-lt);border-bottom:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:8px;" id="boring-bar">
+  <span style="font-size:11px;font-family:var(--cond);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--label)">Active:</span>
+  <select id="boring-select" onchange="selectBoring(this.value)" style="flex:1;border:none;background:transparent;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);-webkit-appearance:none;appearance:none;cursor:pointer">
+    <option value="">— Add a boring in Boring Info tab —</option>
+  </select>
+</div>
+
+<!-- ════════════════════════════════════ -->
+<!--  TAB: PROJECT                        -->
+<!-- ════════════════════════════════════ -->
+<div id="tab-project" class="section active">
+
+  <div class="card">
+    <div class="card-title">Project Information</div>
+    <div class="field">
+      <label>Project Name</label>
+      <input type="text" id="proj-name" placeholder="Project Name" oninput="updateHdr()">
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Commission No.</label>
+        <input type="text" id="proj-num" placeholder="e.g. XXXXX.XXX">
+      </div>
+      <div class="field">
+        <label>Client</label>
+        <input type="text" id="proj-client" placeholder="Client Name">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>State</label>
+        <select id="proj-state">
+          <option value="">—</option>
+          <option>Maryland</option><option>Virginia</option><option>DC</option>
+          <option>Delaware</option><option>Pennsylvania</option><option>West Virginia</option>
+          <option>North Carolina</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>County / Locale</label>
+        <input type="text" id="proj-county" placeholder="County, Locale, or Jurisdiction">
+      </div>
+    </div>
+    <div class="field">
+      <label>Input Units</label>
+      <select id="proj-units">
+        <option value="E">English (ft, psi)</option>
+        <option value="SI">SI (m, kPa)</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-primary" style="flex:1" onclick="saveToCurrent();showToast('Project saved','success')">Save Project</button>
+    <button class="btn btn-outline" style="flex:1" onclick="switchTabById('tab-boring')">→ Boring Info</button>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════ -->
+<!--  TAB: BORING INFO                   -->
+<!-- ════════════════════════════════════ -->
+<div id="tab-boring" class="section">
+
+  <!-- List of borings -->
+  <div id="boring-cards-list"></div>
+
+  <div style="display:flex;gap:8px;margin-top:0">
+    <button class="btn btn-outline" style="flex:1" onclick="promptAddBoring()">+ Add Boring</button>
+    <button class="btn btn-ghost" style="flex:1" onclick="promptCopyBoring()">⧉ Copy From Existing</button>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════ -->
+<!--  TAB: SPT RUNS                      -->
+<!-- ════════════════════════════════════ -->
+<div id="tab-spt" class="section">
+  <div id="spt-list"></div>
+  <button class="btn btn-outline btn-full" onclick="addSPT()">+ Add Sample</button>
+</div>
+
+<!-- ════════════════════════════════════ -->
+<!--  TAB: LITHOLOGY                     -->
+<!-- ════════════════════════════════════ -->
+<div id="tab-lith" class="section">
+  <div id="lith-list"></div>
+  <button class="btn btn-outline btn-full" style="color:var(--accent2);border-color:var(--accent2)" onclick="addLith()">+ Add Stratum</button>
+</div>
+
+<!-- ════════════════════════════════════ -->
+<!--  TAB: GROUNDWATER                   -->
+<!-- ════════════════════════════════════ -->
+<div id="tab-gw" class="section">
+  <div id="gw-list"></div>
+  <button class="btn btn-outline btn-full" style="color:#0284c7;border-color:#0284c7" onclick="addGW()">+ Add Groundwater Reading</button>
+</div>
+
+<!-- ════════════════════════════════════ -->
+<!--  TAB: ROCK CORING                   -->
+<!-- ════════════════════════════════════ -->
+<div id="tab-rock" class="section">
+  <div id="rock-list"></div>
+  <button class="btn btn-outline btn-full" style="color:#7c3aed;border-color:#7c3aed" onclick="addRock()">+ Add Rock Core Run</button>
+</div>
+
+<!-- ════════════════════════════════════ -->
+<!--  TAB: NOTES                         -->
+<!-- ════════════════════════════════════ -->
+<div id="tab-notes" class="section">
+  <div id="notes-list"></div>
+  <button class="btn btn-outline btn-full" onclick="addNote()">+ Add Note</button>
+</div>
+
+<!-- ════════════════════════════════════ -->
+<!-- ════════════════════════════════════ -->
+<div id="tab-saved" class="section">
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-primary" style="flex:1" onclick="saveCurrentLog()">Save Current Project</button>
+    <button class="btn btn-green" style="flex:1" onclick="exportGINT()">Export gINT XLSX</button>
+    <button class="btn btn-outline" style="flex:1" onclick="saveJSON()">&#8659; Save JSON</button>
+    <button class="btn btn-ghost" style="flex:1" onclick="loadJSON()">&#8657; Load JSON</button>
+  </div>
+  <div id="saved-list"></div>
+  <!-- P3-4: field devices may be shared or lost — give users a one-tap wipe -->
+  <div style="margin-top:18px;text-align:center">
+    <button class="btn btn-danger btn-sm" onclick="clearDeviceData()">Clear This Device</button>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">Removes all FieldLog data stored in this browser (saved logs, autosave, initials). Exported files are not affected.</div>
+  </div>
+</div>
+
+<!-- (boring modal removed - add boring is now inline in Boring Info tab) -->
+
+<!-- ── LITH LINK MODAL ── -->
+<div class="modal-overlay hidden" id="lith-link-modal">
+  <div class="modal">
+    <div class="modal-title">Link to Previous Stratum?</div>
+    <div id="lith-link-prev-info" style="font-size:13px;color:var(--muted);margin-bottom:14px;padding:9px 11px;background:var(--bg);border-radius:5px;border-left:3px solid var(--accent2);font-family:var(--mono);line-height:1.6"></div>
+    <p style="font-size:14px;color:var(--text2);line-height:1.5;margin-bottom:20px">Match the bottom depth of the previous stratum to this stratum's top depth, and carry the line type boundary forward automatically.</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-green btn-full" onclick="confirmLithLink()">Yes</button>
+      <button class="btn btn-ghost btn-full" onclick="skipLithLink()">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── STATUS BAR ── -->
+<div class="status-bar">
+  <div><span class="status-dot"></span>OFFLINE READY</div>
+  <div id="stat-boring" style="font-weight:500">—</div>
+  <div id="stat-counts">0S · 0L · 0R</div>
+  <div id="stat-autosave" title="Autosaves every 5 min" style="color:var(--muted)">—</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════════════════════ -->
+<!--  JAVASCRIPT                                  -->
+<!-- ════════════════════════════════════════════ -->
+<!-- SheetJS — loaded from cdnjs (vendor/xlsx.full.min.js not tracked in git repo) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" onerror="window._xlsxMissing=true"></script>
+<script>
+// ── DATA MODEL ───────────────────────────────────────────────────
+let state = {
+  schemaVersion: 2,   // P2-3: bump FIELDLOG_SCHEMA_VERSION below when the data model changes
+  project: { name:'', num:'', client:'', state:'', county:'', units:'E', sptIntervals:'3' },
+  borings: [],        // array of boring objects
+  activeBoring: null  // index into borings
+};
+// HS-2: never trust localStorage blindly — guard the parse
+let savedLogs = [];
+try {
+  const _sl = JSON.parse(localStorage.getItem('fieldlog_v2_saves') || '[]');
+  if (Array.isArray(_sl)) savedLogs = _sl;
+} catch (e) { console.warn('FieldLog: saved-logs store unreadable, starting empty', e); }
+let nextId = 1; // for unique entry IDs
+
+// ═════════════════════════════════════════════════════════════════
+//  SECURITY & DATA-INTEGRITY HELPERS
+//  (code review items HS-1, HS-2, HS-3, P2-3, P3-3, P3-4)
+// ═════════════════════════════════════════════════════════════════
+
+// HS-1/HS-2: HTML-escape EVERY user-supplied value interpolated into a
+// template literal. Covers text nodes and double-quoted attributes.
+function esc(v) {
+  return String(v ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// HS-1/HS-3: boring IDs are validated at write time, not just on display.
+// Allowed: letters, digits, space, - _ . # ( ) / ' — max 50 chars.
+const BORING_ID_RE = /^[A-Za-z0-9][A-Za-z0-9 ._#()'\/-]{0,49}$/;
+function validBoringId(id) {
+  return typeof id === 'string' && BORING_ID_RE.test(id);
+}
+
+// ── P3-3: lightweight audit identity (until Entra ID auth, P1-1) ──
+function getUserInitials() {
+  try { return localStorage.getItem('geotools_user_initials') || ''; } catch (e) { return ''; }
+}
+function ensureUserInitials() {
+  let ini = getUserInitials();
+  if (!ini) {
+    ini = (prompt('Enter your initials (recorded with log data for QC traceability):') || '')
+            .trim().replace(/[^A-Za-z.]/g, '').slice(0, 6);
+    if (ini) { try { localStorage.setItem('geotools_user_initials', ini); } catch (e) {} }
+  }
+  return ini;
+}
+function touchAudit(obj) {
+  if (!obj) return;
+  obj.modifiedBy = getUserInitials();
+  obj.modifiedAt = new Date().toISOString();
+}
+
+// ── P3-4: clear all FieldLog data from this device ────────────────
+function clearDeviceData() {
+  if (!confirm('Clear ALL FieldLog data stored on this device?\n\nThis removes saved logs, the autosave snapshot, and your stored initials. Exported JSON/XLSX files are NOT affected.\n\nThis cannot be undone.')) return;
+  try {
+    localStorage.removeItem('fieldlog_v2_saves');
+    localStorage.removeItem('fieldlog_v2_autosave');
+    localStorage.removeItem('geotools_user_initials');
+  } catch (e) {}
+  location.reload();
+}
+
+// ═════════════════════════════════════════════════════════════════
+//  P2-3 + HS-2: SCHEMA VERSIONING & IMPORT VALIDATION
+//  Every saved object carries schemaVersion. Imported JSON and
+//  localStorage restores are whitelist-rebuilt: only known fields with
+//  coerced types survive; anything else (including injected markup in
+//  unexpected keys) is dropped. Free-text fields are kept verbatim but
+//  are ALWAYS rendered through esc().
+// ═════════════════════════════════════════════════════════════════
+const FIELDLOG_SCHEMA_VERSION = 2;
+
+function cleanStr(v, max = 4000) {
+  if (v === null || v === undefined) return '';
+  return String(v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').slice(0, max);
+}
+function cleanBool(v) { return v === true || v === 'true'; }
+function cleanNum(v, fallback = 0) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+function cleanEnum(v, allowed, fallback = '') {
+  return allowed.includes(v) ? v : fallback;
+}
+function sanitizeRow(raw, stringKeys, extra) {
+  const out = { id: cleanNum(raw && raw.id, 0) };
+  stringKeys.forEach(k => { out[k] = cleanStr(raw ? raw[k] : ''); });
+  if (extra) Object.assign(out, extra(raw || {}));
+  return out;
+}
+
+// Upgrades any older save shape to the current schema, then rebuilds it
+// through the whitelist. Throws (with a user-readable message) on files
+// that cannot be safely interpreted. HS-2 test case: a string field
+// containing <img src=x onerror=alert(1)> survives as data but renders
+// as literal text because every display site escapes.
+function migrateAndSanitizeState(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new Error('Snapshot is not a valid FieldLog state object.');
+  }
+  const ver = cleanNum(raw.schemaVersion, 1); // pre-versioning saves = v1
+  if (ver > FIELDLOG_SCHEMA_VERSION) {
+    throw new Error('This file was saved by a newer version of FieldLog (schema v' + ver + '). Update the app, then try again.');
+  }
+  // v1 → v2 migration: boringNotes introduced; nothing else changed shape.
+  // Future migrations: add steps here, in order, before the rebuild below.
+  const p = raw.project || {};
+  const s = {
+    schemaVersion: FIELDLOG_SCHEMA_VERSION,
+    project: {
+      name: cleanStr(p.name, 200), num: cleanStr(p.num, 100), client: cleanStr(p.client, 200),
+      state: cleanStr(p.state, 100), county: cleanStr(p.county, 100), units: cleanStr(p.units, 50)
+    },
+    borings: [],
+    activeBoring: null
+  };
+  (Array.isArray(raw.borings) ? raw.borings : []).forEach(rb => {
+    if (!rb || typeof rb !== 'object') return;
+    let bid = cleanStr(rb.id, 50).trim();
+    if (!validBoringId(bid)) {
+      // Strip disallowed characters rather than dropping the boring (preserve field data)
+      bid = bid.replace(/[^A-Za-z0-9 ._#()'\/-]/g, '').slice(0, 50).trim() || ('B-' + (s.borings.length + 1));
+    }
+    const b = newBoring(bid);
+    ['loc','start','complete','holeDepth','inspector','co','driller','rig','method','hammer',
+     'samplerID','hamCal','coreMethod','coreDia','lat','lon','north','east','coordSys','elev',
+     'boringNotes','createdBy','createdAt','modifiedBy','modifiedAt']
+      .forEach(k => { if (rb[k] !== undefined) b[k] = cleanStr(rb[k]); });
+    b.hamWt   = cleanNum(rb.hamWt, 140);
+    b.hamDrop = cleanNum(rb.hamDrop, 30);
+    b.completionStatus = cleanEnum(rb.completionStatus, ['', 'Completed', 'Terminated']);
+    b.sptIntervals     = cleanEnum(rb.sptIntervals, ['3', '4'], '3');
+    b.spt = (Array.isArray(rb.spt) ? rb.spt : []).map(r => sanitizeRow(r,
+      ['num','topDepth','length','intervalLen','b1','b2','b3','b4','recovery','notes'],
+      r2 => ({ type: cleanEnum(r2.type, ['S','T','B','G'], 'S'), refusal: cleanBool(r2.refusal) })));
+    b.lith = (Array.isArray(rb.lith) ? rb.lith : []).map(l => sanitizeRow(l,
+      ['stratum','topDepth','botDepth','uscs','aashto','moisture','densityConsist','color',
+       'c1desc','c1part','c2pct','c2desc','c2part','c3pct','c3desc','c3part','other'],
+      l2 => ({ linked: cleanBool(l2.linked), lineType: cleanEnum(l2.lineType, ['Dash','Solid','None'], 'Dash') })));
+    b.gw = (Array.isArray(rb.gw) ? rb.gw : []).map(g => sanitizeRow(g,
+      ['readingType','customType','depth','cave','timestamp']));
+    b.rock = (Array.isArray(rb.rock) ? rb.rock : []).map(r => sanitizeRow(r,
+      ['num','topDepth','runLength','color','rockType','recoveryLen','rqdLen',
+       'hardness','weathering','fracFreq','jointSpacing','notes']));
+    b.notes = (Array.isArray(rb.notes) ? rb.notes : []).map(n => sanitizeRow(n,
+      ['depth','text','timestamp']));
+    s.borings.push(b);
+  });
+  const aIdx = cleanNum(raw.activeBoring, -1);
+  s.activeBoring = (aIdx >= 0 && aIdx < s.borings.length) ? aIdx : (s.borings.length ? 0 : null);
+  return s;
+}
+
+function newBoring(id) {
+  return {
+    id, loc:'', start:'', complete:'', completionStatus:'', holeDepth:'',
+    inspector:'', co:'', driller:'', rig:'', method:'', hammer:'', samplerID:'1.375',
+    hamWt:140, hamDrop:30, hamCal:'', coreMethod:'', coreDia:'',
+    lat:'', lon:'', north:'', east:'', coordSys:'MD State Plane', elev:'',
+    boringNotes:'',  // P2-2: explicit init so exports never serialize undefined
+    sptIntervals:'3',
+    // P3-3: audit trail (initials until Entra ID auth is wired up per P1-1)
+    createdBy: getUserInitials(), createdAt: new Date().toISOString(),
+    modifiedBy: getUserInitials(), modifiedAt: new Date().toISOString(),
+    spt:[], lith:[], gw:[], rock:[], notes:[]
+    // NOTE: a duplicate scalar `notes:''` key was removed here — it was dead
+    // (silently overwritten by the notes array) and shadowed boringNotes.
+  };
+}
+
+// ── USCS LIST ────────────────────────────────────────────────────
+const USCS_COARSE = ['GW','GP','GM','GC','GW-GM','GW-GC','GP-GM','GP-GC',
+                     'SW','SP','SM','SC','SW-SM','SW-SC','SP-SM','SP-SC'];
+const USCS_FINE   = ['CL','ML','OL','CL-ML','CH','MH','OH'];
+const USCS_ORG    = ['PT'];
+const USCS_SPEC   = ['CWR','FILL-SM','FILL-ML','FILL-GM','FILL-GC','FILL-CL','FILL-SC',
+                     'TOPSOIL','BLANK AUGER','METAMORPHIC ROCK','FILL'];
+
+function buildUSCS(sel) {
+  let h = '<option value="">— Select —</option>';
+  const grp = (label, arr) => {
+    h += `<optgroup label="${label}">`;
+    arr.forEach(c => h += `<option${sel===c?' selected':''}>${c}</option>`);
+    h += '</optgroup>';
+  };
+  grp('Coarse-Grained', USCS_COARSE);
+  grp('Fine-Grained', USCS_FINE);
+  grp('Highly Organic', USCS_ORG);
+  grp('Special / gINT', USCS_SPEC);
+  return h;
+}
+
+function isFineUSCS(uscs) {
+  if (!uscs) return false;
+  // Direct fine-grained codes
+  if (USCS_FINE.includes(uscs)) return true;
+  // FILL- variants: FILL-CL, FILL-ML, FILL-CH, FILL-MH, FILL-OL, FILL-OH, FILL-CL-ML
+  const stripped = uscs.replace(/^FILL-/,'').replace(/^FILL /,'');
+  return USCS_FINE.includes(stripped);
+}
+
+const AASHTO_OPTS = ['','A-1-a','A-1-b','A-2-4','A-2-5','A-2-6','A-2-7','A-3',
+                     'A-4','A-5','A-6','A-7-5','A-7-6'];
+
+const MOISTURE_OPTS  = ['','Dry','Moist','Wet','Very Wet'];
+const DENSITY_COARSE = ['','Very Loose (0-4 bpf)','Loose (5-10 bpf)','Medium Dense (11-30 bpf)','Dense (31-50 bpf)','Very Dense (50+ bpf)'];
+const CONSIST_FINE   = ['','Very Soft (0-2 bpf)','Soft (3-4 bpf)','Medium Stiff (5-8 bpf)','Stiff (9-15 bpf)','Very Stiff (16-30 bpf)','Hard (30+ bpf)'];
+
+const COARSE_MODS = ['','Coarse','Coarse to Fine','Coarse to Medium','Medium','Medium to Fine','Fine',
+                     'Coarse to Fine Sub-Rounded','Coarse to Fine Sub-Angular','Fine to Coarse'];
+const FINE_MODS   = ['','Low Plasticity','Medium Plasticity','High Plasticity'];
+
+// Combined descriptor list used for all three constituent dropdowns
+function buildDescSelect(sel) {
+  let h = '<option value="">— Select —</option>';
+  h += '<optgroup label="Grain Size">';
+  COARSE_MODS.filter(o => o).forEach(o => { h += `<option${sel===o?' selected':''}>${o}</option>`; });
+  h += '</optgroup>';
+  h += '<optgroup label="Plasticity">';
+  FINE_MODS.filter(o => o).forEach(o => { h += `<option${sel===o?' selected':''}>${o}</option>`; });
+  h += '</optgroup>';
+  return h;
+}
+const PARTICLES   = ['','Gravel','Sand','Silt','Clay','Boulders',
+                     'Cobbles','Angular Gravel','Subangular Gravel','Subrounded Gravel','Rounded Gravel'];
+const PROPS       = ['','And (36-50%)','Some (21-35%)','Little (11-20%)','Trace (1-10%)'];
+
+// ── ROCK CORING LOOKUPS ──────────────────────────────────────────
+const HARDNESS_OPTS = ['','Very Hard','Hard','Medium Hard','Medium','Soft','Very Soft'];
+const WEATHER_OPTS  = ['','Very Slightly','Slightly','Moderately','Severely','Very Severely','Completely'];
+const FRAC_OPTS     = ['','Sound','Slightly Fractured','Moderately Fractured','Extremely Fractured'];
+const JOINT_OPTS    = ['','Very Wide','Wide','Moderately Close','Close','Very Close'];
+const BED_OPTS      = ['','Very Thick','Thick','Medium','Thin','Very Thin','Fissile'];
+const ATTIT_OPTS    = ['','Vertical','Steep or High Angle','Moderately Dipping','Shallow to Low Angle','Horizontal'];
+
+function recoveryDesc(pct) {
+  if (pct === null || pct === undefined || isNaN(pct)) return '';
+  if (pct < 40)  return 'Incompetent';
+  if (pct < 70)  return 'Competent';
+  if (pct < 90)  return 'Fairly Continuous';
+  return 'Continuous';
+}
+function rqdDesc(pct) {
+  if (pct === null || pct === undefined || isNaN(pct)) return '';
+  if (pct < 25)  return 'Very Poor';
+  if (pct < 50)  return 'Poor';
+  if (pct < 75)  return 'Fair';
+  if (pct < 90)  return 'Good';
+  return 'Excellent';
+}
+
+// ── ACTIVE BORING HELPERS ────────────────────────────────────────
+function ab() {
+  return state.activeBoring !== null ? state.borings[state.activeBoring] : null;
+}
+
+function requireBoring() {
+  if (!ab()) { showToast('Add or select a boring first','warn'); return false; }
+  return true;
+}
+
+// ── BORING MANAGEMENT ────────────────────────────────────────────
+function promptAddBoring() {
+  ensureUserInitials(); // P3-3: capture audit identity on first data entry
+  const id = prompt('Enter Boring ID (e.g. B-01):');
+  if (!id || !id.trim()) return;
+  const trimmed = id.trim();
+  if (!validBoringId(trimmed)) { showToast("Invalid Boring ID — letters, numbers, spaces, and - _ . # ( ) / ' only (max 50)",'warn'); return; }
+  if (state.borings.find(b => b.id === trimmed)) { showToast('ID already exists','warn'); return; }
+  state.borings.push(newBoring(trimmed));
+  state.activeBoring = state.borings.length - 1;
+  renderBoringCards();
+  renderBoringSelect();
+  showToast('Boring ' + trimmed + ' added', 'success');
+  // Auto-expand the new card
+  setTimeout(() => {
+    const card = document.getElementById(`bc-${trimmed.replace(/[^a-zA-Z0-9]/g,'_')}`);
+    if (card) { card.classList.add('expanded'); card.scrollIntoView({behavior:'smooth',block:'start'}); }
+  }, 60);
+}
+
+function addBoring() { promptAddBoring(); } // keep old ref working
+
+function promptCopyBoring() {
+  if (!state.borings.length) { showToast('No borings to copy from', 'warn'); return; }
+  const list = state.borings.map(b => `  ${b.id}${b.loc ? ' — ' + b.loc : ''}`).join('\n');
+  const srcId = prompt('Copy from which boring?\n\n' + list + '\n\nEnter Boring ID:');
+  if (!srcId || !srcId.trim()) return;
+  const src = state.borings.find(b => b.id === srcId.trim());
+  if (!src) { showToast('Boring "' + srcId.trim() + '" not found', 'warn'); return; }
+  const newId = prompt('Enter new Boring ID:');
+  if (!newId || !newId.trim()) return;
+  const trimmed = newId.trim();
+  if (!validBoringId(trimmed)) { showToast("Invalid Boring ID — letters, numbers, spaces, and - _ . # ( ) / ' only (max 50)",'warn'); return; }
+  if (state.borings.find(b => b.id === trimmed)) { showToast('ID "' + trimmed + '" already exists', 'warn'); return; }
+  const nb = newBoring(trimmed);
+  // Copy Inspector, Coordinate System, and all Drill Setup fields
+  nb.inspector = src.inspector;
+  nb.coordSys  = src.coordSys;
+  nb.co        = src.co;
+  nb.driller   = src.driller;
+  nb.rig       = src.rig;
+  nb.method    = src.method;
+  nb.hammer    = src.hammer;
+  nb.samplerID = src.samplerID;
+  nb.hamWt     = src.hamWt;
+  nb.hamDrop   = src.hamDrop;
+  nb.hamCal    = src.hamCal;
+  nb.coreMethod= src.coreMethod;
+  nb.coreDia   = src.coreDia;
+  state.borings.push(nb);
+  state.activeBoring = state.borings.length - 1;
+  renderBoringCards();
+  renderBoringSelect();
+  showToast('Boring ' + trimmed + ' copied from ' + src.id, 'success');
+  setTimeout(() => {
+    const card = document.getElementById(`bc-${trimmed.replace(/[^a-zA-Z0-9]/g, '_')}`);
+    if (card) { card.classList.add('expanded'); card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  }, 60);
+}
+
+function selectBoring(id) {
+  const idx = state.borings.findIndex(b => b.id === id);
+  if (idx === -1) return;
+  state.activeBoring = idx;
+  renderAll();
+  updateStatusBar();
+}
+
+function deleteBoring(id) {
+  if (!confirm(`Delete boring ${id} and all its data?`)) return;
+  const idx = state.borings.findIndex(b => b.id === id);
+  if (idx === -1) return;
+  state.borings.splice(idx, 1);
+  if (state.activeBoring >= state.borings.length) state.activeBoring = state.borings.length - 1;
+  if (state.borings.length === 0) state.activeBoring = null;
+  renderBoringCards();
+  renderBoringSelect();
+  renderAll();
+  updateStatusBar();
+}
+
+function saveBoring(id) {
+  const b = state.borings.find(b => b.id === id);
+  if (!b) return;
+  const pfx = `bf-${id.replace(/[^a-zA-Z0-9]/g,'_')}-`;
+  const gv = f => document.getElementById(pfx+f)?.value || '';
+  Object.assign(b, {
+    id:        document.getElementById(pfx+'id')?.value || b.id,
+    loc:       gv('loc'), start: gv('start'), inspector: gv('inspector'),
+    co:        gv('co'), driller: gv('driller'), rig: gv('rig'),
+    method:    gv('method'), hammer: gv('hammer'), samplerID: gv('sampler-id'),
+    hamWt:     gv('ham-wt'), hamDrop: gv('ham-drop'), hamCal: gv('ham-cal'),
+    coreMethod:gv('core-method'), coreDia: gv('core-dia'),
+    north:     gv('north'), east: gv('east'), coordSys: gv('coord-sys'),
+    lat:       gv('lat'), lon: gv('lon'), elev: gv('elev'),
+    holeDepth: gv('hole-depth'), complete: gv('complete-date'), boringNotes: gv('boring-notes'),
+    sptIntervals: gv('spt-intervals')
+  });
+  // Update active boring if this is the one
+  state.activeBoring = state.borings.findIndex(b2 => b2.id === b.id);
+  renderBoringCards();
+  renderBoringSelect();
+  updateStatusBar();
+  showToast('Boring ' + b.id + ' saved','success');
+}
+
+function setCompletionInline(boringId, status) {
+  const b = state.borings.find(b => b.id === boringId);
+  if (!b) return;
+  b.completionStatus = status;
+  const pfx = `bf-${boringId.replace(/[^a-zA-Z0-9]/g,'_')}-`;
+  if (!b.complete) {
+    b.complete = new Date().toISOString().split('T')[0];
+    const el = document.getElementById(pfx+'complete-date');
+    if (el) el.value = b.complete;
+  }
+  // Update badge
+  const badge = document.getElementById(`cb-badge-${boringId.replace(/[^a-zA-Z0-9]/g,'_')}`);
+  if (badge) {
+    const cls = status==='Completed'?'completed':'terminated';
+    const ico = status==='Completed'?'✓':'⚠';
+    badge.className = `completion-badge ${cls}`;
+    badge.textContent = `${ico} ${status}`;
+    badge.style.display = 'flex';
+  }
+  showToast('Marked as ' + status, 'success');
+}
+
+function renderBoringCards() {
+  const el = document.getElementById('boring-cards-list');
+  if (!el) return;
+  if (!state.borings.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📍</div><div class="empty-text">No borings yet — tap Add Boring</div></div>`;
+    return;
+  }
+  el.innerHTML = state.borings.map((b, i) => {
+    const uid = b.id.replace(/[^a-zA-Z0-9]/g,'_');
+    const pfx = `bf-${uid}-`;
+    const isActive = state.activeBoring !== null && state.borings[state.activeBoring]?.id === b.id;
+    const compCls = b.completionStatus==='Completed'?'completed':b.completionStatus==='Terminated'?'terminated':'';
+    const compIco = b.completionStatus==='Completed'?'✓':b.completionStatus==='Terminated'?'⚠':'';
+    return `
+    <div class="entry-card${isActive?' expanded':''}" id="bc-${uid}" style="${isActive?'border-left-color:var(--accent)':''}">
+      <div class="entry-header" onclick="toggleBorCard('${uid}',${i})">
+        <div>
+          <div class="entry-depth">${esc(b.id)}</div>
+          <div class="entry-meta">${esc(b.loc)||'No location'} · ${b.holeDepth?esc(b.holeDepth)+' ft':'depth TBD'} ${b.completionStatus?'· '+esc(b.completionStatus):''}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${b.completionStatus ? `<span class="pill ${compCls==='completed'?'pill-green':'pill-red'}">${compIco} ${esc(b.completionStatus)}</span>` : ''}
+          <span class="entry-chevron">›</span>
+        </div>
+      </div>
+      <div class="entry-body">
+
+        <div id="cb-badge-${uid}" class="completion-badge ${compCls}" style="display:${b.completionStatus?'flex':'none'};margin-bottom:10px">
+          ${compIco} ${esc(b.completionStatus)}
+        </div>
+
+        <div class="card-title">Identification</div>
+        <div class="grid-2">
+          <div class="field"><label>Boring No. (PointID)</label>
+            <input type="text" id="${pfx}id" value="${esc(b.id)}" placeholder="e.g. B-01"></div>
+          <div class="field"><label>Location</label>
+            <input type="text" id="${pfx}loc" value="${esc(b.loc)}" placeholder="e.g. Crest of Dam"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Start Date</label>
+            <input type="date" id="${pfx}start" value="${esc(b.start)}"></div>
+          <div class="field"><label>Inspector</label>
+            <input type="text" id="${pfx}inspector" value="${esc(b.inspector)}" placeholder="Initials"></div>
+        </div>
+
+        <div class="card-title" style="margin-top:12px">Coordinates &amp; Elevation</div>
+        <div class="field"><label>Coordinate System</label>
+          <select id="${pfx}coord-sys">
+            ${['MD State Plane','VA State Plane (N)','VA State Plane (S)','PA State Plane (N)','PA State Plane (S)',
+               'DC State Plane','WV State Plane','NC State Plane','UTM Zone 17N','UTM Zone 18N','Geographic (Lat/Lon)','Other']
+              .map(o=>`<option${b.coordSys===o?' selected':''}>${o}</option>`).join('')}
+          </select></div>
+        <div class="grid-2">
+          <div class="field"><label>Northing (Y)</label>
+            <input type="number" id="${pfx}north" value="${esc(b.north)}" step="0.01" placeholder="—"></div>
+          <div class="field"><label>Easting (X)</label>
+            <input type="number" id="${pfx}east" value="${esc(b.east)}" step="0.01" placeholder="—"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Latitude</label>
+            <input type="number" id="${pfx}lat" value="${esc(b.lat)}" step="0.000001" placeholder="e.g. 39.5254"></div>
+          <div class="field"><label>Longitude</label>
+            <input type="number" id="${pfx}lon" value="${esc(b.lon)}" step="0.000001" placeholder="e.g. -77.4631"></div>
+        </div>
+        <div class="field"><label>Surface Elevation (ft)</label>
+          <input type="number" id="${pfx}elev" value="${esc(b.elev)}" step="0.1" placeholder="e.g. 728"></div>
+
+        <div class="card-title" style="margin-top:12px">Drill Setup</div>
+        <div class="field"><label>Drilling Company</label>
+          <input type="text" id="${pfx}co" value="${esc(b.co)}" placeholder="Drilling Contractor"></div>
+        <div class="grid-2">
+          <div class="field"><label>Driller</label>
+            <input type="text" id="${pfx}driller" value="${esc(b.driller)}" placeholder="Name or initials"></div>
+          <div class="field"><label>Rig</label>
+            <input type="text" id="${pfx}rig" value="${esc(b.rig)}" placeholder="e.g. CME 45"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Advancement Method</label>
+            <select id="${pfx}method">
+              ${['','Hollow Stem Auger (2.25")','Hollow Stem Auger (3.25")','Hollow Stem Auger (4.25")',
+                 'Mud Rotary','Air Rotary','Wireline NQ Double-Tube','Wireline HQ Double-Tube',
+                 'Casing Advance','Direct Push','Other']
+                .map(o=>`<option value="${o}"${b.method===o?' selected':''}>${o||'— Select —'}</option>`).join('')}
+            </select></div>
+          <div class="field"><label>SPT Interval</label>
+            <select id="${pfx}spt-intervals">
+              <option value="3"${(b.sptIntervals||'3')==='3'?' selected':''}>3-Interval (18 in)</option>
+              <option value="4"${b.sptIntervals==='4'?' selected':''}>4-Interval (24 in)</option>
+            </select></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>SPT Hammer Type</label>
+            <select id="${pfx}hammer">
+              ${['','Automatic','Safety','Donut','Trip','CME Auto']
+                .map(o=>`<option value="${o}"${b.hammer===o?' selected':''}>${o||'— Select —'}</option>`).join('')}
+            </select></div>
+          <div class="field"><label>Sampler Inner Dia. (in)</label>
+            <select id="${pfx}sampler-id">
+              ${[['1.375','1.375 (Standard SS)'],['1.5','1.5'],['1.875','1.875 (Modified CS)'],['2.0','2.0'],['other','Other']]
+                .map(([v,l])=>`<option value="${v}"${b.samplerID===v?' selected':''}>${l}</option>`).join('')}
+            </select></div>
+        </div>
+        <div class="grid-3">
+          <div class="field"><label>Hammer Wt. (lbs)</label>
+            <input type="number" id="${pfx}ham-wt" value="${esc(b.hamWt||140)}" step="1"></div>
+          <div class="field"><label>Drop (in)</label>
+            <input type="number" id="${pfx}ham-drop" value="${esc(b.hamDrop||30)}" step="1"></div>
+          <div class="field"><label>Cal. Date</label>
+            <input type="date" id="${pfx}ham-cal" value="${esc(b.hamCal)}"></div>
+        </div>
+        <div class="field"><label>Rock Coring Method</label>
+          <select id="${pfx}core-method">
+            ${['','Wireline NQ Double-Tube','Wireline HQ Double-Tube','Wireline NQ Single-Tube',
+               'Wireline HQ Single-Tube','NX Double-Tube','BQ Double-Tube']
+              .map(o=>`<option value="${o}"${b.coreMethod===o?' selected':''}>${o||'— N/A —'}</option>`).join('')}
+          </select></div>
+        <div class="field"><label>Core Diameter (in)</label>
+          <select id="${pfx}core-dia">
+            ${[['','—'],['1.875','1.875 (NQ)'],['2.5','2.5 (HQ)'],['1.625','1.625 (BQ)'],['2.156','2.156 (NX)']]
+              .map(([v,l])=>`<option value="${v}"${b.coreDia===v?' selected':''}>${l}</option>`).join('')}
+          </select></div>
+
+        <div class="card-title" style="margin-top:12px">Completion / Termination</div>
+        <div class="grid-2" style="margin-bottom:10px">
+          <button class="btn btn-green btn-full" onclick="setCompletionInline(state.borings[${i}].id,'Completed')">✓ Completed</button>
+          <button class="btn btn-danger btn-full" onclick="setCompletionInline(state.borings[${i}].id,'Terminated')">⚠ Terminated</button>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>End Depth (ft)</label>
+            <input type="number" id="${pfx}hole-depth" value="${esc(b.holeDepth)}" step="0.5" placeholder="e.g. 72"></div>
+          <div class="field"><label>Completion Date</label>
+            <input type="date" id="${pfx}complete-date" value="${esc(b.complete)}"></div>
+        </div>
+        <div class="field"><label>Boring Notes</label>
+          <textarea id="${pfx}boring-notes" placeholder="General observations, installation, grout details…">${esc(b.boringNotes)}</textarea></div>
+
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveBoring(state.borings[${i}].id)">Save Boring</button>
+          <button class="btn btn-outline" style="flex:1" onclick="activateBoring(state.borings[${i}].id);switchTabById('tab-spt')">→ SPT Runs</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteBoring(state.borings[${i}].id)">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  makeSearchableSelects(el);
+}
+
+function toggleBorCard(uid, idx) {
+  const card = document.getElementById(`bc-${uid}`);
+  if (!card) return;
+  card.classList.toggle('expanded');
+  // HS-1/HS-3: user-entered boring IDs are never embedded in inline JS
+  // string literals — handlers receive the array index instead.
+  if (card.classList.contains('expanded')) {
+    const b = state.borings[idx];
+    if (b) activateBoring(b.id);
+  }
+}
+
+function activateBoring(id) {
+  const idx = state.borings.findIndex(b => b.id === id);
+  if (idx !== -1) {
+    state.activeBoring = idx;
+    renderBoringSelect();
+    renderAll();
+    updateStatusBar();
+  }
+}
+
+function renderBoringSelect() {
+  const sel = document.getElementById('boring-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Select active boring —</option>';
+  state.borings.forEach(b => {
+    const o = document.createElement('option');
+    o.value = b.id; o.textContent = b.id + (b.loc ? ' — '+b.loc : '');
+    if (state.activeBoring !== null && state.borings[state.activeBoring]?.id === b.id) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+// ── FORM → STATE SYNC ────────────────────────────────────────────
+function saveToCurrent() {
+  state.project = {
+    name:    v('proj-name'), num: v('proj-num'), client: v('proj-client'),
+    state:   v('proj-state'), county: v('proj-county'),
+    units:   v('proj-units')
+  };
+  updateHdr();
+}
+
+function loadBoringToForm() { renderBoringCards(); }
+function setBorCompletion(status) { if (ab()) setCompletionInline(ab().id, status); }
+function renderCompletionBadge() {}
+function updateBoring() {}
+function updateBoringSel() { renderBoringCards(); renderBoringSelect(); }
+
+// ── SPT RUNS ─────────────────────────────────────────────────────
+let sptId = 0;
+function addSPT() {
+  if (!requireBoring()) return;
+  const id = ++sptId;
+  ab().spt.push({ id, type:'S', num:'', topDepth:'', length:'', intervalLen:'',
+    b1:'', b2:'', b3:'', b4:'', recovery:'', refusal:false, notes:'' });
+  renderSPT();
+  setTimeout(() => {
+    const card = document.getElementById(`spt-${id}`);
+    if (card) { card.classList.add('expanded'); card.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 50);
+  updateStatusBar();
+}
+
+function delSPT(id) {
+  if (!ab()) return;
+  ab().spt = ab().spt.filter(r => r.id !== id);
+  renderSPT(); updateStatusBar();
+}
+
+// ── CALCULATION BASIS: SPT N-VALUE (review item HS-4) ─────────────
+// Per ASTM D1586, the N-value is the sum of the blow counts for the
+// 2nd and 3rd 6-in increments — the 12 in of penetration following the
+// 6-in seating interval. This applies to BOTH the 3-interval (18 in)
+// and 4-interval (24 in) drive conventions: the 4th increment is
+// recorded and exported to gINT (Blows_4th) but is NOT included in N.
+// The previous code had two identical-looking branches with no
+// documented basis; this version makes the convention explicit.
+// ✔ ENGINEER SIGN-OFF: basis confirmed by R. Haynes, 2026-06-11
+//   (N = b2 + b3 for both drive conventions; refusal "(b2+b3)*").
+//   Regression tests encode this in tests/run-tests.js.
+const REFUSAL_N_VALUE = 50; // ASTM D1586 / office convention: refusal reported as N = 50, displayed "50*"
+
+function calcN(r, intervals) {
+  intervals = intervals || '3'; // retained for the call signature; N basis is identical (see above)
+  const b1 = parseInt(r.b1), b2 = parseInt(r.b2), b3 = parseInt(r.b3);
+
+  if (r.refusal) {
+    // Refusal during seating or the 2nd increment: report N = 50*
+    if (!isNaN(b1) && b1 >= REFUSAL_N_VALUE) return REFUSAL_N_VALUE + '*';
+    if (!isNaN(b2) && b2 >= REFUSAL_N_VALUE) return REFUSAL_N_VALUE + '*';
+    // Refusal in/after the 3rd increment: N = b2 + b3 (b3 may be a partial drive)
+    if (!isNaN(b2) && !isNaN(b3)) return (b2 + b3) + '*';
+    return REFUSAL_N_VALUE + '*';
+  }
+
+  // Standard drive: N = 2nd + 3rd increments (both 3- and 4-interval drives)
+  if (isNaN(b2) || isNaN(b3)) return '—';
+  return b2 + b3;
+}
+
+// ── CALCULATION BASIS: SAMPLE BOTTOM DEPTH (review item HS-5) ─────
+// Split Spoon (S) / Shelby Tube (T): bottom = top + interval length,
+//   where the interval is entered in INCHES (r.intervalLen, legacy r.length).
+// Bulk (B) / Grab (G): the UI's "Bottom Depth (ft)" field is stored in
+//   r.length and IS the bottom depth — no interval math applies. The old
+//   code ran top + r.length/12 for every type, silently corrupting B/G
+//   bottom depths on screen.
+function calcBottom(r) {
+  const top = parseFloat(r.topDepth);
+  if (r.type === 'B' || r.type === 'G') {
+    const bot = parseFloat(r.length);
+    return isNaN(bot) ? '?' : bot.toFixed(2);
+  }
+  const len = parseFloat(r.intervalLen || r.length); // inches
+  if (!isNaN(top) && !isNaN(len)) return (top + len/12).toFixed(2);
+  return '?';
+}
+
+function recPct(r) {
+  const len = parseFloat(r.intervalLen || r.length) || 0;
+  const rec = parseFloat(r.recovery) || 0;
+  if (!len) return 0;
+  return Math.min(100, Math.round((rec / len) * 100));
+}
+
+function sptTypeLabel(r) {
+  if (r.type==='T') return 'T-'+r.num;
+  if (r.type==='B') return 'B-'+r.num;
+  if (r.type==='G') return 'G-'+r.num;
+  return 'S-'+r.num;
+}
+
+function renderSPT() {
+  const el = document.getElementById('spt-list');
+  const b = ab();
+  if (!b || !b.spt.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🔨</div><div class="empty-text">No samples — tap Add Sample</div></div>`;
+    return;
+  }
+  const intervals = b.sptIntervals || '3';
+  el.innerHTML = b.spt.map(r => {
+    const n = (r.type==='S') ? calcN(r, intervals) : '—';
+    const bot = calcBottom(r);
+    const isSPT = r.type === 'S';
+    const isTube = r.type === 'T';
+    const isDepthDefined = r.type === 'B' || r.type === 'G';
+
+    return `
+    <div class="entry-card" id="spt-${r.id}">
+      <div class="entry-header" onclick="toggleEntry('spt-${r.id}')">
+        <div>
+          <div class="entry-depth">${sptTypeLabel(r)} &nbsp; ${esc(r.topDepth) || '?'} – ${bot} ft</div>
+          <div class="entry-meta">${r.type==='S'?'Split Spoon':r.type==='T'?'Shelby Tube':r.type==='B'?'Bulk':'Grab'}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${isSPT ? `<div class="entry-badge n-badge" id="nb-${r.id}">N=${n}</div>` : ''}
+          <span class="entry-chevron">›</span>
+        </div>
+      </div>
+      <div class="entry-body">
+        <!-- Sample type & number -->
+        <div class="grid-2">
+          <div class="field">
+            <label>Sample Type</label>
+            <select onchange="updSPT(${r.id},'type',this.value);renderSPT()">
+              <option${r.type==='S'?' selected':''} value="S">S — Split Spoon (SPT)</option>
+              <option${r.type==='T'?' selected':''} value="T">T — Shelby Tube</option>
+              <option${r.type==='B'?' selected':''} value="B">B — Bulk</option>
+              <option${r.type==='G'?' selected':''} value="G">G — Grab</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Sample No.</label>
+            <input type="text" value="${esc(r.num)}" placeholder="e.g. 1" oninput="updSPT(${r.id},'num',this.value)">
+          </div>
+        </div>
+
+        <!-- Depths -->
+        <div class="grid-2">
+          <div class="field">
+            <label>Top Depth (ft)</label>
+            <input type="number" step="0.5" value="${esc(r.topDepth)}" placeholder="e.g. 5.0"
+              oninput="updSPT(${r.id},'topDepth',this.value);updBot(${r.id})">
+          </div>
+          ${isDepthDefined ? `
+          <div class="field">
+            <label>Bottom Depth (ft)</label>
+            <input type="number" step="0.5" value="${esc(r.length)}" placeholder="e.g. 6.5"
+              oninput="updSPT(${r.id},'length',this.value)">
+          </div>` : `
+          <div class="field">
+            <label>Interval Length (in) → <span style="color:var(--accent);font-family:var(--mono)" id="bot-${r.id}">${bot} ft</span></label>
+            <input type="number" step="1" value="${esc(r.intervalLen)}" placeholder="e.g. 24"
+              oninput="updSPT(${r.id},'intervalLen',this.value);updBot(${r.id})">
+          </div>`}
+        </div>
+
+        ${isSPT ? `
+        <!-- Blow counts -->
+        <div class="divider"></div>
+        <div class="blow-labels">
+          <span>Seat.</span><span>2nd 6"</span><span>3rd 6"</span>
+          ${intervals==='4'?'<span>4th 6"</span>':''}
+          <span class="nl">N</span>
+        </div>
+        <div class="blow-row">
+          <input class="blow-input" type="number" min="0" max="99" value="${esc(r.b1)}" placeholder="—"
+            oninput="updSPT(${r.id},'b1',this.value);updN(${r.id})">
+          <span class="blow-sep">·</span>
+          <input class="blow-input" type="number" min="0" max="99" value="${esc(r.b2)}" placeholder="—"
+            oninput="updSPT(${r.id},'b2',this.value);updN(${r.id})">
+          <span class="blow-sep">+</span>
+          <input class="blow-input" type="number" min="0" max="99" value="${esc(r.b3)}" placeholder="—"
+            oninput="updSPT(${r.id},'b3',this.value);updN(${r.id})">
+          ${intervals==='4'?`
+          <span class="blow-sep" title="4th increment is recorded/exported but not summed into N">·</span>
+          <input class="blow-input" type="number" min="0" max="99" value="${esc(r.b4)}" placeholder="—"
+            oninput="updSPT(${r.id},'b4',this.value);updN(${r.id})">
+          `:''}
+          <span class="blow-sep">=</span>
+          <div class="n-display" id="nd-${r.id}">${n}</div>
+        </div>
+        <div style="margin-top:6px;text-align:right">
+          <label style="font-size:12px;color:var(--muted);cursor:pointer">
+            <input type="checkbox" ${r.refusal?'checked':''} onchange="updSPT(${r.id},'refusal',this.checked);updN(${r.id})">
+            Refusal / Partial Drive
+          </label>
+        </div>` : ''}
+
+        ${(isSPT||isTube) ? `
+        <!-- Recovery -->
+        <div class="divider"></div>
+        <div class="field">
+          <label>Recovery (in)</label>
+          <input type="number" step="0.5" value="${esc(r.recovery)}" placeholder="e.g. 18"
+            oninput="updSPT(${r.id},'recovery',this.value);updRec(${r.id})">
+        </div>
+        <div class="rec-bar-bg"><div class="rec-bar-fill" id="rbar-${r.id}" style="width:${recPct(r)}%"></div></div>
+        <div class="rec-pct" id="rpct-${r.id}">${recPct(r)}% recovery</div>
+        ` : ''}
+
+
+        <div style="margin-top:10px;display:flex;gap:8px;justify-content:space-between">
+          <button class="btn btn-primary btn-sm" onclick="saveSPTEntry(${r.id})">Save</button>
+          <button class="btn btn-danger btn-sm" onclick="delSPT(${r.id})">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  makeSearchableSelects(el);
+}
+
+function updSPT(id, field, val) {
+  const r = ab()?.spt.find(r => r.id === id);
+  if (!r) return;
+  // P2-1: the old ternary was a no-op, so refusal could persist as the
+  // string "false" (which is truthy). Coerce to a real boolean.
+  r[field] = (field === 'refusal') ? (val === true || val === 'true') : val;
+  touchAudit(ab()); // P3-3
+}
+function updN(id) {
+  const r = ab()?.spt.find(r => r.id === id);
+  if (!r) return;
+  const n = calcN(r, ab()?.sptIntervals || '3');
+  const nd = document.getElementById('nd-'+id);
+  const nb = document.getElementById('nb-'+id);
+  if (nd) nd.textContent = n;
+  if (nb) nb.textContent = 'N='+n;
+}
+function saveSPTEntry(id) { renderSPT(); showToast('Sample saved','success'); }
+function saveLithEntry(id) { renderLith(); showToast('Stratum saved','success'); }
+function saveGWEntry(id)  { renderGW();  showToast('Reading saved','success'); }
+function saveRockEntry(id){ renderRock(); showToast('Core run saved','success'); }
+
+// ── NOTES ────────────────────────────────────────────────────────
+let noteId = 0;
+function addNote() {
+  if (!requireBoring()) return;
+  const id = ++noteId;
+  const now = new Date();
+  const ts = now.toLocaleString('en-US', {
+    month:'2-digit', day:'2-digit', year:'numeric',
+    hour:'numeric', minute:'2-digit', second:'2-digit', hour12:true
+  });
+  if (!Array.isArray(ab().notes)) ab().notes = [];
+  ab().notes.push({ id, depth:'', text:'', timestamp: ts });
+  renderNotes();
+  setTimeout(() => {
+    const card = document.getElementById(`note-${id}`);
+    if (card) { card.classList.add('expanded'); card.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 50);
+  updateStatusBar();
+}
+
+function delNote(id) {
+  if (!ab()) return;
+  ab().notes = (ab().notes||[]).filter(n => n.id !== id);
+  renderNotes(); updateStatusBar();
+}
+
+function updNote(id, field, val) {
+  const n = (ab()?.notes||[]).find(n => n.id === id);
+  if (n) n[field] = val;
+}
+
+function saveNoteEntry(id) { renderNotes(); showToast('Note saved','success'); }
+
+function renderNotes() {
+  const el = document.getElementById('notes-list');
+  const b = ab();
+  const notes = Array.isArray(b?.notes) ? b.notes : [];
+  if (!b || !notes.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">No notes — tap Add Note</div></div>`;
+    return;
+  }
+  el.innerHTML = notes.map(n => `
+    <div class="entry-card" id="note-${n.id}">
+      <div class="entry-header" onclick="toggleEntry('note-${n.id}')">
+        <div>
+          <div class="entry-depth">${n.depth ? esc(n.depth) + ' ft' : 'No depth'}</div>
+          <div class="entry-meta">${esc(n.timestamp)}${n.text ? ' · ' + esc(n.text.substring(0,40)) + (n.text.length>40?'…':'') : ''}</div>
+        </div>
+        <span class="entry-chevron">›</span>
+      </div>
+      <div class="entry-body">
+        <div class="field">
+          <label>Depth (ft)</label>
+          <input type="number" step="0.1" value="${esc(n.depth)}" placeholder="e.g. 14.5"
+            oninput="updNote(${n.id},'depth',this.value)">
+        </div>
+        <div class="field">
+          <label>Note</label>
+          <textarea placeholder="Field observation, equipment issue, condition change…"
+            oninput="updNote(${n.id},'text',this.value)">${esc(n.text)}</textarea>
+        </div>
+        <div class="field">
+          <label style="color:var(--muted)">Timestamp</label>
+          <div style="font-family:var(--mono);font-size:13px;color:var(--muted);padding:6px 0">${esc(n.timestamp)}</div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;justify-content:space-between">
+          <button class="btn btn-primary btn-sm" onclick="saveNoteEntry(${n.id})">Save</button>
+          <button class="btn btn-danger btn-sm" onclick="delNote(${n.id})">Delete</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function updBot(id) {
+  const r = ab()?.spt.find(r => r.id === id);
+  if (!r) return;
+  const el = document.getElementById('bot-'+id);
+  if (el) el.textContent = calcBottom(r) + ' ft';
+}
+function updRec(id) {
+  const r = ab()?.spt.find(r => r.id === id);
+  if (!r) return;
+  const pct = recPct(r);
+  const bar = document.getElementById('rbar-'+id);
+  const lbl = document.getElementById('rpct-'+id);
+  if (bar) bar.style.width = pct + '%';
+  if (lbl) lbl.textContent = pct + '% recovery';
+}
+
+// ── LITHOLOGY ────────────────────────────────────────────────────
+let lithId = 0;
+let _pendingLithId = null;
+
+function addLith() {
+  if (!requireBoring()) return;
+  _pendingLithId = ++lithId;
+  const lith = ab().lith;
+
+  if (lith.length > 0) {
+    const prev = lith[lith.length - 1];
+    const prevDepth = (prev.topDepth !== '' && prev.botDepth !== '')
+      ? `${esc(prev.topDepth)} – ${esc(prev.botDepth)} ft`
+      : prev.topDepth !== '' ? `${esc(prev.topDepth)} ft – (open)` : '(depths not set)';
+    document.getElementById('lith-link-prev-info').innerHTML =
+      `<span style="color:var(--label);font-size:10px;letter-spacing:.8px;text-transform:uppercase">Previous Stratum</span><br>${prevDepth} &nbsp;·&nbsp; ${esc(prev.uscs) || 'No classification'}`;
+    document.getElementById('lith-link-modal').classList.remove('hidden');
+  } else {
+    _pushNewLith(_pendingLithId, false);
+  }
+}
+
+function confirmLithLink() {
+  document.getElementById('lith-link-modal').classList.add('hidden');
+  _pushNewLith(_pendingLithId, true);
+}
+
+function skipLithLink() {
+  document.getElementById('lith-link-modal').classList.add('hidden');
+  _pushNewLith(_pendingLithId, false);
+}
+
+function _pushNewLith(id, linked) {
+  ab().lith.push({ id, linked: linked, lineType:'Dash', stratum:'', topDepth:'', botDepth:'',
+    uscs:'', aashto:'', moisture:'', densityConsist:'',
+    color:'', c1desc:'', c1part:'',
+    c2pct:'', c2desc:'', c2part:'',
+    c3pct:'', c3desc:'', c3part:'',
+    other:'' });
+  renderLith();
+  setTimeout(() => {
+    const card = document.getElementById(`lith-${id}`);
+    if (card) { card.classList.add('expanded'); card.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 50);
+  updateStatusBar();
+}
+
+function delLith(id) {
+  if (!ab()) return;
+  ab().lith = ab().lith.filter(l => l.id !== id);
+  renderLith(); updateStatusBar();
+}
+
+function updLith(id, field, val) {
+  const lith = ab()?.lith;
+  const l = lith?.find(l => l.id === id);
+  if (l) {
+    l[field] = val;
+
+    if (field === 'topDepth' || field === 'botDepth') {
+      const hdr = document.getElementById(`lith-depth-${id}`);
+      if (hdr) hdr.textContent = `${l.topDepth||'?'} \u2013 ${l.botDepth||'?'} ft`;
+    }
+
+    // If this stratum is linked to the previous one, propagate topDepth → prev.botDepth
+    // and lineType → prev.lineType automatically (the critical gINT requirement)
+    if (l.linked) {
+      const idx = lith.indexOf(l);
+      if (idx > 0) {
+        const prev = lith[idx - 1];
+        if (field === 'topDepth') {
+          prev.botDepth = val;
+          // Surgical DOM update — a full renderLith() here would destroy
+          // the input mid-keystroke (bug: only one digit could be typed
+          // before the card re-rendered and collapsed).
+          const prevBot = document.getElementById(`lith-bot-${prev.id}`);
+          if (prevBot) prevBot.value = val;
+          const prevHdr = document.getElementById(`lith-depth-${prev.id}`);
+          if (prevHdr) prevHdr.textContent = `${prev.topDepth||'?'} \u2013 ${prev.botDepth||'?'} ft`;
+        }
+        if (field === 'lineType') {
+          prev.lineType = val;
+          const prevSel = document.querySelector(`#lith-${prev.id} select[onchange*="'lineType'"]`);
+          if (prevSel) prevSel.value = val;
+        }
+      }
+    }
+
+    if (field === 'uscs') {
+      const fine = isFineUSCS(val);
+      // Update density/consistency dropdown only
+      const dc = document.getElementById(`dc-${id}`);
+      if (dc) {
+        dc.innerHTML = (fine ? CONSIST_FINE : DENSITY_COARSE)
+          .map(o => `<option${l.densityConsist===o?' selected':''}>${o}</option>`).join('');
+        syncSearchSelect(dc);
+      }
+    }
+  }
+}
+
+function buildDCOptions(uscs, sel) {
+  if (!uscs) {
+    // No USCS — show both lists grouped so the user can pick the right one
+    let h = '<option value="">— Select —</option>';
+    h += '<optgroup label="Density (Coarse-Grained)">';
+    DENSITY_COARSE.filter(o => o).forEach(o => { h += `<option${sel===o?' selected':''}>${o}</option>`; });
+    h += '</optgroup>';
+    h += '<optgroup label="Consistency (Fine-Grained)">';
+    CONSIST_FINE.filter(o => o).forEach(o => { h += `<option${sel===o?' selected':''}>${o}</option>`; });
+    h += '</optgroup>';
+    return h;
+  }
+  const fine = isFineUSCS(uscs);
+  return (fine ? CONSIST_FINE : DENSITY_COARSE)
+    .map(o => `<option${sel===o?' selected':''}>${o}</option>`).join('');
+}
+
+function buildSelect(opts, sel, id='') {
+  return opts.map(o => `<option${sel===o?' selected':''}>${o}</option>`).join('');
+}
+
+// Collapsed-card preview: full field-app-style description.
+// moisture, density/consistency, color, primary constituent,
+// secondary (pct desc part), tertiary (pct desc part), other,
+// USCS lowercase in parentheses, AASHTO lowercase in brackets.
+function lithMeta(l) {
+  const parts = [];
+  if (l.moisture) parts.push(l.moisture);
+  if (l.densityConsist) parts.push(l.densityConsist);
+  if (l.color) parts.push(l.color);
+  const c1 = [l.c1desc, l.c1part].filter(Boolean).join(' ');
+  if (c1) parts.push(c1);
+  const c2 = [l.c2pct, l.c2desc, l.c2part].filter(Boolean).join(' ');
+  if (c2) parts.push(c2);
+  const c3 = [l.c3pct, l.c3desc, l.c3part].filter(Boolean).join(' ');
+  if (c3) parts.push(c3);
+  if (l.other) parts.push(l.other);
+  if (l.uscs) parts.push('(' + String(l.uscs).toLowerCase() + ')');
+  if (l.aashto) parts.push('[' + String(l.aashto).toLowerCase() + ']');
+  return parts.join(', ') || 'No description';
+}
+
+function renderLith() {
+  const el = document.getElementById('lith-list');
+  const b = ab();
+  if (!b || !b.lith.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🗺️</div><div class="empty-text">No strata — tap Add Stratum</div></div>`;
+    return;
+  }
+  el.innerHTML = b.lith.map(l => `
+    <div class="entry-card lith-card" id="lith-${l.id}">
+      <div class="entry-header" onclick="toggleEntry('lith-${l.id}')">
+        <div>
+          <div class="entry-depth" id="lith-depth-${l.id}" style="color:var(--accent2)">${esc(l.topDepth)||'?'} – ${esc(l.botDepth)||'?'} ft</div>
+          <div class="entry-meta">${esc(lithMeta(l))}</div>
+        </div>
+        <span class="entry-chevron">›</span>
+      </div>
+      <div class="entry-body">
+        <div class="grid-2">
+          <div class="field">
+            <label>Line Type — Top of Stratum</label>
+            <select onchange="updLith(${l.id},'lineType',this.value)">
+              <option${l.lineType==='Dash'?' selected':''} value="Dash">Dashed — Inferred</option>
+              <option${l.lineType==='Solid'?' selected':''} value="Solid">Solid — Observed</option>
+              <option${l.lineType==='None'?' selected':''} value="None">None — Mid-Stratum Change</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Stratum No.</label>
+            <input type="text" value="${esc(l.stratum)}" placeholder="e.g. 1"
+              oninput="updLith(${l.id},'stratum',this.value)">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Top Depth (ft)</label>
+            <input type="number" step="0.1" id="lith-top-${l.id}" value="${esc(l.topDepth)}" oninput="updLith(${l.id},'topDepth',this.value)">
+          </div>
+          <div class="field">
+            <label>Bottom Depth (ft)</label>
+            <input type="number" step="0.1" id="lith-bot-${l.id}" value="${esc(l.botDepth)}" oninput="updLith(${l.id},'botDepth',this.value)">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="grid-2">
+          <div class="field">
+            <label>USCS Classification</label>
+            <select onchange="updLith(${l.id},'uscs',this.value)">${buildUSCS(l.uscs)}</select>
+          </div>
+          <div class="field">
+            <label>AASHTO</label>
+            <select onchange="updLith(${l.id},'aashto',this.value)">
+              ${buildSelect(AASHTO_OPTS, l.aashto)}
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Moisture</label>
+            <select onchange="updLith(${l.id},'moisture',this.value)">
+              ${buildSelect(MOISTURE_OPTS, l.moisture)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Density / Consistency</label>
+            <select id="dc-${l.id}" onchange="updLith(${l.id},'densityConsist',this.value)">
+              ${buildDCOptions(l.uscs, l.densityConsist)}
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Color</label>
+          <input type="text" value="${esc(l.color)}" placeholder="e.g. Brown, Orange" oninput="updLith(${l.id},'color',this.value)">
+        </div>
+        <div class="divider"></div>
+        <!-- PRIMARY -->
+        <div style="font-size:11px;font-family:var(--cond);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--label);margin-bottom:6px">Primary Constituent</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Descriptor</label>
+            <select id="c1desc-${l.id}" onchange="updLith(${l.id},'c1desc',this.value)">
+              ${buildDescSelect(l.c1desc)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Particle / Material</label>
+            <select onchange="updLith(${l.id},'c1part',this.value)">
+              ${buildSelect(PARTICLES, l.c1part)}
+            </select>
+          </div>
+        </div>
+        <!-- SECONDARY -->
+        <div style="font-size:11px;font-family:var(--cond);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--label);margin-bottom:6px">Secondary Constituent</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Proportion</label>
+            <select onchange="updLith(${l.id},'c2pct',this.value)">
+              ${buildSelect(PROPS, l.c2pct)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Descriptor</label>
+            <select id="c2desc-${l.id}" onchange="updLith(${l.id},'c2desc',this.value)">
+              ${buildDescSelect(l.c2desc)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Particle</label>
+            <select onchange="updLith(${l.id},'c2part',this.value)">
+              ${buildSelect(PARTICLES, l.c2part)}
+            </select>
+          </div>
+        </div>
+        <!-- TERTIARY -->
+        <div style="font-size:11px;font-family:var(--cond);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--label);margin-bottom:6px">Tertiary Constituent</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Proportion</label>
+            <select onchange="updLith(${l.id},'c3pct',this.value)">
+              ${buildSelect(PROPS, l.c3pct)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Descriptor</label>
+            <select id="c3desc-${l.id}" onchange="updLith(${l.id},'c3desc',this.value)">
+              ${buildDescSelect(l.c3desc)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Particle</label>
+            <select onchange="updLith(${l.id},'c3part',this.value)">
+              ${buildSelect(PARTICLES, l.c3part)}
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:6px">
+          <label>Other / Comments</label>
+          <textarea placeholder="e.g. Residual Soil, Contains Root Fragments…" oninput="updLith(${l.id},'other',this.value)">${esc(l.other)}</textarea>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;justify-content:space-between">
+          <button class="btn btn-primary btn-sm" onclick="saveLithEntry(${l.id})">Save</button>
+          <button class="btn btn-danger btn-sm" onclick="delLith(${l.id})">Delete</button>
+        </div>
+      </div>
+    </div>`).join('');
+  makeSearchableSelects(el);
+}
+
+// ── GROUNDWATER ──────────────────────────────────────────────────
+let gwId = 0;
+function addGW() {
+  if (!requireBoring()) return;
+  const id = ++gwId;
+  ab().gw.push({ id, readingType:'During Drilling', customType:'',
+    depth:'', cave:'', timestamp:'', notes:'' });
+  renderGW();
+  setTimeout(() => {
+    const card = document.getElementById(`gw-${id}`);
+    if (card) { card.classList.add('expanded'); card.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 50);
+}
+
+function delGW(id) {
+  if (!ab()) return;
+  ab().gw = ab().gw.filter(g => g.id !== id);
+  renderGW();
+}
+
+function updGW(id, field, val) {
+  const g = ab()?.gw.find(g => g.id === id);
+  if (g) g[field] = val;
+}
+
+// Reading-type change: toggle the custom-type field and refresh the
+// header label in place. A full renderGW() here collapsed the card
+// the moment the user picked a type (bug).
+function updGWType(id, val) {
+  const g = ab()?.gw.find(g => g.id === id);
+  if (!g) return;
+  g.readingType = val;
+  const custom = document.getElementById(`gw-custom-${id}`);
+  if (custom) custom.style.display = (val === 'Other') ? '' : 'none';
+  const hdr = document.getElementById(`gw-type-${id}`);
+  if (hdr) hdr.textContent = (val === 'Other') ? (g.customType || 'Other') : val;
+}
+
+const GW_TYPES = ['During Drilling','End of Drilling','24-Hour','48-Hour','72-Hour','Other'];
+
+function renderGW() {
+  const el = document.getElementById('gw-list');
+  const b = ab();
+  if (!b || !b.gw.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">💧</div><div class="empty-text">No readings — tap Add Groundwater Reading</div></div>`;
+    return;
+  }
+  el.innerHTML = b.gw.map(g => `
+    <div class="entry-card gw-card" id="gw-${g.id}">
+      <div class="entry-header" onclick="toggleEntry('gw-${g.id}')">
+        <div>
+          <div class="entry-depth" id="gw-type-${g.id}" style="color:#0284c7">${g.readingType === 'Other' ? (esc(g.customType)||'Other') : esc(g.readingType)}</div>
+          <div class="entry-meta">${g.depth ? 'Water @ ' + esc(g.depth) + ' ft' : 'No depth entered'} ${g.cave ? '· Cave/Casing: '+esc(g.cave)+' ft':''}</div>
+        </div>
+        <span class="entry-chevron">›</span>
+      </div>
+      <div class="entry-body">
+        <div class="field">
+          <label>Reading Type</label>
+          <select onchange="updGWType(${g.id},this.value)">
+            ${GW_TYPES.map(t => `<option${g.readingType===t?' selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field" id="gw-custom-${g.id}" style="display:${g.readingType==='Other'?'':'none'}">
+          <label>Describe Reading Type</label>
+          <input type="text" value="${esc(g.customType)}" placeholder="e.g. 7-Day" oninput="updGW(${g.id},'customType',this.value);updGWType(${g.id},'Other')">
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Water Depth (ft)</label>
+            <input type="number" step="0.1" value="${esc(g.depth)}" placeholder="e.g. 24.3" oninput="updGW(${g.id},'depth',this.value)">
+          </div>
+          <div class="field">
+            <label>Casing / Cave Depth (ft)</label>
+            <input type="number" step="0.1" value="${esc(g.cave)}" placeholder="e.g. Cased" oninput="updGW(${g.id},'cave',this.value)">
+          </div>
+        </div>
+        <div class="field">
+          <label>Timestamp</label>
+          <input type="datetime-local" value="${esc(g.timestamp)}" onchange="updGW(${g.id},'timestamp',this.value)">
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;justify-content:space-between">
+          <button class="btn btn-primary btn-sm" onclick="saveGWEntry(${g.id})">Save</button>
+          <button class="btn btn-danger btn-sm" onclick="delGW(${g.id})">Delete</button>
+        </div>
+      </div>
+    </div>`).join('');
+  makeSearchableSelects(el);
+}
+
+// ── ROCK CORING ──────────────────────────────────────────────────
+let rockId = 0;
+function addRock() {
+  if (!requireBoring()) return;
+  const id = ++rockId;
+  const num = ab().rock.length + 1;
+  ab().rock.push({ id, num, topDepth:'', runLength:'',
+    recoveryLen:'', rqdLen:'',
+    color:'', rockType:'',
+    hardness:'', weathering:'', fracFreq:'', jointSpacing:'', bedding:'', attitude:'',
+    notes:'' });
+  renderRock();
+  setTimeout(() => {
+    const card = document.getElementById(`rock-${id}`);
+    if (card) { card.classList.add('expanded'); card.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 50);
+  updateStatusBar();
+}
+
+function delRock(id) {
+  if (!ab()) return;
+  ab().rock = ab().rock.filter(r => r.id !== id);
+  renderRock(); updateStatusBar();
+}
+
+function updRock(id, field, val) {
+  const r = ab()?.rock.find(r => r.id === id);
+  if (r) {
+    r[field] = val;
+    if (['runLength','recoveryLen','rqdLen'].includes(field)) {
+      updRockMetrics(id);
+    }
+  }
+}
+
+function rockBottom(r) {
+  const top = parseFloat(r.topDepth);
+  const len = parseFloat(r.runLength);
+  if (!isNaN(top) && !isNaN(len)) return (top+len).toFixed(1);
+  return '?';
+}
+
+function rockRecPct(r) {
+  const run = parseFloat(r.runLength)*12 || 0;
+  const rec = parseFloat(r.recoveryLen) || 0;
+  if (!run) return null;
+  return Math.min(100, Math.round((rec/run)*100));
+}
+
+function rockRqdPct(r) {
+  const run = parseFloat(r.runLength)*12 || 0;
+  const rqd = parseFloat(r.rqdLen) || 0;
+  if (!run) return null;
+  return Math.min(100, Math.round((rqd/run)*100));
+}
+
+function updRockMetrics(id) {
+  const r = ab()?.rock.find(r => r.id === id);
+  if (!r) return;
+  const recP = rockRecPct(r);
+  const rqdP = rockRqdPct(r);
+  const rv = document.getElementById(`rrv-${id}`);
+  const rd = document.getElementById(`rrd-${id}`);
+  const qv = document.getElementById(`rqv-${id}`);
+  const qd = document.getElementById(`rqd-${id}`);
+  if (rv) rv.textContent = recP !== null ? recP+'%' : '—';
+  if (rd) rd.textContent = recoveryDesc(recP);
+  if (qv) qv.textContent = rqdP !== null ? rqdP+'%' : '—';
+  if (qd) qd.textContent = rqdDesc(rqdP);
+  const botEl = document.getElementById(`rbot-${id}`);
+  if (botEl) botEl.textContent = rockBottom(r)+' ft';
+  const botLbl = document.getElementById(`rbot-lbl-${id}`);
+  if (botLbl) botLbl.textContent = rockBottom(r)+' ft';
+}
+
+function renderRock() {
+  const el = document.getElementById('rock-list');
+  const b = ab();
+  if (!b || !b.rock.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🪨</div><div class="empty-text">No core runs — tap Add Rock Core Run</div></div>`;
+    return;
+  }
+  el.innerHTML = b.rock.map(r => {
+    const recP = rockRecPct(r);
+    const rqdP = rockRqdPct(r);
+    return `
+    <div class="entry-card rock-card" id="rock-${r.id}">
+      <div class="entry-header" onclick="toggleEntry('rock-${r.id}')">
+        <div>
+          <div class="entry-depth" style="color:#7c3aed">R-${esc(r.num)} &nbsp; ${esc(r.topDepth)||'?'} – <span id="rbot-${r.id}">${rockBottom(r)} ft</span></div>
+          <div class="entry-meta">${esc(r.rockType)||'Rock type TBD'} ${r.color?'· '+esc(r.color):''}</div>
+        </div>
+        <div style="display:flex;gap:5px;align-items:center">
+          ${recP !== null ? `<div class="entry-badge" style="background:#f5f3ff;color:#7c3aed;border-color:#a78bfa">Rec ${recP}%</div>` : ''}
+          ${rqdP !== null ? `<div class="entry-badge" style="background:#f0fdf4;color:var(--accent2);border-color:var(--accent2)">RQD ${rqdP}%</div>` : ''}
+          <span class="entry-chevron">›</span>
+        </div>
+      </div>
+      <div class="entry-body">
+        <div class="grid-3">
+          <div class="field">
+            <label>Run No.</label>
+            <input type="number" value="${esc(r.num)}" min="1" oninput="updRock(${r.id},'num',this.value)">
+          </div>
+          <div class="field">
+            <label>Top Depth (ft)</label>
+            <input type="number" step="0.1" value="${esc(r.topDepth)}" oninput="updRock(${r.id},'topDepth',this.value);updRockMetrics(${r.id})">
+          </div>
+          <div class="field">
+            <label>Run Length (ft) → <span style="color:#7c3aed;font-family:var(--mono)" id="rbot-lbl-${r.id}">${rockBottom(r)} ft</span></label>
+            <input type="number" step="0.1" value="${esc(r.runLength)}" oninput="updRock(${r.id},'runLength',this.value);updRockMetrics(${r.id})">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Rock Color</label>
+            <input type="text" value="${esc(r.color)}" placeholder="e.g. Gray, Brown" oninput="updRock(${r.id},'color',this.value)">
+          </div>
+          <div class="field">
+            <label>Rock Type</label>
+            <input type="text" value="${esc(r.rockType)}" placeholder="e.g. Quartzite" oninput="updRock(${r.id},'rockType',this.value)">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Recovery Length (in)</label>
+            <input type="number" step="0.5" value="${esc(r.recoveryLen)}" oninput="updRock(${r.id},'recoveryLen',this.value);updRockMetrics(${r.id})">
+          </div>
+          <div class="field">
+            <label>RQD Length (in)</label>
+            <input type="number" step="0.5" value="${esc(r.rqdLen)}" oninput="updRock(${r.id},'rqdLen',this.value);updRockMetrics(${r.id})">
+          </div>
+        </div>
+        <div class="metrics-row" style="margin-bottom:10px">
+          <div class="metric-box">
+            <div class="metric-val" style="color:#7c3aed" id="rrv-${r.id}">${recP !== null ? recP+'%' : '—'}</div>
+            <div class="metric-lbl">Recovery</div>
+            <div class="metric-desc" id="rrd-${r.id}">${recoveryDesc(recP)}</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-val" style="color:var(--accent2)" id="rqv-${r.id}">${rqdP !== null ? rqdP+'%' : '—'}</div>
+            <div class="metric-lbl">RQD</div>
+            <div class="metric-desc" id="rqd-${r.id}">${rqdDesc(rqdP)}</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Field Hardness</label>
+            <select onchange="updRock(${r.id},'hardness',this.value)">
+              ${buildSelect(HARDNESS_OPTS, r.hardness)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Weathering</label>
+            <select onchange="updRock(${r.id},'weathering',this.value)">
+              ${buildSelect(WEATHER_OPTS, r.weathering)}
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Fracture Frequency</label>
+            <select onchange="updRock(${r.id},'fracFreq',this.value)">
+              ${buildSelect(FRAC_OPTS, r.fracFreq)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Joint Spacing</label>
+            <select onchange="updRock(${r.id},'jointSpacing',this.value)">
+              ${buildSelect(JOINT_OPTS, r.jointSpacing)}
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;justify-content:space-between">
+          <button class="btn btn-primary btn-sm" onclick="saveRockEntry(${r.id})">Save</button>
+          <button class="btn btn-danger btn-sm" onclick="delRock(${r.id})">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  makeSearchableSelects(el);
+}
+
+// ── RENDER ALL ───────────────────────────────────────────────────
+function renderAll() {
+  renderBoringCards();
+  renderSPT(); renderLith(); renderGW(); renderRock(); renderNotes();
+  renderBoringSelect();
+}
+
+// ── EXPORT gINT XLSX ─────────────────────────────────────────────
+// P2-4: SheetJS failures (malformed data, memory, unexpected types) must
+// surface to the user instead of dying silently in the console.
+function exportGINT() {
+  try {
+    _exportGINTInner();
+  } catch (err) {
+    console.error('XLSX export failed:', err);
+    alert('XLSX export failed: ' + (err && err.message ? err.message : err) + '\n\nPlease check your data and try again.');
+  }
+}
+
+function _exportGINTInner() {
+  saveToCurrent();
+  if (!state.borings.length) { showToast('No borings to export','warn'); return; }
+
+  const wb = XLSX.utils.book_new();
+
+  // Strip " (xx-xx%)" range text from proportion labels
+  function sp(v) { return (v||'').replace(/\s*\([^)]*\)/g,''); }
+
+  // Build Manual Override description from rock core run fields
+  function rockDesc(r) {
+    const p = [];
+    if (r.weathering)   p.push(r.weathering + ' Weathered');
+    if (r.color)        p.push(r.color);
+    if (r.rockType)     p.push(r.rockType.toUpperCase());
+    if (r.hardness)     p.push(r.hardness);
+    if (r.fracFreq)     p.push(r.fracFreq);
+    if (r.jointSpacing) p.push(r.jointSpacing + ' Fracture Spacing');
+    if (r.notes)        p.push(r.notes);
+    return p.join(', ');
+  }
+
+  // ── PROJECT sheet ──
+  const projRows = [
+    ['Project Name','Client','Commission Number','State','County or Locale','Input_Units','Output_Units','Depth_Log_Page','Draft','GintUpdated'],
+    [state.project.name, state.project.client, state.project.num,
+     state.project.state, state.project.county,
+     state.project.units, state.project.units,
+     '','','']
+  ];
+  const wsPROJ = XLSX.utils.aoa_to_sheet(projRows);
+  XLSX.utils.book_append_sheet(wb, wsPROJ, 'PROJECT');
+
+  // ── POINT sheet ──
+  const ptHdr = ['PointID','HoleDepth','Location','Start','Complete','Baseline','Station','Offset Distance','Offset Direction','North','East','Coordinate System','Latitude','Longitude','Elevation','Inspector','Drilling Company','Driller','Rig','Advancement Method','Soil Sampler Inner Diameter','SPT Hammer Type','HamCalDate','SPT Hammer Weight','SPT Hammer Fall','Rock Coring Method','Rock Core Diameter','Notes','GW 1 Date and Time','GW 1 Depth','GW 1 Cave','GW 2 Date and Time','GW 2 Depth','GW 2 Cave','GW 3 Date and Time','GW 3 Depth','GW 3 Cave','Depth_Log_Page','Plunge','Photos','GintUpdated'];
+  const ptRows = [ptHdr];
+
+  state.borings.forEach(b => {
+    const gwArr = b.gw || [];
+    ptRows.push([
+      b.id, b.holeDepth, b.loc,
+      b.start ? excelDate(b.start) : '',
+      b.complete ? excelDate(b.complete) : '',
+      '','','','',
+      b.north, b.east, b.coordSys, b.lat, b.lon, b.elev,
+      b.inspector, b.co, b.driller, b.rig, b.method,
+      b.samplerID, b.hammer, b.hamCal ? excelDate(b.hamCal) : '',
+      b.hamWt, b.hamDrop,
+      b.coreMethod, b.coreDia, b.boringNotes||'',
+      gwArr[0]?.timestamp ? excelDate(gwArr[0].timestamp) : '',
+      gwArr[0]?.depth||'', gwArr[0]?.cave||'',
+      gwArr[1]?.timestamp ? excelDate(gwArr[1].timestamp) : '',
+      gwArr[1]?.depth||'', gwArr[1]?.cave||'',
+      gwArr[2]?.timestamp ? excelDate(gwArr[2].timestamp) : '',
+      gwArr[2]?.depth||'', gwArr[2]?.cave||'',
+      '','','',''
+    ]);
+  });
+  const wsPOINT = XLSX.utils.aoa_to_sheet(ptRows);
+  XLSX.utils.book_append_sheet(wb, wsPOINT, 'POINT');
+
+  // ── LITHOLOGY sheet ──
+  const liHdr = ['PointID','Depth','Bottom','Line_Type','Stratum','Moisture','Density / Consistency','Color','Constituent 1: Descriptor','Constituent 1: Particle','Constituent 2: Percentage','Constituent 2: Descriptor','Constituent 2: Particle','Constituent 3: Percentage','Constituent 3: Descriptor','Constituent 3: Particle','Other','USCS','AASHTO','Lab-Tested?','Graphic','Manual Override','GintUpdated'];
+  const liRows = [liHdr];
+  state.borings.forEach(b => {
+    (b.lith||[]).forEach(l => {
+      liRows.push([
+        b.id, l.topDepth, l.botDepth, l.lineType, l.stratum,
+        l.moisture, sp(l.densityConsist), l.color,
+        l.c1desc, l.c1part,
+        sp(l.c2pct), l.c2desc, l.c2part,
+        sp(l.c3pct), l.c3desc, l.c3part,
+        l.other, l.uscs, l.aashto, 0, l.uscs, '', ''
+      ]);
+    });
+    // Rock core runs → lithology entries with run descriptions
+    (b.rock||[]).forEach(r => {
+      liRows.push([
+        b.id, r.topDepth, rockBottom(r), 'Solid', '',
+        '','', r.color||'',
+        '','','','','','','','',
+        '','','', 0, '', rockDesc(r), ''
+      ]);
+    });
+  });
+  const wsLITH = XLSX.utils.aoa_to_sheet(liRows);
+  XLSX.utils.book_append_sheet(wb, wsLITH, 'LITHOLOGY');
+
+  // ── NOTES sheet ──
+  const ntHdr = ['PointID','Depth','Notes','GintUpdated'];
+  const ntRows = [ntHdr];
+  state.borings.forEach(b => {
+    (Array.isArray(b.notes) ? b.notes : []).forEach(n => {
+      ntRows.push([ b.id, n.depth||'', n.text||'', n.timestamp||'' ]);
+    });
+  });
+  const wsNOTES = XLSX.utils.aoa_to_sheet(ntRows);
+  XLSX.utils.book_append_sheet(wb, wsNOTES, 'NOTES');
+
+  // ── SAMPLE sheet ──
+  const smHdr = ['PointID','Depth','Sample Type','Sample No','Length','Hide Symbol','Blows_1st','Blows_2nd','Blows_3rd','Blows_4th','SPTN Calculated','SPTN Override','Recovery','RQD','NMC','LL','PL','Fines','Lab USCS','Lab AASHTO','GroupIndex','Total Unit Weight','OMC','MDD','CBR','UCS','PLT','StrTestType','C','Phi','e0','Pc','Cc','Cr','pH','Minimum Resistivity','Chloride Content','Sulfate Content','Other Test and Result','Hide Result','Photos','Depth Override','GintUpdated'];
+  const smRows = [smHdr];
+  state.borings.forEach(b => {
+    (b.spt||[]).forEach(r => {
+      const n = (r.type==='S') ? calcN(r, b.sptIntervals || '3') : '';
+      const sampleLen = (r.type==='B'||r.type==='G')
+        ? ((parseFloat(r.length)-parseFloat(r.topDepth))*12||'')
+        : (r.intervalLen||r.length||24);
+      smRows.push([
+        b.id, r.topDepth, r.type, r.num, sampleLen, 0,
+        r.b1||'', r.b2||'', r.b3||'', r.b4||'',
+        n, '',
+        r.recovery||'', '',
+        '','','','','','','','','','','','','','','','','','','','','','','','','',
+        0,'','',''
+      ]);
+    });
+    // Rock core runs → Sample 'R' rows (Recovery in inches, RQD as percentage)
+    (b.rock||[]).forEach(r => {
+      const runLenIn = Math.round((parseFloat(rockBottom(r)) - parseFloat(r.topDepth)) * 12);
+      const rqdVal   = rockRqdPct(r) !== null ? rockRqdPct(r) : '';
+      smRows.push([
+        b.id, r.topDepth, 'R', String(r.num), runLenIn, 0,
+        '','','','',
+        '','',
+        r.recoveryLen||'', rqdVal,
+        '','','','','','','','','','','','','','','','','','','','','','','','','',
+        0,'','',''
+      ]);
+    });
+  });
+  const wsSAMPLE = XLSX.utils.aoa_to_sheet(smRows);
+  XLSX.utils.book_append_sheet(wb, wsSAMPLE, 'SAMPLE');
+
+  // ── Write ──
+  const projName = (state.project.name || 'FieldLog').replace(/[^a-zA-Z0-9_-]/g,'_');
+  XLSX.writeFile(wb, `${projName}_gINT_Import.xlsx`);
+  showToast('gINT XLSX exported ✓','success');
+}
+
+// ── GINT IMPORT ──────────────────────────────────────────────────
+function importGINT() {
+  // Guard: SheetJS (vendor/xlsx.full.min.js) must be loaded.
+  // "XLSX is not defined" usually means a stale service worker is serving an
+  // old cached copy of this page. Hard-refresh (Ctrl+Shift+R / ⌘+Shift+R)
+  // or clear site data to force the SW to fetch the latest version.
+  if (typeof XLSX === 'undefined') {
+    alert('SheetJS library not loaded — cannot import.\n\nThis usually means your browser is running a cached version of FieldLog.\n\nFix: press Ctrl+Shift+R (Windows) or ⌘+Shift+R (Mac) to force-refresh, then try again.');
+    return;
+  }
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.xlsx,.xls';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+  input.onchange = evt => {
+    const file = evt.target.files[0];
+    document.body.removeChild(input);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        _importGINTInner(e.target.result, file.name);
+      } catch (err) {
+        console.error('gINT import failed:', err);
+        alert('gINT import failed: ' + (err && err.message ? err.message : err) +
+              '\n\nVerify this is a FieldLog-exported gINT file and try again.');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+  input.click();
+}
+
+function _importGINTInner(arrayBuffer, filename) {
+  const wb = XLSX.read(arrayBuffer, { type: 'array', cellDates: false });
+
+  // Require at minimum PROJECT and POINT sheets
+  if (!wb.Sheets['PROJECT'] || !wb.Sheets['POINT']) {
+    throw new Error('Missing required sheets (PROJECT, POINT). Is this a FieldLog gINT export?');
+  }
+
+  // Sheet name → array of row objects keyed by header
+  function sheetRows(name) {
+    const ws = wb.Sheets[name];
+    if (!ws) return [];
+    return XLSX.utils.sheet_to_json(ws, { defval: '' });
+  }
+
+  // ── DIAGNOSTIC: log column names for debugging ────────────────────
+  // Open browser DevTools → Console to see what columns are in the file.
+  // This helps diagnose field-name mismatches between gINT templates.
+  ['PROJECT','POINT','LITHOLOGY','SAMPLE','NOTES'].forEach(sName => {
+    const rows = sheetRows(sName);
+    if (rows.length) {
+      console.log(`[gINT Import] ${sName} columns:`, Object.keys(rows[0]));
+      console.log(`[gINT Import] ${sName} first row sample:`, rows[0]);
+    } else {
+      console.log(`[gINT Import] ${sName}: sheet empty or missing`);
+    }
+  });
+
+  // Safe string coercion
+  function str(v) { return (v === null || v === undefined) ? '' : String(v).trim(); }
+
+  // Resolve a value from a row by trying column names in priority order.
+  // Returns the first non-empty match, or '' if none match.
+  function col(row, ...names) {
+    for (const name of names) {
+      const v = str(row[name]);
+      if (v) return v;
+    }
+    return '';
+  }
+
+  // Parse a date/datetime value back to a string FieldLog can use.
+  // - Date-only fields → "yyyy-MM-dd"
+  // - Datetime fields  → "yyyy-MM-ddTHH:mm"  (datetime-local input format)
+  // Handles: Excel serial number (integer or fractional), ISO string,
+  //          US locale "m/d/yyyy" or "m/d/yyyy H:MM" strings.
+  function parseDatetime(v, dateOnly) {
+    if (!v && v !== 0) return '';
+    if (typeof v === 'number') {
+      try {
+        const d = XLSX.SSF.parse_date_code(v);
+        if (d) {
+          const dt = `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+          if (!dateOnly && d.H !== undefined && (d.H || d.M)) {
+            return `${dt}T${String(d.H||0).padStart(2,'0')}:${String(d.M||0).padStart(2,'0')}`;
+          }
+          return dt;
+        }
+      } catch(e) {}
+      return '';
+    }
+    const s = String(v).trim();
+    if (!s) return '';
+    // ISO with time component
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) return dateOnly ? s.slice(0,10) : s.slice(0,16);
+    // ISO date only
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    // US locale date or datetime: "m/d/yyyy" or "m/d/yyyy H:MM" or "m/d/yyyy H:MM AM/PM"
+    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+    if (m) {
+      const dt = `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+      if (!dateOnly && m[4]) return `${dt}T${m[4].padStart(2,'0')}:${m[5]}`;
+      return dt;
+    }
+    return s; // pass through unrecognized formats unchanged
+  }
+
+  // Format a parsed datetime for the notes timestamp display field
+  // (matches the locale format used by addNote: "Jun 18, 2026, 10:30 AM")
+  function fmtNoteTs(v) {
+    const dt = parseDatetime(v);
+    if (!dt) return '';
+    try {
+      const d = new Date(dt.includes('T') ? dt : dt + 'T00:00');
+      return d.toLocaleString('en-US', {
+        month:'short', day:'numeric', year:'numeric',
+        hour:'numeric', minute:'2-digit'
+      });
+    } catch(e) { return dt; }
+  }
+
+  // Map common US state abbreviations to the full names used in FieldLog's
+  // proj-state select, so files exported from gINT (which stores abbrevs) match.
+  const STATE_MAP = {
+    'MD':'Maryland','VA':'Virginia','DC':'DC','DE':'Delaware',
+    'PA':'Pennsylvania','WV':'West Virginia','NC':'North Carolina'
+  };
+  function normalizeState(v) { return STATE_MAP[v.toUpperCase().trim()] || v; }
+
+  // Infer the closest GW reading type from the elapsed calendar days between
+  // boring completion and the GW measurement.
+  // Thresholds match the GW_TYPES list: End of Drilling / 24-Hr / 48-Hr / 72-Hr / Other
+  function inferGWType(completeDateStr, gwTimestampStr) {
+    if (!completeDateStr || !gwTimestampStr) return 'During Drilling';
+    try {
+      // Use calendar-day comparison at noon to avoid timezone/hour edge cases
+      const cDay = new Date(completeDateStr.slice(0, 10) + 'T12:00').getTime();
+      const gDay = new Date(gwTimestampStr.slice(0, 10) + 'T12:00').getTime();
+      if (isNaN(cDay) || isNaN(gDay)) return 'During Drilling';
+      const days = Math.round((gDay - cDay) / 86400000);
+      if (days <  0) return 'During Drilling'; // before completion — taken during drilling
+      if (days === 0) return 'End of Drilling'; // same calendar day as completion
+      if (days <= 1)  return '24-Hour';
+      if (days <= 2)  return '48-Hour';
+      if (days <= 4)  return '72-Hour';          // ±1 day window around 72 hr
+      return 'Other';
+    } catch(e) { return 'During Drilling'; }
+  }
+
+  // ── PROJECT ──────────────────────────────────────────────────────
+  const pRow = sheetRows('PROJECT')[0] || {};
+  const rawProject = {
+    // Try FieldLog export names first, then common gINT / alternate names
+    name:   col(pRow, 'Project Name',   'Name', 'Project_Name', 'ProjectName'),
+    num:    col(pRow, 'Commission Number', 'RKK Project Number', 'Commission No', 'Number', 'Project Number', 'Proj_Number', 'Project No'),
+    client: col(pRow, 'Client',          'Owner', 'ClientName', 'Client Name'),
+    state:  normalizeState(col(pRow, 'State', 'Project State', 'ST')),
+    county: col(pRow, 'County or Locale','County', 'Locale', 'Location'),
+    units:  col(pRow, 'Input_Units',     'Units') || 'E',
+    sptIntervals: '3'
+  };
+
+  // ── POINT → boring stubs ─────────────────────────────────────────
+  const boringsByPID = {};
+  const boringOrder  = [];
+  // Per-entry ID counters (global across borings so syncCounters() works)
+  let gwAutoId = 1, sptAutoId = 1, lithAutoId = 1, rockAutoId = 1, noteAutoId = 1;
+
+  sheetRows('POINT').forEach(pt => {
+    const rawPID = str(pt['PointID']);
+    if (!rawPID || boringsByPID[rawPID]) return; // skip blank or duplicate
+
+    const b = {
+      id:               rawPID,
+      holeDepth:        str(pt['HoleDepth']),
+      loc:              str(pt['Location']),
+      start:            parseDatetime(pt['Start'], true),
+      complete:         parseDatetime(pt['Complete'], true),
+      completionStatus: '',
+      north:            str(pt['North']),
+      east:             str(pt['East']),
+      coordSys:         str(pt['Coordinate System']) || 'MD State Plane',
+      lat:              str(pt['Latitude']),
+      lon:              str(pt['Longitude']),
+      elev:             str(pt['Elevation']),
+      inspector:        str(pt['Inspector']),
+      co:               str(pt['Drilling Company']),
+      driller:          str(pt['Driller']),
+      rig:              str(pt['Rig']),
+      method:           str(pt['Advancement Method']),
+      samplerID:        str(pt['Soil Sampler Inner Diameter']) || '1.375',
+      hammer:           str(pt['SPT Hammer Type']),
+      hamCal:           parseDatetime(pt['HamCalDate'], true),
+      hamWt:            str(pt['SPT Hammer Weight']) || '140',
+      hamDrop:          str(pt['SPT Hammer Fall']) || '30',
+      coreMethod:       str(pt['Rock Coring Method']),
+      coreDia:          str(pt['Rock Core Diameter']),
+      boringNotes:      str(pt['Notes']),
+      sptIntervals:     '3',
+      createdBy:  getUserInitials(), createdAt:  new Date().toISOString(),
+      modifiedBy: getUserInitials(), modifiedAt: new Date().toISOString(),
+      spt: [], lith: [], gw: [], rock: [], notes: []
+    };
+
+    // GW readings (up to 3 exported per boring)
+    for (let i = 1; i <= 3; i++) {
+      const ts  = pt[`GW ${i} Date and Time`];
+      const dep = str(pt[`GW ${i} Depth`]);
+      const cav = str(pt[`GW ${i} Cave`]);
+      if (ts || dep) {
+        const tsStr = parseDatetime(ts);   // full datetime: "yyyy-MM-ddTHH:mm"
+        b.gw.push({
+          id: gwAutoId++,
+          readingType: inferGWType(b.complete, tsStr),
+          customType: '',
+          timestamp: tsStr,
+          depth: dep, cave: cav, notes: ''
+        });
+      }
+    }
+
+    boringsByPID[rawPID] = b;
+    boringOrder.push(rawPID);
+  });
+
+  if (!boringOrder.length) {
+    throw new Error('No borings found in POINT sheet.');
+  }
+
+  // ── LITHOLOGY ────────────────────────────────────────────────────
+  // Rock lith rows (Line_Type=Solid, no Stratum, has Manual Override) are
+  // stored separately and merged onto SAMPLE 'R' runs by topDepth.
+  // They cannot be reverse-parsed into structured fields, so the Manual
+  // Override text is preserved in the run's notes field.
+  const rockDescByKey = {}; // key: `${pid}|${topDepth}` → { color, notes }
+
+  sheetRows('LITHOLOGY').forEach(li => {
+    const pid = str(li['PointID']);
+    const b = boringsByPID[pid];
+    if (!b) return;
+
+    const isRockRow = str(li['Line_Type']) === 'Solid'
+                   && !str(li['Stratum'])
+                   && str(li['Manual Override']);
+    if (isRockRow) {
+      rockDescByKey[`${pid}|${str(li['Depth'])}`] = {
+        color: str(li['Color']),
+        notes: str(li['Manual Override'])
+      };
+      return;
+    }
+
+    b.lith.push({
+      id:             lithAutoId++,
+      linked:         false,
+      lineType:       str(li['Line_Type']) || 'Dash',
+      stratum:        str(li['Stratum']),
+      topDepth:       str(li['Depth']),
+      botDepth:       str(li['Bottom']),
+      moisture:       str(li['Moisture']),
+      // gINT native: "Consistency"; FieldLog export: "Density / Consistency"
+      densityConsist: col(li, 'Density / Consistency', 'Consistency', 'Density_Consistency', 'D_Consistency'),
+      color:          str(li['Color']),
+      c1desc:         str(li['Constituent 1: Descriptor']),
+      c1part:         str(li['Constituent 1: Particle']),
+      c2pct:          str(li['Constituent 2: Percentage']),
+      c2desc:         str(li['Constituent 2: Descriptor']),
+      c2part:         str(li['Constituent 2: Particle']),
+      c3pct:          str(li['Constituent 3: Percentage']),
+      c3desc:         str(li['Constituent 3: Descriptor']),
+      c3part:         str(li['Constituent 3: Particle']),
+      other:          str(li['Other']),
+      // gINT native: "Graphic" holds the USCS symbol; FieldLog export: "USCS"
+      uscs:           col(li, 'USCS', 'Graphic', 'USCS_Symbol', 'USCS Symbol'),
+      // gINT native: "AASHTO" (same); fallback to common variants
+      aashto:         col(li, 'AASHTO', 'AASHTO_Symbol', 'AASHTO Symbol')
+    });
+  });
+
+  // ── SAMPLE ───────────────────────────────────────────────────────
+  const rockNumByBoring = {}; // auto-number rock runs per boring
+
+  sheetRows('SAMPLE').forEach(sm => {
+    const pid = str(sm['PointID']);
+    const b = boringsByPID[pid];
+    if (!b) return;
+    const typ = str(sm['Sample Type']);
+    const top = str(sm['Depth']);
+
+    if (typ === 'R') {
+      // Rock core run
+      // Export wrote Length as (bottom-top)*12 inches; reverse to feet
+      const lenIn    = parseFloat(sm['Length']) || 0;
+      const runLenFt = lenIn > 0 ? +(lenIn / 12).toFixed(2) : '';
+      // Recovery is stored in inches directly
+      const recIn    = parseFloat(sm['Recovery']);
+      // RQD was exported as a percentage; reconstruct rqdLen in inches
+      const rqdPct   = parseFloat(sm['RQD']);
+      const rqdLenIn = (!isNaN(rqdPct) && runLenFt !== '')
+        ? +(rqdPct / 100 * Number(runLenFt) * 12).toFixed(1) : '';
+      // Merge description from LITHOLOGY rock rows (keyed by topDepth)
+      const desc = rockDescByKey[`${pid}|${top}`] || {};
+      if (!rockNumByBoring[pid]) rockNumByBoring[pid] = 0;
+      rockNumByBoring[pid]++;
+
+      b.rock.push({
+        id:          rockAutoId++,
+        num:         str(sm['Sample No']) || String(rockNumByBoring[pid]),
+        topDepth:    top,
+        runLength:   runLenFt !== '' ? String(runLenFt) : '',
+        recoveryLen: !isNaN(recIn) ? String(recIn) : '',
+        rqdLen:      rqdLenIn !== '' ? String(rqdLenIn) : '',
+        color:       desc.color || '',
+        rockType:    '',
+        hardness: '', weathering: '', fracFreq: '',
+        jointSpacing: '', bedding: '', attitude: '',
+        notes:       desc.notes || ''
+      });
+
+    } else if (['S','T','B','G'].includes(typ)) {
+      const lenIn = parseFloat(sm['Length']) || 0;
+      b.spt.push({
+        id:          sptAutoId++,
+        type:        typ,
+        num:         str(sm['Sample No']),
+        topDepth:    top,
+        // SPT: intervalLen stored as 18/24-inch count; others: length in inches
+        intervalLen: typ === 'S' ? String(lenIn) : '',
+        length:      typ !== 'S' ? String(lenIn) : '',
+        b1:          str(sm['Blows_1st']),
+        b2:          str(sm['Blows_2nd']),
+        b3:          str(sm['Blows_3rd']),
+        b4:          str(sm['Blows_4th']),
+        recovery:    str(sm['Recovery']),
+        refusal:     false,
+        notes:       ''
+      });
+    }
+  });
+
+  // ── NOTES ────────────────────────────────────────────────────────
+  sheetRows('NOTES').forEach(nt => {
+    const pid = str(nt['PointID']);
+    const b = boringsByPID[pid];
+    if (!b) return;
+    const txt = str(nt['Notes']);
+    if (!txt) return;
+    b.notes.push({
+      id:        noteAutoId++,
+      depth:     str(nt['Depth']),
+      text:      txt,
+      timestamp: fmtNoteTs(nt['GintUpdated']) || new Date().toLocaleString('en-US', {month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit'})
+    });
+  });
+
+  // ── Build raw state object and run through existing sanitizer ────
+  // This reuses all validation logic from the JSON load path (HS-2, P2-3).
+  const rawState = {
+    schemaVersion: FIELDLOG_SCHEMA_VERSION,
+    project:       rawProject,
+    borings:       boringOrder.map(pid => boringsByPID[pid]),
+    activeBoring:  boringOrder.length ? 0 : null
+  };
+
+  let newState;
+  try {
+    newState = migrateAndSanitizeState(rawState);
+  } catch (verr) {
+    alert('Import validation failed: ' + verr.message);
+    return;
+  }
+
+  // ── Confirm overwrite if a project is already loaded ─────────────
+  const currentHasData = state.project.name || state.borings.length;
+  if (currentHasData) {
+    const label = newState.project.name || filename;
+    if (!confirm(
+      `Import ${newState.borings.length} boring(s) from "${label}"?\n\n` +
+      `This will replace your current project.\n` +
+      `Save a JSON snapshot first if you need to preserve the current data.\n\n` +
+      `Continue?`
+    )) return;
+  }
+
+  // ── Apply ─────────────────────────────────────────────────────────
+  state = newState;
+  syncCounters();
+  setv('proj-name',   state.project.name);
+  setv('proj-num',    state.project.num);
+  setv('proj-client', state.project.client);
+  setv('proj-state',  state.project.state);  syncSearchSelect(document.getElementById('proj-state'));
+  setv('proj-county', state.project.county);
+  setv('proj-units',  state.project.units);  syncSearchSelect(document.getElementById('proj-units'));
+  renderBoringCards();
+  renderBoringSelect();
+  renderAll();
+  updateHdr();
+  updateStatusBar();
+
+  const bCount  = state.borings.length;
+  const hasRock = state.borings.some(b => b.rock.length > 0);
+  const note    = hasRock ? ' · rock: geometry only' : '';
+  showToast(`Imported ${bCount} boring${bCount !== 1 ? 's' : ''} ✓${note}`, 'success');
+}
+
+function excelDate(str) {
+  if (!str) return '';
+  try {
+    const d = new Date(str);
+    return d.toLocaleDateString('en-US');
+  } catch(e) { return str; }
+}
+
+// ── SAVE LOGS ────────────────────────────────────────────────────
+function saveCurrentLog() {
+  saveToCurrent();
+  const entry = {
+    id: Date.now(),
+    project: state.project.name,
+    date: new Date().toLocaleString('en-US', {month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit'}),
+    borings: state.borings.length,
+    data: JSON.parse(JSON.stringify(state))
+  };
+  savedLogs.unshift(entry);
+  try { localStorage.setItem('fieldlog_v2_saves', JSON.stringify(savedLogs)); } catch(e){}
+  renderSaved();
+  showToast('Log saved ✓','success');
+}
+
+function renderSaved() {
+  const el = document.getElementById('saved-list');
+  if (!savedLogs.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No saved logs yet</div></div>`;
+    return;
+  }
+  el.innerHTML = savedLogs.map(log => `
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div>
+        <div style="font-family:var(--cond);font-weight:700;font-size:15px">${esc(log.project)||'Unnamed'}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(log.date)} · ${esc(log.borings)} boring(s)</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="loadLog(${log.id})">Load</button>
+        <button class="btn btn-green btn-sm" onclick="exportFromSaved(${log.id})">XLSX</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSaved(${log.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function syncCounters() {
+  // After loading state from JSON/saved log, advance all ID counters past
+  // the highest existing IDs so new entries never collide with loaded ones
+  state.borings.forEach(b => {
+    (b.spt   ||[]).forEach(r => { if (r.id > sptId)   sptId   = r.id; });
+    (b.lith  ||[]).forEach(l => { if (l.id > lithId)  lithId  = l.id; });
+    (b.gw    ||[]).forEach(g => { if (g.id > gwId)    gwId    = g.id; });
+    (b.rock  ||[]).forEach(r => { if (r.id > rockId)  rockId  = r.id; });
+    (Array.isArray(b.notes) ? b.notes : []).forEach(n => { if (n.id > noteId)  noteId  = n.id; });
+  });
+}
+
+function loadLog(id) {
+  const log = savedLogs.find(l => l.id === id);
+  if (!log) return;
+  try {
+    state = migrateAndSanitizeState(log.data); // HS-2 + P2-3
+  } catch (verr) {
+    showToast('Saved log failed validation: ' + verr.message, 'warn');
+    return;
+  }
+  syncCounters();
+  // restore project form
+  setv('proj-name', state.project.name); setv('proj-num', state.project.num);
+  setv('proj-client', state.project.client); setv('proj-state', state.project.state); syncSearchSelect(document.getElementById('proj-state'));
+  setv('proj-county', state.project.county); setv('proj-units', state.project.units); syncSearchSelect(document.getElementById('proj-units'));
+  renderBoringCards();
+  renderBoringSelect();
+  renderAll();
+  updateHdr();
+  updateStatusBar();
+  showToast('Log loaded ✓','success');
+}
+
+function exportFromSaved(id) {
+  const log = savedLogs.find(l => l.id === id);
+  if (!log) return;
+  const prev = JSON.parse(JSON.stringify(state));
+  try {
+    state = migrateAndSanitizeState(log.data); // HS-2 + P2-3
+  } catch (verr) {
+    showToast('Saved log failed validation: ' + verr.message, 'warn');
+    return;
+  }
+  exportGINT();
+  state = prev;
+}
+
+function deleteSaved(id) {
+  savedLogs = savedLogs.filter(l => l.id !== id);
+  try { localStorage.setItem('fieldlog_v2_saves', JSON.stringify(savedLogs)); } catch(e){}
+  renderSaved();
+}
+
+// ── UI HELPERS ───────────────────────────────────────────────────
+function switchTab(el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(el.dataset.section).classList.add('active');
+}
+function switchTabById(id) {
+  const el = document.querySelector(`.tab[data-section="${id}"]`);
+  if (el) switchTab(el);
+}
+
+function toggleEntry(id) {
+  document.getElementById(id)?.classList.toggle('expanded');
+}
+
+function openModal(id) {
+  renderBoringSelect();
+  document.getElementById(id)?.classList.remove('hidden');
+}
+function closeModal(id) {
+  document.getElementById(id)?.classList.add('hidden');
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (type ? ' '+type : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function updateHdr() {
+  const pn = v('proj-name') || state.project.name;
+  document.getElementById('hdr-proj').textContent = pn || 'No project loaded';
+}
+
+function updateStatusBar() {
+  const b = ab();
+  document.getElementById('stat-boring').textContent = b ? b.id : '—';
+  document.getElementById('stat-counts').textContent = b
+    ? `${b.spt.length}S · ${b.lith.length}L · ${b.rock.length}R · ${(Array.isArray(b.notes)?b.notes:[]).length}N`
+    : '0S · 0L · 0R · 0N';
+}
+
+function v(id)   { return document.getElementById(id)?.value || ''; }
+function setv(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = (val === null || val === undefined) ? '' : val;
+}
+
+// ── JSON SNAPSHOT ─────────────────────────────────────────────────
+function saveJSON() {
+  saveToCurrent();
+  state.schemaVersion = FIELDLOG_SCHEMA_VERSION; // P2-3
+  const snap = {
+    _tool:    'FieldLog v2',
+    _version: '2.0',
+    _schemaVersion: FIELDLOG_SCHEMA_VERSION,
+    _saved:   new Date().toISOString(),
+    state:    JSON.parse(JSON.stringify(state))
+  };
+  const projName = (state.project.name || 'FieldLog').replace(/[^a-zA-Z0-9_-]/g,'_');
+  const date = new Date().toISOString().slice(0,10);
+  const fname = `${projName}_${date}.json`;
+  const blob = new Blob([JSON.stringify(snap, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fname;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('JSON snapshot saved ✓', 'success');
+}
+
+function loadJSON() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+  input.onchange = evt => {
+    const file = evt.target.files[0];
+    document.body.removeChild(input);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const snap = JSON.parse(e.target.result);
+        if (snap._tool !== 'FieldLog v2') {
+          alert('This file is not a FieldLog v2 snapshot.');
+          return;
+        }
+        // HS-2 + P2-3: schema-validate, migrate, and whitelist-rebuild
+        // before a single byte of the file touches app state or the DOM.
+        let incoming;
+        try {
+          incoming = migrateAndSanitizeState(snap.state);
+        } catch (verr) {
+          alert('This snapshot failed validation and was not loaded:\n' + verr.message);
+          return;
+        }
+        state = incoming;
+        syncCounters();
+        // Restore project form
+        setv('proj-name', state.project.name);
+        setv('proj-num', state.project.num);
+        setv('proj-client', state.project.client);
+        setv('proj-state', state.project.state);   syncSearchSelect(document.getElementById('proj-state'));
+        setv('proj-county', state.project.county);
+        setv('proj-units', state.project.units);   syncSearchSelect(document.getElementById('proj-units'));
+        if (state.borings.length) state.activeBoring = 0;
+        renderBoringCards();
+        renderBoringSelect();
+        renderAll();
+        updateHdr();
+        updateStatusBar();
+        showToast('JSON snapshot loaded ✓', 'success');
+      } catch(err) {
+        alert('Could not read snapshot: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// ── AUTOSAVE ──────────────────────────────────────────────────────
+const AUTOSAVE_KEY = 'fieldlog_v2_autosave';
+const AUTOSAVE_MS  = 5 * 60 * 1000; // 5 minutes
+
+function autosave() {
+  try {
+    if (!state.project.name && !state.borings.length) return; // nothing worth saving
+    saveToCurrent(); // flush any open form fields into state
+    const snap = {
+      _tool:    'FieldLog v2',
+      _version: '2.0',
+      _saved:   new Date().toISOString(),
+      state:    JSON.parse(JSON.stringify(state))
+    };
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(snap));
+    const el = document.getElementById('stat-autosave');
+    if (el) {
+      const d = new Date();
+      el.textContent = 'SAVED ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+      el.style.color = 'var(--accent2)';
+      setTimeout(() => { el.style.color = 'var(--muted)'; }, 3000);
+    }
+  } catch(e) { console.warn('FieldLog: autosave failed', e); }
+}
+
+// Check for a recoverable autosave snapshot on startup
+(function checkAutosaveOnLoad() {
+  try {
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if (!raw) return;
+    const snap = JSON.parse(raw);
+    if (snap._tool !== 'FieldLog v2' || !snap.state) return;
+    const ageMin = (Date.now() - new Date(snap._saved).getTime()) / 60000;
+    if (ageMin > 1440) return; // ignore snapshots older than 24 h
+    window._pendingAutosave = snap;
+    setTimeout(showAutosaveBanner, 600);
+  } catch(e) {}
+})();
+
+function showAutosaveBanner() {
+  if (!window._pendingAutosave) return;
+  const snap = window._pendingAutosave;
+  const d    = new Date(snap._saved);
+  const proj = snap.state?.project?.name ? ' \u2014 ' + esc(snap.state.project.name) : ''; // HS-2: localStorage is untrusted
+  const nBor = snap.state?.borings?.length || 0;
+  const time = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  const date = d.toLocaleDateString([], {month:'short', day:'numeric'});
+  const banner = document.createElement('div');
+  banner.id = 'autosave-banner';
+  banner.style.cssText = 'position:fixed;bottom:36px;left:0;right:0;z-index:500;background:var(--accent);color:white;padding:9px 14px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--sans);box-shadow:0 -2px 10px rgba(0,0,0,.25)';
+  banner.innerHTML =
+    '<span style="flex:1">\u27F3 Autosave found \u2014 ' + date + ' ' + time + proj +
+    ' (' + nBor + ' boring' + (nBor !== 1 ? 's' : '') + ')</span>' +
+    '<button onclick="restoreAutosave()" style="background:white;color:var(--accent);border:none;padding:5px 12px;border-radius:3px;font-weight:600;cursor:pointer;font-size:12px;font-family:var(--sans)">Restore</button>' +
+    '<button onclick="dismissAutosaveBanner()" style="background:rgba(255,255,255,.18);color:white;border:1px solid rgba(255,255,255,.3);padding:5px 10px;border-radius:3px;cursor:pointer;font-size:12px;font-family:var(--sans)">Dismiss</button>';
+  document.body.appendChild(banner);
+}
+
+function restoreAutosave() {
+  const snap = window._pendingAutosave;
+  if (!snap) return;
+  try {
+    state = migrateAndSanitizeState(snap.state); // HS-2 + P2-3
+    syncCounters();
+    setv('proj-name',   state.project.name);
+    setv('proj-num',    state.project.num);
+    setv('proj-client', state.project.client);
+    setv('proj-state',  state.project.state);  syncSearchSelect(document.getElementById('proj-state'));
+    setv('proj-county', state.project.county);
+    setv('proj-units',  state.project.units);  syncSearchSelect(document.getElementById('proj-units'));
+    if (state.borings.length) state.activeBoring = 0;
+    renderBoringCards(); renderBoringSelect(); renderAll();
+    updateHdr(); updateStatusBar();
+    dismissAutosaveBanner();
+    showToast('Autosave restored \u2713', 'success');
+  } catch(e) {
+    showToast('Could not restore autosave', 'warn');
+  }
+}
+
+function dismissAutosaveBanner() {
+  const b = document.getElementById('autosave-banner');
+  if (b) b.remove();
+  window._pendingAutosave = null;
+}
+
+setInterval(autosave, AUTOSAVE_MS);
+
+// ── SEARCHABLE SELECT ENGINE ──────────────────────────────────────
+// Uses a single body-level portal (position:fixed) so it escapes
+// overflow:hidden entry-card containers on all devices.
+let _ssPortal = null;
+let _ssActCtx = null;
+
+function _ssGetPortal() {
+  if (_ssPortal) return _ssPortal;
+  _ssPortal = document.createElement('div');
+  _ssPortal.id = 'ss-portal';
+  document.body.appendChild(_ssPortal);
+  // Close when clicking or tapping outside the portal and its owning wrap
+  function outsideClose(e) {
+    if (_ssActCtx && !_ssActCtx.wrap.contains(e.target) && !_ssPortal.contains(e.target)) {
+      _ssClose();
+    }
+  }
+  document.addEventListener('mousedown', outsideClose);
+  document.addEventListener('touchstart', outsideClose, { passive: true });
+  // Reposition on scroll / resize
+  window.addEventListener('scroll', () => { if (_ssActCtx) _ssPos(_ssActCtx.input); }, true);
+  window.addEventListener('resize', () => { if (_ssActCtx) _ssPos(_ssActCtx.input); });
+  return _ssPortal;
+}
+
+function _ssPos(input) {
+  const p = _ssGetPortal(), r = input.getBoundingClientRect();
+  p.style.left  = r.left + 'px';
+  p.style.width = r.width + 'px';
+  const below = window.innerHeight - r.bottom - 4;
+  const above = r.top - 4;
+  if (below >= 100 || below >= above) {
+    p.style.top    = (r.bottom + 2) + 'px';
+    p.style.bottom = '';
+    p.style.maxHeight = Math.max(80, Math.min(220, below)) + 'px';
+  } else {
+    p.style.bottom = (window.innerHeight - r.top + 2) + 'px';
+    p.style.top    = '';
+    p.style.maxHeight = Math.max(80, Math.min(220, above)) + 'px';
+  }
+}
+
+function _ssClose() {
+  if (!_ssActCtx) return;
+  const { sel, input } = _ssActCtx;
+  _ssGetPortal().style.display = 'none';
+  const cur = sel.options[sel.selectedIndex];
+  input.value = (cur && cur.value !== '') ? cur.text : '';
+  _ssActCtx = null;
+}
+
+function _ssBuild(ctx, q) {
+  const p = _ssGetPortal();
+  p.innerHTML = '';
+  p.style.display = 'block';
+  _ssActCtx = ctx;
+  if (ctx) ctx.hiIdx = -1;
+  q = (q || '').toLowerCase().trim();
+  const sel = ctx.sel;
+  let count = 0;
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  function addOpt(value, text) {
+    text = text.trim();
+    if (!text) return false;
+    if (q && !text.toLowerCase().includes(q)) return false;
+    const d = document.createElement('div');
+    d.className = 'ss-opt';
+    d.dataset.value = value;
+    d.dataset.text  = text;
+    if (q) {
+      const i = text.toLowerCase().indexOf(q);
+      d.innerHTML = esc(text.slice(0,i)) + '<strong>' + esc(text.slice(i, i+q.length)) + '</strong>' + esc(text.slice(i+q.length));
+    } else {
+      d.textContent = text;
+    }
+    if (value !== '' && value === sel.value) d.classList.add('hi');
+    d.addEventListener('mousedown', e => { e.preventDefault(); ctx.choose(value, text); });
+    p.appendChild(d);
+    count++;
+    return true;
+  }
+
+  Array.from(sel.children).forEach(node => {
+    if (node.tagName === 'OPTGROUP') {
+      let grpAdded = false;
+      Array.from(node.children).forEach(opt => {
+        const txt = opt.text.trim();
+        if (!txt || (q && !txt.toLowerCase().includes(q))) return;
+        if (!grpAdded) {
+          const g = document.createElement('div');
+          g.className = 'ss-grp';
+          g.textContent = node.label;
+          p.appendChild(g);
+          grpAdded = true;
+        }
+        addOpt(opt.value !== '' ? opt.value : opt.text, opt.text);
+      });
+    } else {
+      addOpt(node.value !== '' ? node.value : node.text, node.text);
+    }
+  });
+
+  if (!count) {
+    const nm = document.createElement('div');
+    nm.className = 'ss-none';
+    nm.textContent = 'No matches';
+    p.appendChild(nm);
+  }
+  _ssPos(ctx.input);
+  const hi = p.querySelector('.hi');
+  if (hi) hi.scrollIntoView({ block: 'nearest' });
+}
+
+function enhanceSelect(sel) {
+  if (sel.dataset.ssEnhanced) return;
+  sel.dataset.ssEnhanced = '1';
+  sel.style.display = 'none';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'ss-wrap';
+  sel.parentNode.insertBefore(wrap, sel);
+  wrap.appendChild(sel);
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'ss-input';
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('spellcheck', 'false');
+  input.setAttribute('autocorrect', 'off');
+  input.setAttribute('autocapitalize', 'off');
+  const curOpt = sel.options[sel.selectedIndex];
+  input.value = (curOpt && curOpt.value !== '') ? curOpt.text : '';
+  input.placeholder = '— Select or type —';
+  wrap.appendChild(input);
+
+  const caret = document.createElement('span');
+  caret.className = 'ss-caret';
+  wrap.appendChild(caret);
+
+  const ctx = {
+    sel, input, wrap, hiIdx: -1,
+    choose(value, text) {
+      sel.value = value;
+      input.value = text;
+      _ssClose();
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  };
+
+  input.addEventListener('focus', () => {
+    // Do NOT call input.select() here — it triggers a spurious blur/refocus cycle
+    // on many browsers, causing the dropdown to flash open then immediately close.
+    setTimeout(() => { input.value = ''; _ssBuild(ctx, ''); }, 0);
+  });
+
+  input.addEventListener('input', () => _ssBuild(ctx, input.value));
+
+  input.addEventListener('blur', () => {
+    // Capture which context owns this input. After the delay:
+    //   - if _ssActCtx is still OUR context → nothing has opened since, safe to close
+    //   - if _ssActCtx switched to another context → a new portal opened, leave it alone
+    // 400ms safely clears the ~300ms synthesised-tap delay on older mobile browsers.
+    const capturedCtx = ctx;
+    setTimeout(() => {
+      if (_ssActCtx === capturedCtx && !capturedCtx.wrap.contains(document.activeElement)) {
+        _ssClose();
+      }
+    }, 400);
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (_ssActCtx !== ctx) _ssBuild(ctx, '');
+      const opts = [..._ssGetPortal().querySelectorAll('.ss-opt')];
+      ctx.hiIdx = e.key === 'ArrowDown'
+        ? Math.min(ctx.hiIdx + 1, opts.length - 1)
+        : Math.max(ctx.hiIdx - 1, 0);
+      opts.forEach((o, i) => o.classList.toggle('hi', i === ctx.hiIdx));
+      if (opts[ctx.hiIdx]) opts[ctx.hiIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const opts = [..._ssGetPortal().querySelectorAll('.ss-opt')];
+      if (opts[ctx.hiIdx]) ctx.choose(opts[ctx.hiIdx].dataset.value, opts[ctx.hiIdx].dataset.text);
+    } else if (e.key === 'Escape' || e.key === 'Tab') {
+      _ssClose();
+    }
+  });
+
+  caret.addEventListener('mousedown', e => {
+    e.preventDefault();
+    if (_ssActCtx === ctx) { _ssClose(); input.blur(); }
+    else { input.focus(); }
+  });
+}
+
+function makeSearchableSelects(container) {
+  (container || document).querySelectorAll('.field select').forEach(enhanceSelect);
+}
+
+// Call after updating a select's innerHTML externally (e.g. dc/consistency rebuild)
+function syncSearchSelect(sel) {
+  if (!sel?.dataset.ssEnhanced) return;
+  const input = sel.parentElement?.querySelector('.ss-input');
+  if (!input) return;
+  const cur = sel.options[sel.selectedIndex];
+  input.value = (cur && cur.value !== '') ? cur.text : '';
+}
+
+// ── HEADER DROPDOWN MENUS ────────────────────────────────────────
+function toggleHdrMenu(id) {
+  const el = document.getElementById(id);
+  const wasOpen = el.classList.contains('open');
+  closeHdrMenus();
+  if (!wasOpen) el.classList.add('open');
+}
+function closeHdrMenus() {
+  document.querySelectorAll('.hdr-menu.open').forEach(m => m.classList.remove('open'));
+}
+// Close on any click outside a menu
+document.addEventListener('click', e => {
+  if (!e.target.closest('.hdr-menu')) closeHdrMenus();
+});
+
+// ── INIT ─────────────────────────────────────────────────────────
+// Warn immediately if SheetJS failed to load — both export and import depend on it.
+if (window._xlsxMissing || typeof XLSX === 'undefined') {
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b91c1c;color:white;font-family:sans-serif;font-size:13px;font-weight:600;padding:10px 16px;text-align:center';
+  banner.textContent = '⚠ SheetJS library failed to load — gINT export and import are unavailable. Check that vendor/xlsx.full.min.js is deployed. (Ctrl+Shift+R to force-refresh)';
+  document.body.prepend(banner);
+}
+renderBoringCards();
+renderSaved();
+updateStatusBar();
+makeSearchableSelects(); // enhance static selects in Project tab
+
+// ── SERVICE WORKER REGISTRATION ──────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('FieldLog: service worker registered'))
+    .catch(e => console.warn('FieldLog: SW registration failed', e));
+}
+</script>
+</body>
+</html>

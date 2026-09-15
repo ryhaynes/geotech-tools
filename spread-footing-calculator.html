@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spread Footing Bearing Resistance</title>
+<link rel="manifest" href="manifest.json">
+<link href="fonts/fonts.css" rel="stylesheet">
+<style>
+:root {
+  --navy:#0c1f35;--navy2:#152d4a;--blue:#1d5fa8;--blue2:#2471c9;
+  --steel:#4a7daa;--green:#166534;--red:#991b1b;--orange:#c2410c;
+  --bg:#f0f4f8;--bg2:#ffffff;--border:#c8d6e5;--text:#1a2b3c;--muted:#5a738a;
+  --mono:'IBM Plex Mono','Courier New',monospace;
+  --sans:'IBM Plex Sans','Segoe UI',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--text);line-height:1.5}
+
+/* HEADER */
+.header{background:var(--navy);color:#fff;border-bottom:3px solid var(--blue2)}
+.breadcrumb{padding:6px 24px;font-size:11px;font-family:var(--mono);color:var(--muted);background:#fff;border-bottom:1px solid var(--border)}.breadcrumb a{color:var(--blue2);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.header-inner{max-width:1200px;margin:0 auto;padding:15px 24px 12px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.header h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.header h1 span{color:#6db3f5}
+.header-sub{font-size:10.5px;color:#7a9fc0;margin-top:3px;font-family:var(--mono)}
+.hdr-actions{display:flex;gap:7px;align-items:center;flex-shrink:0}
+.hdr-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:3px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#c8ddf0;cursor:pointer;transition:background .15s;white-space:nowrap}
+.hdr-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.32)}
+.hdr-btn.save{border-color:#4ade80aa;color:#4ade80}
+.hdr-btn.save:hover{background:rgba(74,222,128,.12)}
+.hdr-btn.print{border-color:#93c5fdaa;color:#93c5fd}
+.hdr-btn.print:hover{background:rgba(147,197,253,.1)}
+
+.container{max-width:1200px;margin:0 auto;padding:20px 20px 60px}
+
+/* PROJECT CARD */
+.proj-card{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+.proj-head{background:var(--navy2);color:#fff;padding:7px 16px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.proj-row{display:flex;gap:0;border-bottom:1px solid var(--border)}
+.proj-row:last-child{border-bottom:none}
+.proj-cell{display:flex;align-items:center;gap:10px;padding:9px 16px;flex:1;min-width:0}
+.proj-cell:not(:first-child){border-left:1px solid var(--border)}
+.proj-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.proj-input{border:none;border-bottom:1px solid var(--border);background:transparent;font-family:var(--sans);font-size:13px;color:var(--text);padding:1px 4px;flex:1;min-width:0;outline:none}
+.proj-input:focus{border-bottom-color:var(--blue2)}
+.proj-input::placeholder{color:#b0c0d0;font-style:italic}
+
+/* PHASE SECTIONS */
+.phase{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+.phase-head{display:flex;align-items:center;gap:12px;padding:11px 20px;background:var(--navy2);color:#fff}
+.phase-num{font-family:var(--mono);font-size:17px;font-weight:600;color:#6db3f5;line-height:1;flex-shrink:0}
+.phase-title{font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.phase-sub{font-family:var(--mono);font-size:10px;color:#7a9fc0;margin-top:1px}
+.phase-ref{font-family:var(--mono);font-size:10px;color:#5a8ab0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:2px 7px;border-radius:2px;margin-left:auto;white-space:nowrap;flex-shrink:0}
+.phase-body{padding:20px 22px}
+
+/* INNER CARDS */
+.card{background:#f7f9fc;border:1px solid var(--border);border-radius:3px;margin-bottom:14px;overflow:hidden}
+.card:last-child{margin-bottom:0}
+.card-head{background:var(--navy);color:#fff;padding:7px 14px;font-size:10.5px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--blue2);flex-shrink:0}
+.card-body{padding:16px 18px}
+
+/* FORM */
+.field-row{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.field-row:last-child{margin-bottom:0}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.field label em{font-style:italic;text-transform:none;letter-spacing:0;font-weight:400}
+select,input[type=number],input[type=text]{padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-size:13px;font-family:var(--sans);color:var(--text);background:#fff}
+select:focus,input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(36,113,201,.12)}
+input[type=number]{width:110px}
+input::placeholder{color:#b0c4d8}
+select{min-width:140px}
+
+/* TOGGLE */
+.method-toggle{display:flex;gap:0;border:1px solid var(--border);border-radius:3px;overflow:hidden;width:fit-content}
+.method-btn{padding:7px 18px;font-size:12px;font-family:var(--sans);font-weight:500;background:#fff;color:var(--muted);border:none;border-right:1px solid var(--border);cursor:pointer;transition:background .1s}
+.method-btn:last-child{border-right:none}
+.method-btn.active{background:var(--navy2);color:#fff;font-weight:600}
+.method-btn:hover:not(.active){background:#eaf2fc}
+
+/* CHECKBOX */
+.check-label{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text);cursor:pointer;line-height:1.5}
+.check-label input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue2);cursor:pointer;flex-shrink:0;margin-top:2px}
+
+/* TOOLTIP */
+.tip{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:var(--border);color:var(--muted);font-size:9px;font-weight:700;cursor:help;margin-left:3px;vertical-align:middle;font-family:var(--sans);font-style:normal;line-height:1}
+
+/* REF TOGGLE */
+.ref-toggle{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--blue2);cursor:pointer;margin:10px 0 13px;font-family:var(--mono);text-decoration:underline;text-underline-offset:2px;user-select:none}
+.ref-toggle:hover{color:var(--blue)}
+.ref-panel{display:none;margin-bottom:4px}
+.ref-panel.open{display:block}
+.ref-tbl{border-collapse:collapse;font-size:11.5px;width:100%}
+.ref-tbl th{background:var(--navy2);color:#fff;padding:6px 10px;border:1px solid #2a4a6a;font-size:9.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;text-align:center}
+.ref-tbl td{padding:5px 10px;border:1px solid #d8e4ee;font-size:11.5px;text-align:center;font-family:var(--mono)}
+.ref-tbl .cur-row td{background:#fef08a;font-weight:700}
+.ref-tbl-note{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+/* FORMULA / CALC BLOCK */
+.calc-block{background:#f0f5fb;border:1px solid #c8d9ed;border-left:3px solid var(--blue2);border-radius:3px;padding:12px 16px;margin-bottom:12px;font-family:var(--mono);font-size:11.5px;line-height:1.8;overflow-x:auto}
+.calc-block:last-child{margin-bottom:0}
+.calc-ref{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-family:var(--sans);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #d0dcea}
+.calc-line{color:var(--navy);margin-bottom:1px}
+.calc-line.sub{padding-left:16px;color:#2a5a9a}
+.calc-line.result{font-weight:700;font-size:13px;border-top:1px solid #c0d0e4;padding-top:8px;margin-top:8px;color:var(--navy)}
+
+/* PILLS */
+.result-row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 2px}
+.pill{background:#f0f6ff;border:1px solid #c0d8f0;border-radius:3px;padding:10px 15px;min-width:130px}
+.pill-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.pill-value{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--navy);margin:3px 0 2px;letter-spacing:-.5px}
+.pill-sub{font-size:10px;color:var(--muted)}
+.pill.big{background:var(--navy2);border-color:var(--navy2)}
+.pill.big .pill-label{color:#7a9fc0}
+.pill.big .pill-value{color:#fff;font-size:24px}
+.pill.big .pill-sub{color:#7a9fc0}
+.pill.ok{background:#f0fdf4;border-color:#86efac}
+.pill.ok .pill-value{color:var(--green)}
+.pill.ng{background:#fff5f5;border-color:#fca5a5}
+.pill.ng .pill-value{color:var(--red)}
+
+/* STATUS CARDS */
+.status-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.status-card{border-radius:3px;padding:16px 18px;border:2px solid}
+.status-card.ok{background:#f0fdf4;border-color:#86efac}
+.status-card.ng{background:#fff5f5;border-color:#fca5a5}
+.status-badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.status-badge.ok{color:var(--green)}
+.status-badge.ng{color:var(--red)}
+.status-icon{font-size:14px}
+.status-label{font-size:11.5px;font-weight:600;color:var(--navy);margin-bottom:10px}
+.status-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:4px;font-family:var(--mono);gap:8px}
+.status-row span:last-child{font-weight:600;color:var(--text)}
+.status-dcr{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:10px}
+.status-dcr.ok{color:var(--green)}
+.status-dcr.ng{color:var(--red)}
+
+/* NOTE/INFO/WARN BOXES */
+.note-box{font-size:11.5px;color:var(--muted);background:#f4f8fc;border-left:3px solid var(--steel);padding:8px 12px;margin-bottom:14px;line-height:1.6}
+.note-box:last-child{margin-bottom:0}
+.note-box strong{color:var(--text)}
+.warn-box{font-size:11.5px;color:#7c2d12;background:#fff8f0;border-left:3px solid var(--orange);padding:8px 12px;margin-bottom:12px;line-height:1.6}
+.info-box{font-size:11.5px;color:#1e3a5f;background:#eef5ff;border-left:3px solid var(--blue);padding:8px 12px;margin-bottom:14px;line-height:1.6}
+.info-box:last-child{margin-bottom:0}
+
+/* SECTION DIVIDERS in results */
+.results-section-head{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:8px 0 6px;border-bottom:1px solid var(--border);margin-bottom:12px}
+
+/* RESISTANCE FACTOR TABLE */
+.phi-select-wrap{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.phi-select-wrap select{flex:1;min-width:260px;max-width:520px}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.25);width:400px;overflow:hidden}
+.modal-head{background:var(--navy2);color:#fff;padding:14px 20px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;color:#7a9fc0;cursor:pointer;font-size:20px;line-height:1;padding:0}.modal-close:hover{color:#fff}
+.modal-body{padding:20px}
+.modal-prompt{font-size:12px;color:var(--muted);margin-bottom:14px}
+.modal-check-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:3px;margin-bottom:6px;cursor:pointer;transition:background .12s;user-select:none}
+.modal-check-row:hover{background:#f7f9fc}
+.modal-check-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue2);cursor:pointer;flex-shrink:0}
+.modal-check-row span{font-size:13px;font-weight:600;color:var(--text)}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-ok{flex:1;padding:9px;background:var(--navy2);color:#fff;border:none;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)}.modal-ok:hover{background:var(--navy)}
+.modal-cancel{flex:1;padding:9px;background:#f0f4f8;color:var(--muted);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)}.modal-cancel:hover{background:#e2e8f0;color:var(--text)}
+.no-print{display:none!important}
+
+@media print {
+  body{background:#fff}
+  .breadcrumb,.hdr-actions{display:none!important}
+  .header{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .header-inner{padding:10px 20px}
+  .phase-head,.card-head,.proj-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .status-card.ok,.status-card.ng{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .calc-block{break-inside:avoid}
+  .card{break-inside:avoid}
+  .status-cards{break-inside:avoid}
+  .container{padding:12px 16px 20px}
+  .ref-panel{display:none!important}
+  .modal-overlay{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="printModal">
+  <div class="modal">
+    <div class="modal-head">Print / Export PDF <button class="modal-close" onclick="closePrintModal()">&#x2715;</button></div>
+    <div class="modal-body">
+      <p class="modal-prompt">Select the sections you&rsquo;d like to include:</p>
+      <label class="modal-check-row"><input type="checkbox" id="pProjInfo" checked><span>&#8281; Project Information</span></label>
+      <label class="modal-check-row"><input type="checkbox" id="pInputs" checked><span>&#8281; Input Sections (1&ndash;5)</span></label>
+      <label class="modal-check-row"><input type="checkbox" id="pResults" checked><span>&#8281; Results &amp; Calculations</span></label>
+      <div class="modal-actions">
+        <button class="modal-ok" onclick="doPrint()">OK &mdash; Print / Export</button>
+        <button class="modal-cancel" onclick="closePrintModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="breadcrumb">
+  <a href="index.html">&#8592; Geotech Tools</a> &nbsp;/&nbsp; Spread Footing Bearing Resistance
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>Spread Footing <span>Bearing Resistance</span></h1>
+      <div class="header-sub">AASHTO LRFD 9th Ed. &sect;10.6.3 &middot; Strength Limit State &middot; Soil</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="hdr-btn save" onclick="saveJSON()">&#8595; Save JSON</button>
+      <button class="hdr-btn" onclick="document.getElementById('loadInput').click()">&#8593; Load JSON</button>
+      <button class="hdr-btn print" onclick="openPrintModal()">&#8281; Print / PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- PROJECT INFO -->
+  <div class="proj-card">
+    <div class="proj-head">Project Information</div>
+    <div class="proj-row">
+      <div class="proj-cell">
+        <span class="proj-label">Project</span>
+        <input class="proj-input" id="pi-proj" type="text" placeholder="Project name or number" oninput="autosave()">
+      </div>
+      <div class="proj-cell">
+        <span class="proj-label">Structure / Footing ID</span>
+        <input class="proj-input" id="pi-loc" type="text" placeholder="Bridge, bent, or footing designation" oninput="autosave()">
+      </div>
+    </div>
+    <div class="proj-row">
+      <div class="proj-cell">
+        <span class="proj-label">Engineer</span>
+        <input class="proj-input" id="pi-engr" type="text" placeholder="Initials" oninput="autosave()">
+      </div>
+      <div class="proj-cell">
+        <span class="proj-label">Date</span>
+        <input class="proj-input" id="pi-date" type="text" placeholder="MM/DD/YYYY" oninput="autosave()">
+      </div>
+      <div class="proj-cell">
+        <span class="proj-label">Notes</span>
+        <input class="proj-input" id="pi-notes" type="text" placeholder="Optional" oninput="autosave()">
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS MODE -->
+  <div class="phase">
+    <div class="phase-head">
+      <span class="phase-num">&#9670;</span>
+      <div>
+        <div class="phase-title">Analysis Mode</div>
+        <div class="phase-sub" id="mode-sub">Drained &mdash; effective stress, c&prime; and &phi;&prime;</div>
+      </div>
+      <div class="phase-ref">&sect;10.6.3.1.2a</div>
+    </div>
+    <div class="phase-body">
+      <div class="info-box">
+        Per &sect;10.6.3.1.2a: Cohesionless soils &rarr; <strong>Drained</strong> (effective stress, &phi; &gt; 0). Cohesive soils &rarr;
+        <strong>Undrained</strong> (total stress, &phi; = 0, c = S<sub>u</sub>). For cohesive soils subject to softening, also evaluate the drained condition.
+      </div>
+      <div class="method-toggle">
+        <button class="method-btn active" data-mode="drained" onclick="setMode('drained')">Drained (&phi; &gt; 0)</button>
+        <button class="method-btn" data-mode="undrained" onclick="setMode('undrained')">Undrained (&phi; = 0)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. FOOTING GEOMETRY -->
+  <div class="phase">
+    <div class="phase-head">
+      <span class="phase-num">1</span>
+      <div>
+        <div class="phase-title">Footing Geometry</div>
+        <div class="phase-sub">Gross dimensions and embedment depth</div>
+      </div>
+      <div class="phase-ref">&sect;10.6.1.3</div>
+    </div>
+    <div class="phase-body">
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Dimensions</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>B &mdash; Width <em>(ft)</em> <span class="tip" title="Shorter plan dimension; used for eccentricity (B direction), shape factors, and self-weight term">?</span></label>
+              <input type="number" id="inp-B" min="0.1" step="0.25" placeholder="" oninput="compute()">
+            </div>
+            <div class="field">
+              <label>L &mdash; Length <em>(ft)</em> <span class="tip" title="Longer plan dimension; L &ge; B">?</span></label>
+              <input type="number" id="inp-L" min="0.1" step="0.25" placeholder="" oninput="compute()">
+            </div>
+            <div class="field">
+              <label>D<sub>f</sub> &mdash; Embedment Depth <em>(ft)</em> <span class="tip" title="Distance from ground surface to base of footing; drives overburden surcharge term and depth correction">?</span></label>
+              <input type="number" id="inp-Df" min="0" step="0.25" placeholder="" oninput="compute()">
+            </div>
+          </div>
+          <div class="note-box">
+            Effective dimensions B&prime; = B &minus; 2e<sub>B</sub> and L&prime; = L &minus; 2e<sub>L</sub> are computed from applied moments
+            per &sect;10.6.1.3 and used in all bearing resistance calculations per &sect;10.6.3.1.1.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. SOIL PARAMETERS -->
+  <div class="phase">
+    <div class="phase-head">
+      <span class="phase-num">2</span>
+      <div>
+        <div class="phase-title">Soil Parameters</div>
+        <div class="phase-sub" id="soil-sub">Drained shear strength &mdash; effective stress</div>
+      </div>
+      <div class="phase-ref">Table 10.6.3.1.2a-1</div>
+    </div>
+    <div class="phase-body">
+
+      <!-- DRAINED -->
+      <div class="card" id="card-drained">
+        <div class="card-head"><span class="dot"></span>Drained Parameters (Effective Stress)</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>&phi;<sub>f</sub> &mdash; Friction Angle <em>(&deg;)</em></label>
+              <input type="number" id="inp-phi" min="0" max="45" step="0.5" placeholder="" oninput="compute()">
+            </div>
+            <div class="field">
+              <label>c&prime; &mdash; Effective Cohesion <em>(ksf)</em> <span class="tip" title="Enter 0 for sands; small effective cohesion for OC clays in drained analysis">?</span></label>
+              <input type="number" id="inp-c" min="0" step="0.01" placeholder="0" oninput="compute()">
+            </div>
+          </div>
+          <div class="ref-toggle" id="bcf-toggle" onclick="toggleBCF()">&#9658; Show Bearing Capacity Factor Table (Table 10.6.3.1.2a-1)</div>
+          <div class="ref-panel" id="bcf-panel">
+            <table class="ref-tbl" id="bcf-tbl">
+              <thead>
+                <tr>
+                  <th>&phi;<sub>f</sub></th><th>N<sub>c</sub></th><th>N<sub>q</sub></th><th>N<sub>&gamma;</sub></th>
+                  <th>&phi;<sub>f</sub></th><th>N<sub>c</sub></th><th>N<sub>q</sub></th><th>N<sub>&gamma;</sub></th>
+                </tr>
+              </thead>
+              <tbody id="bcf-tbody"></tbody>
+            </table>
+            <div class="ref-tbl-note">Source: N<sub>c</sub> (Prandtl, 1921), N<sub>q</sub> (Reissner, 1924), N<sub>&gamma;</sub> (Vesic, 1975). Highlighted row = interpolated value for entered &phi;<sub>f</sub>.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UNDRAINED -->
+      <div class="card" id="card-undrained" style="display:none">
+        <div class="card-head"><span class="dot"></span>Undrained Parameters (Total Stress, &phi; = 0)</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>S<sub>u</sub> &mdash; Undrained Shear Strength <em>(ksf)</em></label>
+              <input type="number" id="inp-Su" min="0" step="0.01" placeholder="" oninput="compute()">
+            </div>
+          </div>
+          <div class="info-box">
+            For undrained analysis: &phi; = 0, c = S<sub>u</sub>. From Table 10.6.3.1.2a-1 at &phi; = 0&deg;:
+            N<sub>c</sub> = 5.14, N<sub>q</sub> = 1.0, N<sub>&gamma;</sub> = 0.0. Depth correction d<sub>q</sub> = 1.0 (2&middot;tan(0) = 0).
+          </div>
+        </div>
+      </div>
+
+      <!-- UNIT WEIGHTS -->
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Unit Weights</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>&gamma;<sub>q</sub> &mdash; Above Bearing Elevation <em>(pcf)</em> <span class="tip" title="Total unit weight of soil above footing base; appears in surcharge term &gamma;q &middot; Df &middot; Nqm &middot; Cwq">?</span></label>
+              <input type="number" id="inp-gq" min="0" step="1" placeholder="" oninput="compute()">
+            </div>
+            <div class="field">
+              <label>&gamma;<sub>f</sub> &mdash; Below Bearing Elevation <em>(pcf)</em> <span class="tip" title="Total unit weight of soil below footing base; appears in self-weight term 0.5 &middot; &gamma;f &middot; B&prime; &middot; N&gamma;m &middot; Cw&gamma;; corrected for GWT via Cw&gamma;">?</span></label>
+              <input type="number" id="inp-gf" min="0" step="1" placeholder="" oninput="compute()">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. GROUNDWATER -->
+  <div class="phase">
+    <div class="phase-head">
+      <span class="phase-num">3</span>
+      <div>
+        <div class="phase-title">Groundwater</div>
+        <div class="phase-sub">Highest anticipated groundwater level within service life</div>
+      </div>
+      <div class="phase-ref">Table 10.6.3.1.2a-2</div>
+    </div>
+    <div class="phase-body">
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Groundwater Depth</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>D<sub>w</sub> &mdash; Depth to Water Table <em>(ft)</em> <span class="tip" title="Measured from ground surface. Use highest anticipated GWT per &sect;10.6.3.1.1. Enter large value (e.g. 999) if GWT is well below footing influence zone.">?</span></label>
+              <input type="number" id="inp-Dw" min="0" step="0.25" placeholder="" oninput="compute()">
+            </div>
+          </div>
+          <div class="note-box">
+            C<sub>wq</sub> and C<sub>w&gamma;</sub> are linearly interpolated from Table 10.6.3.1.2a-2.
+            Breakpoints: D<sub>w</sub> = 0 (C<sub>wq</sub> = 0.50, C<sub>w&gamma;</sub> = 0.50),
+            D<sub>w</sub> = D<sub>f</sub> (C<sub>wq</sub> = 1.00, C<sub>w&gamma;</sub> = 0.50),
+            D<sub>w</sub> &ge; D<sub>f</sub> + 1.5B&prime; (C<sub>wq</sub> = 1.00, C<sub>w&gamma;</sub> = 1.00).
+            GWT has no effect when D<sub>w</sub> &gt; D<sub>f</sub> + 1.5B&prime;.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. FACTORED LOADS -->
+  <div class="phase">
+    <div class="phase-head">
+      <span class="phase-num">4</span>
+      <div>
+        <div class="phase-title">Factored Loads &mdash; Strength I</div>
+        <div class="phase-sub">Load resultants at footing base; Strength I combination per &sect;3.4.1</div>
+      </div>
+      <div class="phase-ref">&sect;3.4.1, &sect;10.6.3.3</div>
+    </div>
+    <div class="phase-body">
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Factored Load Inputs (from Structural Analysis, Strength I)</div>
+        <div class="card-body">
+          <div class="info-box" style="margin-bottom:14px">
+            Enter the <strong>Strength I factored load resultants</strong> provided by the structural engineer,
+            resolved to the base of the footing. These are <em>inputs</em> &mdash; the tool uses them to
+            compute eccentricity, effective dimensions B&prime;&times;L&prime;, and factored contact pressure q<sub>u</sub>.
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>V<sub>u</sub> &mdash; Factored Vertical <em>(kips)</em></label>
+              <input type="number" id="inp-Vu" min="0" step="1" placeholder="" oninput="compute()">
+            </div>
+            <div class="field">
+              <label>H<sub>u</sub> &mdash; Factored Horizontal <em>(kips)</em> <span class="tip" title="Used for contact pressure check; also used for inclination factors if unfactored loads are not entered separately">?</span></label>
+              <input type="number" id="inp-Hu" min="0" step="1" placeholder="0" oninput="compute()">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>M<sub>B,u</sub> &mdash; Moment &parallel; B-axis <em>(kip&middot;ft)</em> <span class="tip" title="Factored moment producing eccentricity in the B (width) direction; eB = MB,u / Vu">?</span></label>
+              <input type="number" id="inp-MBu" min="0" step="1" placeholder="0" oninput="compute()">
+            </div>
+            <div class="field">
+              <label>M<sub>L,u</sub> &mdash; Moment &parallel; L-axis <em>(kip&middot;ft)</em> <span class="tip" title="Factored moment producing eccentricity in the L (length) direction; eL = ML,u / Vu">?</span></label>
+              <input type="number" id="inp-MLu" min="0" step="1" placeholder="0" oninput="compute()">
+            </div>
+          </div>
+          <div class="note-box">
+            Eccentricity is evaluated at the <strong>Strength I</strong> limit state using factored loads per &sect;10.6.3.3.
+            Limit: e &le; B/3 (or L/3) for footings on soil.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ANALYSIS OPTIONS -->
+  <div class="phase">
+    <div class="phase-head">
+      <span class="phase-num">5</span>
+      <div>
+        <div class="phase-title">Analysis Options &amp; Resistance Factor</div>
+        <div class="phase-sub">Correction factors and &phi;<sub>b</sub> per Table 10.5.5.2.2-1</div>
+      </div>
+      <div class="phase-ref">&sect;10.5.5.2.2, &sect;10.6.3.1.2a</div>
+    </div>
+    <div class="phase-body">
+
+      <!-- DEPTH CORRECTION -->
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Depth Correction Factor d<sub>q</sub></div>
+        <div class="card-body">
+          <div class="field-row" style="margin-bottom:10px">
+            <label class="check-label">
+              <input type="checkbox" id="cb-depth" onchange="compute()">
+              Apply depth correction factor d<sub>q</sub> (Eq. 10.6.3.1.2a-10)
+            </label>
+          </div>
+          <div class="note-box">
+            Apply d<sub>q</sub> only when soils <em>above</em> the bearing elevation are as competent as foundation soils; otherwise d<sub>q</sub> = 1.0.
+            d<sub>q</sub> is capped at 1.4 and has been verified for &phi; = 32&ndash;42&deg; and D<sub>f</sub>/B = 1&ndash;8 (AASHTO commentary, &sect;10.6.3.1.2a).
+          </div>
+        </div>
+      </div>
+
+      <!-- INCLINATION FACTORS -->
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Load Inclination Factors i<sub>c</sub>, i<sub>q</sub>, i<sub>&gamma;</sub></div>
+        <div class="card-body">
+          <div class="field-row" style="margin-bottom:10px">
+            <label class="check-label">
+              <input type="checkbox" id="cb-incl" onchange="toggleIncl()">
+              Apply load inclination factors (Eqs. 10.6.3.1.2a-5 through 10.6.3.1.2a-8)
+            </label>
+          </div>
+          <div id="incl-opts" style="display:none">
+            <div class="info-box" style="margin-bottom:12px">
+              Per &sect;10.6.3.1.2a Commentary: inclination factors use <strong>unfactored</strong> H and V.
+              These factors may be overly conservative for D<sub>f</sub>/B &ge; 1 (Meyerhof, 1953; Brinch-Hansen, 1970).
+              For footings with modest embedment, consideration may be given to omitting inclination factors.
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>V &mdash; Unfactored Vertical <em>(kips)</em></label>
+                <input type="number" id="inp-V-uf" min="0" step="1" placeholder="" oninput="compute()">
+              </div>
+              <div class="field">
+                <label>H &mdash; Unfactored Horizontal <em>(kips)</em></label>
+                <input type="number" id="inp-H-uf" min="0" step="1" placeholder="" oninput="compute()">
+              </div>
+              <div class="field">
+                <label>Direction of H <span class="tip" title="&theta; measured from the side of length L per Fig. C10.6.3.1.2a-1">?</span></label>
+                <select id="sel-hdir" onchange="compute()">
+                  <option value="B">Along B (&theta; = 90&deg;)</option>
+                  <option value="L">Along L (&theta; = 0&deg;)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="note-box" style="margin-top:0">
+            When inclination factors are not applied, i<sub>c</sub> = i<sub>q</sub> = i<sub>&gamma;</sub> = 1.0.
+          </div>
+        </div>
+      </div>
+
+      <!-- RESISTANCE FACTOR -->
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Resistance Factor &phi;<sub>b</sub> &mdash; Table 10.5.5.2.2-1</div>
+        <div class="card-body">
+          <div class="phi-select-wrap">
+            <div class="field" style="flex:1">
+              <label>Method / Soil / Condition</label>
+              <select id="sel-phi-method" onchange="setPhiB()" style="width:100%">
+                <option value="0.50">Theoretical method (Munfakh et al., 2001) &mdash; Clay &rarr; &phi;<sub>b</sub> = 0.50</option>
+                <option value="0.50">Theoretical method (Munfakh et al., 2001) &mdash; Sand, CPT &rarr; &phi;<sub>b</sub> = 0.50</option>
+                <option value="0.45" selected>Theoretical method (Munfakh et al., 2001) &mdash; Sand, SPT &rarr; &phi;<sub>b</sub> = 0.45</option>
+                <option value="0.45">Semi-empirical method (Meyerhof, 1957) &mdash; All soils &rarr; &phi;<sub>b</sub> = 0.45</option>
+                <option value="0.55">Plate load test &rarr; &phi;<sub>b</sub> = 0.55</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>&phi;<sub>b</sub> <span class="tip" title="May be overridden for local practices per &sect;10.5.5.2">?</span></label>
+              <input type="number" id="inp-phiB" min="0.01" max="1" step="0.01" value="0.45" style="width:80px;font-weight:700;font-size:15px" oninput="compute()">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS (hidden until inputs are complete) -->
+  <div class="phase" id="results-phase" style="display:none">
+    <div class="phase-head">
+      <span class="phase-num">&#10003;</span>
+      <div>
+        <div class="phase-title">Results &mdash; Bearing Resistance Check</div>
+        <div class="phase-sub" id="results-sub">Strength Limit State &middot; &sect;10.6.3.1</div>
+      </div>
+      <div class="phase-ref">Eq. 10.6.3.1.1-1</div>
+    </div>
+    <div class="phase-body" id="results-body"></div>
+  </div>
+
+</div><!-- /container -->
+
+<input type="file" id="loadInput" accept=".json" style="display:none" onchange="loadJSON(event)">
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// BEARING CAPACITY FACTOR TABLES  (Table 10.6.3.1.2a-1)
+// φ = 0° through 45°, integer degrees
+// Nc: Prandtl (1921), Nq: Reissner (1924), Nγ: Vesic (1975)
+// ─────────────────────────────────────────────────────────────────────────────
+const NC = [5.14,5.4,5.6,5.9,6.2,6.5,6.8,7.2,7.5,7.9,8.4,8.8,9.3,9.8,10.4,11.0,11.6,12.3,13.1,13.9,14.8,15.8,16.9,18.1,19.3,20.7,22.3,23.9,25.8,27.9,30.1,32.7,35.5,38.6,42.2,46.1,50.6,55.6,61.4,67.9,75.3,83.9,93.7,105.1,118.4,133.9];
+const NQ = [1.0,1.1,1.2,1.3,1.4,1.6,1.7,1.9,2.1,2.3,2.5,2.7,3.0,3.3,3.6,3.9,4.3,4.8,5.3,5.8,6.4,7.1,7.8,8.7,9.6,10.7,11.9,13.2,14.7,16.4,18.4,20.6,23.2,26.1,29.4,33.3,37.8,42.9,48.9,56.0,64.2,73.9,85.4,99.0,115.3,134.9];
+const NG = [0.0,0.1,0.2,0.2,0.3,0.5,0.6,0.7,0.9,1.0,1.2,1.4,1.7,2.0,2.3,2.7,3.1,3.5,4.1,4.7,5.4,6.2,7.1,8.2,9.4,10.9,12.5,14.5,16.7,19.3,22.4,26.0,30.2,35.2,41.1,48.0,56.3,66.2,78.0,92.3,109.4,130.2,155.6,186.5,224.6,271.8];
+
+function getBCF(phi) {
+  phi = Math.max(0, Math.min(45, phi));
+  const lo = Math.floor(phi), hi = Math.min(45, Math.ceil(phi)), t = phi - lo;
+  return {
+    Nc: NC[lo] + t * (NC[hi] - NC[lo]),
+    Nq: NQ[lo] + t * (NQ[hi] - NQ[lo]),
+    Ng: NG[lo] + t * (NG[hi] - NG[lo])
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GROUNDWATER CORRECTION (Table 10.6.3.1.2a-2)
+// Linear interpolation between three breakpoints
+// ─────────────────────────────────────────────────────────────────────────────
+function getGWT(Dw, Df, Bp) {
+  const upper = Df + 1.5 * Bp;
+  if (Dw <= 0)          return { Cwq: 0.50, Cwg: 0.50 };
+  if (Df <= 0) {
+    // Surface footing: breakpoints at 0 and 1.5B′
+    if (Dw >= upper)    return { Cwq: 1.00, Cwg: 1.00 };
+    const t = Dw / upper;
+    return { Cwq: 0.50 + 0.50 * t, Cwg: 0.50 + 0.50 * t };
+  }
+  if (Dw <= Df)         return { Cwq: 0.50 + 0.50 * (Dw / Df), Cwg: 0.50 };
+  if (Dw >= upper)      return { Cwq: 1.00, Cwg: 1.00 };
+  return { Cwq: 1.00, Cwg: 0.50 + 0.50 * ((Dw - Df) / (1.5 * Bp)) };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FORMAT HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+const f2 = n => (isNaN(n) || !isFinite(n)) ? '—' : n.toFixed(2);
+const f3 = n => (isNaN(n) || !isFinite(n)) ? '—' : n.toFixed(3);
+const f4 = n => (isNaN(n) || !isFinite(n)) ? '—' : n.toFixed(4);
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FIELD & STATE HELPERS  (Build Spec §4.1–4.3, §6A.6)
+// ─────────────────────────────────────────────────────────────────────────────
+function numField(id, def) {
+  const raw = document.getElementById(id).value.trim();
+  if (raw === '') return def;
+  const v = parseFloat(raw);
+  return Number.isFinite(v) ? v : def;
+}
+function gv(id)      { const e = document.getElementById(id); return e ? e.value : ''; }
+function sv(id, val) { const e = document.getElementById(id); if (!e) return; if (['INPUT','TEXTAREA','SELECT'].includes(e.tagName)) e.value = (val == null) ? '' : val; else e.innerHTML = (val == null) ? '' : val; }
+function esc(s)      { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtN(n, d)  { return (n == null || isNaN(n)) ? '——' : n.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d}); }
+
+let isDirty = false;
+function markDirty() { isDirty = true; }
+window.addEventListener('beforeunload', e => { if (isDirty) { e.preventDefault(); e.returnValue = ''; } });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE
+// ─────────────────────────────────────────────────────────────────────────────
+let currentMode = 'drained';
+
+function setMode(m) {
+  currentMode = m;
+  document.querySelectorAll('.method-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === m));
+  document.getElementById('card-drained').style.display  = m === 'drained'   ? '' : 'none';
+  document.getElementById('card-undrained').style.display = m === 'undrained' ? '' : 'none';
+  document.getElementById('mode-sub').textContent =
+    m === 'drained'
+      ? 'Drained — effective stress, c\u2032 and \u03c6\u2032'
+      : 'Undrained — total stress, \u03c6 = 0, c = S\u1d64';
+  document.getElementById('soil-sub').textContent =
+    m === 'drained'
+      ? 'Drained shear strength — effective stress'
+      : 'Total stress — undrained shear strength S\u1d64';
+  compute();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOGGLE HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+function toggleIncl() {
+  const on = document.getElementById('cb-incl').checked;
+  document.getElementById('incl-opts').style.display = on ? '' : 'none';
+  compute();
+}
+
+function toggleBCF() {
+  const panel = document.getElementById('bcf-panel');
+  const toggle = document.getElementById('bcf-toggle');
+  panel.classList.toggle('open');
+  toggle.innerHTML = (panel.classList.contains('open') ? '&#9660;' : '&#9658;') +
+    ' Show Bearing Capacity Factor Table (Table 10.6.3.1.2a-1)';
+  if (panel.classList.contains('open')) buildBCFTable();
+}
+
+function setPhiB() {
+  document.getElementById('inp-phiB').value =
+    document.getElementById('sel-phi-method').value;
+  compute();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUILD BCF REFERENCE TABLE
+// ─────────────────────────────────────────────────────────────────────────────
+function buildBCFTable() {
+  const phi_f = parseFloat(document.getElementById('inp-phi').value) || 0;
+  const phiInt = Math.round(phi_f);
+  let html = '';
+  for (let p = 0; p <= 22; p++) {
+    const p2 = p + 23;
+    const r1 = p === phiInt, r2 = p2 === phiInt;
+    html += `<tr class="${r1 ? 'cur-row' : ''}">
+      <td>${p}&deg;</td><td>${NC[p]}</td><td>${NQ[p]}</td><td>${NG[p]}</td>
+      <td>${p2}&deg;</td><td>${NC[p2]}</td><td>${NQ[p2]}</td><td>${NG[p2]}</td>
+    </tr>`;
+  }
+  document.getElementById('bcf-tbody').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN COMPUTE
+// ─────────────────────────────────────────────────────────────────────────────
+function compute() {
+  autosave();
+
+  const B    = numField('inp-B',   NaN);
+  const L    = numField('inp-L',   NaN);
+  const Df   = numField('inp-Df',  NaN);
+  const gq   = numField('inp-gq',  0) / 1000; // pcf → kcf
+  const gf   = numField('inp-gf',  0) / 1000;
+  const Dw   = numField('inp-Dw',  NaN);
+  const Vu   = numField('inp-Vu',  NaN);
+  const Hu   = numField('inp-Hu',  0);
+  const MBu  = numField('inp-MBu', 0);
+  const MLu  = numField('inp-MLu', 0);
+  const phiB = numField('inp-phiB',NaN);
+  const useDepth = document.getElementById('cb-depth').checked;
+  const useIncl  = document.getElementById('cb-incl').checked;
+
+  // Require core inputs
+  if ([B, L, Df, Dw, Vu, phiB].some(v => isNaN(v))) { hideResults(); return; }
+  if (gq === 0 && gf === 0) { hideResults(); return; }
+
+  // Soil strength parameters
+  let phi_f, c;
+  if (currentMode === 'drained') {
+    phi_f = numField('inp-phi', NaN);
+    c     = numField('inp-c',   0);
+    if (isNaN(phi_f)) { hideResults(); return; }
+  } else {
+    const Su = numField('inp-Su', NaN);
+    if (isNaN(Su)) { hideResults(); return; }
+    phi_f = 0;
+    c     = Su;
+  }
+
+  const phi_r = phi_f * Math.PI / 180; // radians
+
+  // ── 1. ECCENTRICITY  (§10.6.1.3, §10.6.3.3) ───────────────────────────────
+  const eB    = MBu / Vu;
+  const eL    = MLu / Vu;
+  const eBmax = B / 3;   // §10.6.3.3: e ≤ B/3 for soil
+  const eLmax = L / 3;
+  const eccOK = eB <= eBmax && eL <= eLmax;
+
+  // ── 2. EFFECTIVE DIMENSIONS  (Eqs. 10.6.1.3-1) ────────────────────────────
+  const Bp = Math.max(0.01, B - 2 * eB);
+  const Lp = Math.max(Bp,   L - 2 * eL);  // L′ ≥ B′
+
+  // ── 3. GWT CORRECTIONS  (Table 10.6.3.1.2a-2) ─────────────────────────────
+  const { Cwq, Cwg } = getGWT(Dw, Df, Bp);
+
+  // ── 4. BEARING CAPACITY FACTORS  (Table 10.6.3.1.2a-1) ────────────────────
+  const { Nc, Nq, Ng } = getBCF(phi_f);
+
+  // ── 5. SHAPE FACTORS  (Table 10.6.3.1.2a-3) ───────────────────────────────
+  let sc, sq, sg;
+  const BpLp = Bp / Lp;
+  if (phi_f === 0) {
+    sc = 1 + 0.2 * BpLp;   // φ = 0 row of Table 10.6.3.1.2a-3
+    sq = 1.0;
+    sg = 1.0;
+  } else {
+    sc = 1 + BpLp * (Nq / Nc);
+    sq = 1 + BpLp * Math.tan(phi_r);
+    sg = Math.max(0, 1 - 0.4 * BpLp);
+  }
+
+  // ── 6. DEPTH CORRECTION  (Eq. 10.6.3.1.2a-10) ────────────────────────────
+  let dq = 1.0;
+  let dq_raw = 1.0;
+  let dq_capped = false;
+  if (useDepth && phi_f > 0 && Bp > 0) {
+    dq_raw = 1 + 2 * Math.tan(phi_r) * Math.pow(1 - Math.sin(phi_r), 2) * Math.atan(Df / Bp);
+    if (dq_raw > 1.4) { dq = 1.4; dq_capped = true; } else { dq = dq_raw; }
+  }
+
+  // ── 7. LOAD INCLINATION  (Eqs. 10.6.3.1.2a-5 through -9) ─────────────────
+  let ic = 1, iq = 1, ig = 1;
+  let V_uf = 0, H_uf = 0, n_val = 0;
+  let inclApplied = false;
+
+  if (useIncl) {
+    V_uf = numField('inp-V-uf', 0);
+    H_uf = numField('inp-H-uf', 0);
+    const Hdir = document.getElementById('sel-hdir').value;
+
+    if (H_uf > 0 && V_uf > 0) {
+      // n  (Eq. 10.6.3.1.2a-9 simplified for θ = 0° or 90°)
+      if (Hdir === 'B') {
+        // H along B → θ = 90°  →  n = (2 + L′/B′)/(1 + L′/B′)
+        n_val = (2 + Lp / Bp) / (1 + Lp / Bp);
+      } else {
+        // H along L → θ = 0°  →  n = (2 + B′/L′)/(1 + B′/L′)
+        n_val = (2 + Bp / Lp) / (1 + Bp / Lp);
+      }
+
+      inclApplied = true;
+
+      if (phi_f === 0) {
+        // Eq. 10.6.3.1.2a-5 (φ = 0 case)
+        ic = Math.max(0, 1 - (n_val * H_uf) / (c * Bp * Lp * Nc));
+        iq = 1.0;
+        ig = 0.0;  // Nγ = 0 for φ = 0 anyway
+      } else {
+        const cot_phi = 1 / Math.tan(phi_r);
+        const base = V_uf + c * Bp * Lp * cot_phi;
+        if (H_uf >= base) {
+          // Load exceeds passive + cohesion limit; factors → 0
+          iq = 0; ig = 0; ic = 0;
+        } else {
+          iq = Math.max(0, Math.pow(1 - H_uf / base, n_val));        // Eq. 10.6.3.1.2a-7
+          ig = Math.max(0, Math.pow(1 - H_uf / base, n_val + 1));    // Eq. 10.6.3.1.2a-8
+          ic = Math.max(0, iq - (1 - iq) / (Nq - 1));               // Eq. 10.6.3.1.2a-6
+        }
+      }
+    }
+  }
+
+  // ── 8. MODIFIED FACTORS  (Eqs. 10.6.3.1.2a-2, -3, -4) ────────────────────
+  const Ncm = Nc * sc * ic;
+  const Nqm = Nq * sq * dq * iq;
+  const Ngm = Ng * sg * ig;
+
+  // ── 9. NOMINAL BEARING RESISTANCE  (Eq. 10.6.3.1.2a-1) ───────────────────
+  // qn = c·Ncm + γq·Df·Nqm·Cwq + 0.5·γf·B′·Nγm·Cwγ
+  const q_coh = c * Ncm;
+  const q_ovb = gq * Df * Nqm * Cwq;
+  const q_wgt = 0.5 * gf * Bp * Ngm * Cwg;
+  const qn    = q_coh + q_ovb + q_wgt;
+
+  // ── 10. FACTORED RESISTANCE  (Eq. 10.6.3.1.1-1) ───────────────────────────
+  const qR = phiB * qn;
+
+  // ── 11. FACTORED CONTACT PRESSURE ─────────────────────────────────────────
+  const qu = Vu / (Bp * Lp);
+
+  // ── 12. CAPACITY-DEMAND RATIO ──────────────────────────────────────────────
+  const CDR       = qR / qu;
+  const bearingOK = CDR >= 1.0;
+  const allOK     = bearingOK && eccOK;
+
+  renderResults({
+    // mode / params
+    mode: currentMode, phi_f, phi_r, c, currentMode,
+    // geometry
+    B, L, Df, Bp, Lp, BpLp,
+    // eccentricity
+    eB, eL, eBmax, eLmax, eccOK, MBu, MLu, Vu, Hu,
+    // GWT
+    Dw, Cwq, Cwg,
+    // BCFs
+    Nc, Nq, Ng,
+    // shape
+    sc, sq, sg,
+    // depth
+    dq, dq_raw, dq_capped, useDepth,
+    // inclination
+    ic, iq, ig, V_uf, H_uf, n_val, useIncl, inclApplied,
+    hdir: useIncl ? document.getElementById('sel-hdir').value : 'B',
+    // modified BCFs
+    Ncm, Nqm, Ngm,
+    // unit weights
+    gq, gf,
+    // resistance
+    q_coh, q_ovb, q_wgt, qn, qR, phiB, qu, CDR, bearingOK, allOK
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER RESULTS
+// ─────────────────────────────────────────────────────────────────────────────
+function hideResults() {
+  document.getElementById('results-phase').style.display = 'none';
+}
+
+function renderResults(r) {
+  document.getElementById('results-phase').style.display = '';
+  document.getElementById('results-sub').innerHTML =
+    `Strength Limit State &middot; &sect;10.6.3.1 &middot; ${r.mode === 'drained' ? 'Drained (&phi; = ' + r.phi_f.toFixed(1) + '&deg;)' : 'Undrained (&phi; = 0)'}`;
+
+  const body = document.getElementById('results-body');
+
+  const eccCls = r.eccOK   ? 'ok' : 'ng';
+  const brCls  = r.bearingOK ? 'ok' : 'ng';
+  const eccIcon = r.eccOK   ? '&#10003;' : '&#10007;';
+  const brIcon  = r.bearingOK ? '&#10003;' : '&#10007;';
+
+  // Depth factor display string
+  const dqDisplay = r.useDepth && r.phi_f > 0
+    ? `${f3(r.dq)}${r.dq_capped ? ' (capped at 1.400)' : ''}`
+    : `1.000${!r.useDepth ? ' (not applied)' : ' (\u03c6 = 0)'}`;
+
+  // Inclination factors display
+  const inclNote = r.inclApplied
+    ? `V = ${f2(r.V_uf)} kips, H = ${f2(r.H_uf)} kips, n = ${f3(r.n_val)} (H along ${r.hdir})`
+    : 'Not applied &mdash; factors = 1.0';
+
+  // Shape factor formulas
+  const shapeFmla = r.phi_f === 0
+    ? `s<sub>c</sub> = 1 + (B&prime;/L&prime;)/5 = 1 + ${f3(r.BpLp)}/5 = <strong>${f3(r.sc)}</strong>&nbsp;&nbsp;&nbsp;
+       s<sub>q</sub> = 1.000 (&phi; = 0)&nbsp;&nbsp;&nbsp;
+       s<sub>&gamma;</sub> = 1.000 (&phi; = 0)`
+    : `s<sub>c</sub> = 1 + (B&prime;/L&prime;)(N<sub>q</sub>/N<sub>c</sub>) = 1 + (${f3(r.BpLp)})(${f2(r.Nq)}/${f2(r.Nc)}) = <strong>${f3(r.sc)}</strong><br>
+       s<sub>q</sub> = 1 + (B&prime;/L&prime;)tan(&phi;) = 1 + (${f3(r.BpLp)})tan(${r.phi_f.toFixed(1)}&deg;) = <strong>${f3(r.sq)}</strong><br>
+       s<sub>&gamma;</sub> = 1 &minus; 0.4(B&prime;/L&prime;) = 1 &minus; 0.4(${f3(r.BpLp)}) = <strong>${f3(r.sg)}</strong>`;
+
+  // Depth factor formula
+  const depthFmla = r.useDepth && r.phi_f > 0
+    ? `d<sub>q</sub> = 1 + 2&middot;tan(&phi;)&middot;(1&minus;sin(&phi;))&sup2;&middot;arctan(D<sub>f</sub>/B&prime;)<br>
+       &nbsp;&nbsp;&nbsp;&nbsp;= 1 + 2&middot;tan(${r.phi_f.toFixed(1)}&deg;)&middot;(1&minus;sin(${r.phi_f.toFixed(1)}&deg;))&sup2;&middot;arctan(${f3(r.Df / r.Bp)} rad)<br>
+       &nbsp;&nbsp;&nbsp;&nbsp;= ${f3(r.dq_raw)}${r.dq_capped ? ' &rarr; capped at <strong>1.400</strong>' : ' = <strong>' + f3(r.dq) + '</strong>'}`
+    : `d<sub>q</sub> = <strong>1.000</strong> &mdash; ${!r.useDepth ? 'not selected' : '&phi; = 0 for undrained analysis'}`;
+
+  // Inclination factor formulas
+  let inclFmla = '';
+  if (r.inclApplied) {
+    if (r.phi_f === 0) {
+      inclFmla = `i<sub>c</sub> = 1 &minus; nH/(c&middot;B&prime;&middot;L&prime;&middot;N<sub>c</sub>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;= 1 &minus; ${f3(r.n_val)}&middot;${f2(r.H_uf)} / (${f3(r.c)}&middot;${f2(r.Bp)}&middot;${f2(r.Lp)}&middot;${f2(r.Nc)}) = <strong>${f3(r.ic)}</strong><br>
+        i<sub>q</sub> = 1.000, &nbsp; i<sub>&gamma;</sub> = 0.000 (&phi; = 0, N<sub>&gamma;</sub> = 0)`;
+    } else {
+      const cot_phi = 1 / Math.tan(r.phi_r);
+      const base = r.V_uf + r.c * r.Bp * r.Lp * cot_phi;
+      inclFmla = `n = ${f3(r.n_val)} &nbsp; (H along ${r.hdir === 'B' ? 'B, &theta; = 90&deg;' : 'L, &theta; = 0&deg;'})<br>
+        base = V + c&middot;B&prime;&middot;L&prime;&middot;cot(&phi;) = ${f2(r.V_uf)} + ${f3(r.c)}&middot;${f2(r.Bp)}&middot;${f2(r.Lp)}&middot;${f2(cot_phi)} = ${f2(base)} kips<br>
+        i<sub>q</sub> = (1 &minus; H/base)<sup>n</sup> = (1 &minus; ${f2(r.H_uf)}/${f2(base)})<sup>${f3(r.n_val)}</sup> = <strong>${f3(r.iq)}</strong><br>
+        i<sub>&gamma;</sub> = (1 &minus; H/base)<sup>n+1</sup> = <strong>${f3(r.ig)}</strong><br>
+        i<sub>c</sub> = i<sub>q</sub> &minus; (1&minus;i<sub>q</sub>)/(N<sub>q</sub>&minus;1) = ${f3(r.iq)} &minus; (1&minus;${f3(r.iq)})/(${f2(r.Nq)}&minus;1) = <strong>${f3(r.ic)}</strong>`;
+    }
+  } else {
+    inclFmla = `i<sub>c</sub> = i<sub>q</sub> = i<sub>&gamma;</sub> = <strong>1.000</strong> (inclination factors not applied)`;
+  }
+
+  body.innerHTML = `
+    <!-- ── SUMMARY STATUS CARDS ─────────────────────────────────────────── -->
+    <div class="status-cards">
+      <div class="status-card ${eccCls}">
+        <div class="status-badge ${eccCls}">
+          <span class="status-icon">${eccIcon}</span> Eccentricity &mdash; &sect;10.6.3.3
+        </div>
+        <div class="status-label">e &le; B/3 and e &le; L/3 (soil) at Strength I</div>
+        <div class="status-row"><span>e<sub>B</sub></span><span>${f3(r.eB)} ft</span></div>
+        <div class="status-row"><span>Limit (B/3)</span><span>${f3(r.eBmax)} ft ${r.eB > r.eBmax ? '&#9888;' : '&#10003;'}</span></div>
+        <div class="status-row"><span>e<sub>L</sub></span><span>${f3(r.eL)} ft</span></div>
+        <div class="status-row"><span>Limit (L/3)</span><span>${f3(r.eLmax)} ft ${r.eL > r.eLmax ? '&#9888;' : '&#10003;'}</span></div>
+        <div class="status-dcr ${eccCls}">${r.eccOK ? 'SATISF.' : 'EXCEEDS'}</div>
+      </div>
+      <div class="status-card ${brCls}">
+        <div class="status-badge ${brCls}">
+          <span class="status-icon">${brIcon}</span> Bearing &mdash; Eq. 10.6.3.1.1-1
+        </div>
+        <div class="status-label">q<sub>R</sub> = &phi;<sub>b</sub>&middot;q<sub>n</sub> &ge; q<sub>u</sub> = V<sub>u</sub>/(B&prime;&times;L&prime;)</div>
+        <div class="status-row"><span>q<sub>n</sub> (nominal)</span><span>${f2(r.qn)} ksf</span></div>
+        <div class="status-row"><span>&phi;<sub>b</sub></span><span>${r.phiB.toFixed(2)}</span></div>
+        <div class="status-row"><span>q<sub>R</sub> (factored)</span><span>${f2(r.qR)} ksf</span></div>
+        <div class="status-row"><span>q<sub>u</sub> (demand)</span><span>${f2(r.qu)} ksf</span></div>
+        <div class="status-dcr ${brCls}">CDR = ${f2(r.CDR)}</div>
+      </div>
+    </div>
+
+    <!-- ── ECCENTRICITY & EFFECTIVE DIMENSIONS ───────────────────────────── -->
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Eccentricity &amp; Effective Footing Dimensions &mdash; &sect;10.6.1.3</div>
+      <div class="card-body">
+        <div class="calc-block">
+          <div class="calc-ref">Eqs. 10.6.1.3-1 &amp; 10.6.3.3 &mdash; Factored loads at Strength I</div>
+          <div class="calc-line">e<sub>B</sub> = M<sub>B,u</sub> / V<sub>u</sub> = ${f2(r.MBu)} / ${f2(r.Vu)} = <strong>${f3(r.eB)} ft</strong> &nbsp; [Limit: B/3 = ${f3(r.eBmax)} ft] &nbsp; ${r.eB <= r.eBmax ? '&#10003; OK' : '<span style="color:var(--red)">&#9888; EXCEEDS</span>'}</div>
+          <div class="calc-line">e<sub>L</sub> = M<sub>L,u</sub> / V<sub>u</sub> = ${f2(r.MLu)} / ${f2(r.Vu)} = <strong>${f3(r.eL)} ft</strong> &nbsp; [Limit: L/3 = ${f3(r.eLmax)} ft] &nbsp; ${r.eL <= r.eLmax ? '&#10003; OK' : '<span style="color:var(--red)">&#9888; EXCEEDS</span>'}</div>
+          <div class="calc-line result">B&prime; = B &minus; 2e<sub>B</sub> = ${f2(r.B)} &minus; 2(${f3(r.eB)}) = <strong>${f3(r.Bp)} ft</strong></div>
+          <div class="calc-line result">L&prime; = L &minus; 2e<sub>L</sub> = ${f2(r.L)} &minus; 2(${f3(r.eL)}) = <strong>${f3(r.Lp)} ft</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GWT CORRECTIONS ──────────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Groundwater Correction Factors &mdash; Table 10.6.3.1.2a-2</div>
+      <div class="card-body">
+        <div class="calc-block">
+          <div class="calc-ref">Table 10.6.3.1.2a-2 &mdash; D<sub>w</sub> = ${f2(r.Dw)} ft &nbsp; D<sub>f</sub> = ${f2(r.Df)} ft &nbsp; D<sub>f</sub> + 1.5B&prime; = ${f2(r.Df + 1.5 * r.Bp)} ft</div>
+          <div class="calc-line">C<sub>wq</sub> = <strong>${f2(r.Cwq)}</strong> &nbsp; (surcharge / N<sub>q</sub> term)</div>
+          <div class="calc-line">C<sub>w&gamma;</sub> = <strong>${f2(r.Cwg)}</strong> &nbsp; (self-weight / N<sub>&gamma;</sub> term)</div>
+          ${r.Dw >= r.Df + 1.5 * r.Bp ? '<div class="calc-line" style="color:var(--muted)">D<sub>w</sub> &ge; D<sub>f</sub> + 1.5B&prime; &rarr; groundwater has no effect on bearing resistance</div>' : ''}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BEARING CAPACITY FACTORS ─────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Bearing Capacity Factors &mdash; Table 10.6.3.1.2a-1</div>
+      <div class="card-body">
+        <div class="calc-block">
+          <div class="calc-ref">Table 10.6.3.1.2a-1 (Prandtl 1921, Reissner 1924, Vesic 1975) &mdash; &phi;<sub>f</sub> = ${r.phi_f.toFixed(1)}&deg;${r.mode === 'undrained' ? ' (&phi; = 0 for undrained analysis)' : '; linearly interpolated from tabulated integer values'}</div>
+          <div class="calc-line">N<sub>c</sub> = <strong>${f2(r.Nc)}</strong></div>
+          <div class="calc-line">N<sub>q</sub> = <strong>${f2(r.Nq)}</strong></div>
+          <div class="calc-line">N<sub>&gamma;</sub> = <strong>${f2(r.Ng)}</strong>${r.phi_f === 0 ? ' (= 0 for &phi; = 0; self-weight term vanishes)' : ''}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SHAPE FACTORS ─────────────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Shape Correction Factors &mdash; Table 10.6.3.1.2a-3</div>
+      <div class="card-body">
+        <div class="calc-block">
+          <div class="calc-ref">Table 10.6.3.1.2a-3 &mdash; B&prime;/L&prime; = ${f3(r.BpLp)} &nbsp; &phi;<sub>f</sub> = ${r.phi_f.toFixed(1)}&deg;</div>
+          <div class="calc-line">${shapeFmla}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DEPTH CORRECTION ──────────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Depth Correction Factor &mdash; Eq. 10.6.3.1.2a-10</div>
+      <div class="card-body">
+        <div class="calc-block">
+          <div class="calc-ref">Eq. 10.6.3.1.2a-10 &mdash; D<sub>f</sub>/B&prime; = ${f3(r.Df / r.Bp)}</div>
+          <div class="calc-line">${depthFmla}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INCLINATION FACTORS ───────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Load Inclination Factors &mdash; Eqs. 10.6.3.1.2a-5 through 10.6.3.1.2a-9</div>
+      <div class="card-body">
+        <div class="calc-block">
+          <div class="calc-ref">Eqs. 10.6.3.1.2a-5 through -9 (Meyerhof 1953; Brinch-Hansen 1970; Vesic 1973) &mdash; ${inclNote}</div>
+          <div class="calc-line">${inclFmla}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MODIFIED BCFs ──────────────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Modified Bearing Capacity Factors &mdash; Eqs. 10.6.3.1.2a-2 through 10.6.3.1.2a-4</div>
+      <div class="card-body">
+        <div class="calc-block">
+          <div class="calc-ref">N<sub>cm</sub> = N<sub>c</sub>&middot;s<sub>c</sub>&middot;i<sub>c</sub> &nbsp;&nbsp; N<sub>qm</sub> = N<sub>q</sub>&middot;s<sub>q</sub>&middot;d<sub>q</sub>&middot;i<sub>q</sub> &nbsp;&nbsp; N<sub>&gamma;m</sub> = N<sub>&gamma;</sub>&middot;s<sub>&gamma;</sub>&middot;i<sub>&gamma;</sub></div>
+          <div class="calc-line">N<sub>cm</sub> = ${f2(r.Nc)} &times; ${f3(r.sc)} &times; ${f3(r.ic)} = <strong>${f3(r.Ncm)}</strong></div>
+          <div class="calc-line">N<sub>qm</sub> = ${f2(r.Nq)} &times; ${f3(r.sq)} &times; ${f3(r.dq)} &times; ${f3(r.iq)} = <strong>${f3(r.Nqm)}</strong></div>
+          <div class="calc-line">N<sub>&gamma;m</sub> = ${f2(r.Ng)} &times; ${f3(r.sg)} &times; ${f3(r.ig)} = <strong>${f3(r.Ngm)}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NOMINAL BEARING RESISTANCE ───────────────────────────────────── -->
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Nominal Bearing Resistance &mdash; Eq. 10.6.3.1.2a-1</div>
+      <div class="card-body">
+        <div class="calc-block">
+          <div class="calc-ref">Eq. 10.6.3.1.2a-1 &mdash; q<sub>n</sub> = c&middot;N<sub>cm</sub> + &gamma;<sub>q</sub>&middot;D<sub>f</sub>&middot;N<sub>qm</sub>&middot;C<sub>wq</sub> + 0.5&middot;&gamma;<sub>f</sub>&middot;B&prime;&middot;N<sub>&gamma;m</sub>&middot;C<sub>w&gamma;</sub></div>
+          <div class="calc-line sub">Cohesion term: &nbsp;&nbsp;&nbsp; c &middot; N<sub>cm</sub> = ${f4(r.c)} &times; ${f3(r.Ncm)} = <strong>${f3(r.q_coh)} ksf</strong></div>
+          <div class="calc-line sub">Overburden term: &gamma;<sub>q</sub>&middot;D<sub>f</sub>&middot;N<sub>qm</sub>&middot;C<sub>wq</sub> = ${f4(r.gq)} kcf &times; ${f2(r.Df)} ft &times; ${f3(r.Nqm)} &times; ${f2(r.Cwq)} = <strong>${f3(r.q_ovb)} ksf</strong></div>
+          <div class="calc-line sub">Self-weight term: 0.5&middot;&gamma;<sub>f</sub>&middot;B&prime;&middot;N<sub>&gamma;m</sub>&middot;C<sub>w&gamma;</sub> = 0.5 &times; ${f4(r.gf)} kcf &times; ${f2(r.Bp)} ft &times; ${f3(r.Ngm)} &times; ${f2(r.Cwg)} = <strong>${f3(r.q_wgt)} ksf</strong></div>
+          <div class="calc-line result">q<sub>n</sub> = ${f3(r.q_coh)} + ${f3(r.q_ovb)} + ${f3(r.q_wgt)} = <strong>${f2(r.qn)} ksf</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CAPACITY vs DEMAND ────────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Factored Resistance vs. Demand &mdash; Eq. 10.6.3.1.1-1</div>
+      <div class="card-body">
+        <div class="calc-block">
+          <div class="calc-ref">Eq. 10.6.3.1.1-1 &mdash; q<sub>R</sub> = &phi;<sub>b</sub>&middot;q<sub>n</sub> &ge; q<sub>u</sub> = V<sub>u</sub> / (B&prime; &times; L&prime;)</div>
+          <div class="calc-line">q<sub>R</sub> = &phi;<sub>b</sub> &middot; q<sub>n</sub> = ${r.phiB.toFixed(2)} &times; ${f2(r.qn)} = <strong>${f3(r.qR)} ksf</strong></div>
+          <div class="calc-line">q<sub>u</sub> = V<sub>u</sub> / (B&prime; &times; L&prime;) = ${f2(r.Vu)} / (${f2(r.Bp)} &times; ${f2(r.Lp)}) = <strong>${f3(r.qu)} ksf</strong></div>
+        </div>
+        <div class="result-row">
+          <div class="pill">
+            <div class="pill-label">q<sub>n</sub> &mdash; Nominal</div>
+            <div class="pill-value">${f2(r.qn)}</div>
+            <div class="pill-sub">ksf</div>
+          </div>
+          <div class="pill">
+            <div class="pill-label">q<sub>R</sub> &mdash; Factored</div>
+            <div class="pill-value">${f2(r.qR)}</div>
+            <div class="pill-sub">ksf &nbsp; (&phi;<sub>b</sub> = ${r.phiB.toFixed(2)})</div>
+          </div>
+          <div class="pill">
+            <div class="pill-label">q<sub>u</sub> &mdash; Demand</div>
+            <div class="pill-value">${f2(r.qu)}</div>
+            <div class="pill-sub">ksf</div>
+          </div>
+          <div class="pill big ${r.bearingOK ? 'ok' : 'ng'}">
+            <div class="pill-label">CDR = q<sub>R</sub> / q<sub>u</sub></div>
+            <div class="pill-value">${f2(r.CDR)}</div>
+            <div class="pill-sub">${r.bearingOK ? '&#10003; ADEQUATE' : '&#10007; INADEQUATE'}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTOSAVE
+// ─────────────────────────────────────────────────────────────────────────────
+const LS_KEY = 'sfBearing_v1';
+
+function autosave() {
+  markDirty();
+  const data = { _mode: currentMode };
+  document.querySelectorAll('[id^="inp-"],[id^="pi-"],[id^="sel-"],[id^="cb-"]').forEach(el => {
+    data[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch (e) {}
+}
+
+function loadAutosave() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.entries(data).forEach(([k, v]) => {
+      if (k === '_mode') return;
+      const el = document.getElementById(k);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = v;
+      else el.value = v;
+    });
+    if (data._mode) setMode(data._mode);
+    if (data['cb-incl']) document.getElementById('incl-opts').style.display = '';
+    compute();
+  } catch (e) {}
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JSON SAVE / LOAD
+// ─────────────────────────────────────────────────────────────────────────────
+function saveJSON() {
+  const data = { _tool: 'spread-footing-bearing-v1', _saved: new Date().toISOString(), _mode: currentMode, schemaVersion: 1 };
+  document.querySelectorAll('[id^="inp-"],[id^="pi-"],[id^="sel-"],[id^="cb-"]').forEach(el => {
+    data[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `spread-footing-${(document.getElementById('pi-proj').value || 'calc').replace(/\s+/g, '-')}.json`;
+  a.click();
+  isDirty = false;
+}
+
+('change', function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      Object.entries(data).forEach(([k, v]) => {
+        if (k.startsWith('_')) return;
+        const el = document.getElementById(k);
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = v;
+        else el.value = v;
+      });
+      if (data._mode) setMode(data._mode);
+      if (data['cb-incl']) document.getElementById('incl-opts').style.display = '';
+      compute();
+    } catch (err) { alert('Could not load file: ' + err.message); }
+  };
+  reader.readAsText(file);
+  this.value = '';
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRINT MODAL  (Build Spec §4.5)
+// ─────────────────────────────────────────────────────────────────────────────
+function openPrintModal()  { document.getElementById('printModal').classList.add('open'); }
+function closePrintModal() { document.getElementById('printModal').classList.remove('open'); }
+
+function doPrint() {
+  const showProj    = document.getElementById('pProjInfo').checked;
+  const showInputs  = document.getElementById('pInputs').checked;
+  const showResults = document.getElementById('pResults').checked;
+  if (!showProj && !showInputs && !showResults) { alert('Select at least one section to print.'); return; }
+  closePrintModal();
+
+  const projCard    = document.querySelector('.proj-card');
+  const inputPhases = Array.from(document.querySelectorAll('.phase:not(#results-phase)'));
+  const resultPhase = document.getElementById('results-phase');
+
+  if (!showProj)    projCard.classList.add('no-print');
+  inputPhases.forEach(p => { if (!showInputs) p.classList.add('no-print'); });
+  if (!showResults) resultPhase.classList.add('no-print');
+
+  // Inject page breaks between visible sections (spec §4.5 — no break before first)
+  let first = true;
+  [projCard, ...inputPhases, resultPhase].forEach(el => {
+    if (!el.classList.contains('no-print')) {
+      el.style.breakBefore = first ? 'auto' : 'page';
+      first = false;
+    }
+  });
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      projCard.classList.remove('no-print');
+      inputPhases.forEach(p => p.classList.remove('no-print'));
+      resultPhase.classList.remove('no-print');
+      [projCard, ...inputPhases, resultPhase].forEach(el => { el.style.breakBefore = ''; });
+    }, 600);
+  }, 150);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+buildBCFTable();
+loadAutosave();
+</script>
+</body>
+</html>

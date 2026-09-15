@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geotech Tools</title>
+<link rel="manifest" href="manifest.json">
+<link href="fonts/fonts.css" rel="stylesheet"><!-- P1-4: self-hosted IBM Plex (was Google Fonts CDN) -->
+<style>
+:root {
+  --navy:   #0c1f35;
+  --navy2:  #152d4a;
+  --blue:   #1d5fa8;
+  --blue2:  #2471c9;
+  --bg:     #f0f4f8;
+  --bg2:    #ffffff;
+  --border: #c8d6e5;
+  --text:   #1a2b3c;
+  --muted:  #5a738a;
+  --muted2: #8ba3bb;
+  --mono:   'IBM Plex Mono', monospace;
+  --sans:   'IBM Plex Sans', sans-serif;
+  --cond:   'IBM Plex Sans Condensed', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+
+/* ── TOP BAR — matches individual tools ── */
+.topbar {
+  background: var(--navy);
+  border-bottom: 3px solid var(--blue2);
+}
+.topbar-inner {
+  max-width: 1040px; margin: 0 auto; padding: 14px 40px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+.topbar-brand {
+  font-family: var(--cond); font-weight: 700; font-size: 16px;
+  color: #fff; letter-spacing: 0.5px;
+}
+.topbar-brand span { color: #6db3f5; font-weight: 300; }
+.topbar-sub { font-family: var(--mono); font-size: 10px; color: #7a9fc0; }
+
+/* ── HERO ── */
+header {
+  max-width: 1040px; margin: 0 auto;
+  padding: 48px 40px 36px;
+}
+.rkk-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 4px 10px 4px 6px;
+  border: 1px solid var(--border); border-radius: 20px;
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  margin-bottom: 24px;
+}
+.rkk-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--blue2);
+  box-shadow: 0 0 6px rgba(36, 113, 201, 0.5);
+  animation: pulse 2.5s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+h1 {
+  font-family: var(--cond); font-size: clamp(32px, 5vw, 52px);
+  font-weight: 700; letter-spacing: -0.5px; line-height: 1.05;
+  color: var(--navy); margin-bottom: 12px;
+}
+h1 em { font-style: normal; color: var(--blue); }
+.tagline {
+  font-size: 13.5px; color: var(--muted); font-family: var(--mono);
+  max-width: 480px; line-height: 1.65;
+}
+
+/* ── MAIN ── */
+main { max-width: 1040px; margin: 0 auto; padding: 0 40px 64px; }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, var(--blue2) 0%, transparent 60%);
+  margin-bottom: 36px; opacity: 0.35;
+}
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── GRID ── */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px; margin-bottom: 44px;
+}
+
+/* ── TOOL CARD ── */
+.tool-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 22px; display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+  transition: border-color .18s, transform .15s, box-shadow .18s;
+  text-decoration: none; color: inherit; cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.tool-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--card-accent, var(--blue)); opacity: 0; transition: opacity .18s;
+}
+.tool-card:hover {
+  border-color: var(--card-accent, var(--blue));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(0,0,0,.10);
+}
+.tool-card:hover::before { opacity: 1; }
+
+.card-icon { font-size: 26px; margin-bottom: 12px; line-height: 1; }
+.card-tag {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--card-accent, var(--blue)); margin-bottom: 5px;
+}
+.card-name {
+  font-family: var(--cond); font-weight: 700; font-size: 18px;
+  line-height: 1.2; color: var(--navy); margin-bottom: 8px;
+}
+.card-desc {
+  font-size: 12.5px; color: var(--muted); line-height: 1.6;
+  flex: 1; margin-bottom: 18px;
+}
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between; margin-top: auto;
+}
+.card-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.chip {
+  font-family: var(--mono); font-size: 10px; padding: 2px 7px;
+  border-radius: 3px; background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+}
+.card-arrow {
+  font-size: 16px; color: var(--card-accent, var(--blue));
+  opacity: 0; transition: opacity .15s, transform .15s;
+  transform: translateX(-4px); flex-shrink: 0;
+}
+.tool-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+
+/* ── FOOTER ── */
+footer {
+  max-width: 1040px; margin: 0 auto; padding: 20px 40px 44px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+.footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.footer-left strong { color: var(--blue); }
+.footer-right { font-family: var(--mono); font-size: 11px; color: var(--muted2); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .topbar-inner, header, main, footer { padding-left: 18px; padding-right: 18px; }
+  header { padding-top: 32px; }
+  .tool-grid { grid-template-columns: 1fr; }
+  .topbar-sub { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">Geotech <span>Tools</span></div>
+    <div class="topbar-sub">Internal Tools</div>
+  </div>
+</div>
+
+<!-- ── HERO ── -->
+<header>
+  <div class="rkk-badge">
+    <span class="rkk-dot"></span>
+    Geotechnical Internal Tools
+  </div>
+  <h1>Geotech<br><em>Tools</em></h1>
+  <p class="tagline">// Internal field &amp; engineering tools.<br>Offline-capable.</p>
+</header>
+
+<!-- ── TOOLS ── -->
+<main>
+  <div class="divider"></div>
+
+  <div class="section-label">Field Tools</div>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="fieldlog-v2.html" style="--card-accent: #16a34a">
+      <div class="card-icon">🪨</div>
+      <div class="card-tag">Field · PWA</div>
+      <div class="card-name">FieldLog v2</div>
+      <div class="card-desc">Offline-first boring log data entry. SPT runs, lithology, groundwater, and rock coring — exports directly to gINT-ready XLSX and JSON snapshots.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Offline</span>
+          <span class="chip">gINT Export</span>
+          <span class="chip">Multi-Boring</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="daily-log.html" style="--card-accent: #0369a1">
+      <div class="card-icon">📋</div>
+      <div class="card-tag">Field · Project Management</div>
+      <div class="card-name">Daily Log</div>
+      <div class="card-desc">Subsurface exploration daily log with multi-log project tracking. Define a task template once — new logs inherit it with a running quantity total across all logs. Includes canvas signature pads, autosave, and a printable project summary.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Multi-Log</span>
+          <span class="chip">Running Totals</span>
+          <span class="chip">JSON Snapshot</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="infiltration-test-log.html" style="--card-accent: #0d9488">
+      <div class="card-icon">💧</div>
+      <div class="card-tag">Field · Hydrology</div>
+      <div class="card-name">Infiltration Test Log</div>
+      <div class="card-desc">Constant head infiltration test logging with automatic head calculation from tape-down measurements. Supports multiple test sites per project, single- and double-ring methods, and generates a summary table with average and steady-state rates.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Single / Double Ring</span>
+          <span class="chip">Multi-Site</span>
+          <span class="chip">JSON Snapshot</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="jar-label-wizard.html" style="--card-accent: #2563eb">
+      <div class="card-icon">🏷️</div>
+      <div class="card-tag">Field · Printing</div>
+      <div class="card-name">Jar Label Wizard</div>
+      <div class="card-desc">Generate print-ready 2" round jar labels for soil samples. Configurable for 3- or 4-interval SPT runs and standard or percentage recovery format. Avery 94089 layout.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Avery 94089</span>
+          <span class="chip">Print-Ready</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="box-label-wizard.html" style="--card-accent: #7c3aed">
+      <div class="card-icon">📦</div>
+      <div class="card-tag">Field · Printing</div>
+      <div class="card-name">Box Label Wizard</div>
+      <div class="card-desc">Generate core box labels for rock sample storage. Formatted for standard geotechnical core box dimensions with run and recovery information.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Rock Core</span>
+          <span class="chip">Print-Ready</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="pebble-count-tool.html" style="--card-accent: #65a30d">
+      <div class="card-icon">🪨</div>
+      <div class="card-tag">Field · Gradation</div>
+      <div class="card-name">Wolman Pebble Count</div>
+      <div class="card-desc">Field particle size distribution using the Wolman (1954) pebble count method. Supports up to six SHA sampling locations per project, gravelometer size entry, cumulative GSD curve, and JSON save/load.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">6 Locations</span>
+          <span class="chip">GSD Curve</span>
+          <span class="chip">JSON Snapshot</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-label">Engineering Calculators</div>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="shear-strength-correlation-calculator.html" style="--card-accent: #c2410c">
+      <div class="card-icon">📐</div>
+      <div class="card-tag">Strength · SPT Correlation</div>
+      <div class="card-name">Shear Strength Correlation Calculator</div>
+      <div class="card-desc">Applies (N₁)₆₀ SPT corrections to derive friction angle φ for coarse-grained soils and undrained shear strength Sᵤ for fine-grained soils. Per-boring tabs, depth profiles, cross-boring summary, and print output.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">φ · Sᵤ</span>
+          <span class="chip">Multi-Boring</span>
+          <span class="chip">JSON Snapshot</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="es-correlation-calculator.html" style="--card-accent: #b45309">
+      <div class="card-icon">📊</div>
+      <div class="card-tag">Settlement · Elastic</div>
+      <div class="card-name">E<sub style="font-size:.7em">s</sub> Correlation Calculator</div>
+      <div class="card-desc">Estimates elastic modulus (Eₛ) from SPT N-values using published correlation methods. Supports multi-boring input, stratum definition, and settlement analysis workflows.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">SPT Correlation</span>
+          <span class="chip">JSON Snapshot</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- ===== TEMPORARILY HIDDEN: Earth Pressure Calculator — restore by deleting this opening comment line and the closing comment line below =====
+    <a class="tool-card" href="earth-pressure-calculator.html" style="--card-accent: #0369a1">
+      <div class="card-icon">⬛</div>
+      <div class="card-tag">Lateral Earth Pressure</div>
+      <div class="card-name">Earth Pressure Calculator</div>
+      <div class="card-desc">Computes lateral earth pressure coefficients (K₀, Kₐ, K_p) using Rankine, Coulomb, and log-spiral methods. Supports wall friction, sloped backfill, and cohesive soils. Includes force resultant diagrams.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Rankine / Coulomb</span>
+          <span class="chip">K₀ · Kₐ · K_p</span>
+          <span class="chip">Wall Friction</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    ===== END TEMPORARILY HIDDEN: Earth Pressure Calculator ===== -->
+
+    <!-- ===== TEMPORARILY HIDDEN: Micropile Capacity Calculator — restore by deleting this opening comment line and the closing comment line below =====
+    <a class="tool-card" href="micropile-capacity-calculator.html" style="--card-accent: #0891b2">
+      <div class="card-icon">🔩</div>
+      <div class="card-tag">Deep Foundations · Capacity</div>
+      <div class="card-name">Micropile Capacity Calculator</div>
+      <div class="card-desc">Estimates axial compression and tension capacity of micropiles using bond zone length, grout-to-ground interface parameters, and pile geometry. Supports Type A–D grouting categories per FHWA guidelines.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">Type A–D</span>
+          <span class="chip">Bond Zone</span>
+          <span class="chip">Compression / Tension</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    ===== END TEMPORARILY HIDDEN: Micropile Capacity Calculator ===== -->
+
+    <a class="tool-card" href="pile-corrosion-calculator.html" style="--card-accent: #be123c">
+      <div class="card-icon">⚙️</div>
+      <div class="card-tag">Structural · Steel</div>
+      <div class="card-name">Pile Corrosion Loss Calculator</div>
+      <div class="card-desc">Calculates residual section properties of steel H-piles and pipe piles after uniform corrosion loss. Mode A evaluates a known section; Mode B finds equivalent replacement sections.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">H-Pile</span>
+          <span class="chip">Pipe Pile</span>
+          <span class="chip">JSON Snapshot</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ===== TEMPORARILY HIDDEN: FE Modeling & Constitutive Models section (HS Model Parameter Calculator was the only tile) — restore by deleting this opening comment line and the closing comment line below =====
+  <div class="section-label">FE Modeling &amp; Constitutive Models</div>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="hs-model-calculator.html" style="--card-accent: #0d9488">
+      <div class="card-icon">🧮</div>
+      <div class="card-tag">FE Modeling · Constitutive</div>
+      <div class="card-name">HS Model Parameter Calculator</div>
+      <div class="card-desc">Interactive parameter determination for the Hardening Soil Standard and SmallStrain models. Computes stress-dependent stiffness, earth pressure coefficients, G₀ from V_s, and plots the hyperbolic stress-strain curve and Hardin-Drnevich stiffness reduction. Includes quality checks against Obrzud &amp; Truty (2018) typical ranges.</div>
+      <div class="card-footer">
+        <div class="card-chips">
+          <span class="chip">HS-Std · HS-SS</span>
+          <span class="chip">Stress-Strain</span>
+          <span class="chip">Quality Checks</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+  ===== END TEMPORARILY HIDDEN: FE Modeling & Constitutive Models section ===== -->
+</main>
+
+<footer>
+  <div class="footer-left">
+    <strong>Geotech Tools</strong> · Internal Use Only
+  </div>
+  <div class="footer-right"></div>
+</footer>
+
+<script>
+// P1-3: every tool registers the service worker so the whole suite
+// gets pre-cached for offline use no matter which page is opened first.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('Geotech Tools: service worker registered'))
+    .catch(e => console.warn('Geotech Tools: SW registration failed', e));
+}
+</script>
+</body>
+</html>

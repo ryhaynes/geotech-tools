@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HS Model Parameter Calculator</title>
+<link rel="manifest" href="manifest.json">
+<link href="fonts/fonts.css" rel="stylesheet"><!-- P1-4: self-hosted IBM Plex (was Google Fonts CDN) -->
+<style>
+:root {
+  --navy:#0c1f35;--navy2:#152d4a;--blue:#1d5fa8;--blue2:#2471c9;
+  --amber:#d97706;--green:#166534;--red:#991b1b;--teal:#0a7063;--teal2:#0d9488;
+  --bg:#f0f4f8;--bg2:#ffffff;--border:#c8d6e5;--text:#1a2b3c;
+  --muted:#5a738a;--muted2:#8ba3bb;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+  --cond:'IBM Plex Sans Condensed',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--text);line-height:1.5}
+
+.header{background:var(--navy);border-bottom:3px solid var(--blue2)}
+.header-inner{max-width:1200px;margin:0 auto;padding:18px 24px 14px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+.header h1{font-size:17px;font-weight:700;letter-spacing:-.3px;color:#fff}
+.header h1 span{color:#6db3f5}
+.header-sub{font-size:10.5px;color:#7a9fc0;margin-top:3px;font-family:var(--mono)}
+.header-tag{font-family:var(--mono);font-size:10px;color:#5a8ab0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:3px 8px;border-radius:2px;white-space:nowrap;align-self:flex-start;margin-top:4px}
+
+.breadcrumb{max-width:1200px;margin:0 auto;padding:10px 24px 4px;font-size:11px;font-family:var(--mono);color:var(--muted)}
+.breadcrumb a{color:var(--blue2);text-decoration:none}
+.breadcrumb a:hover{text-decoration:underline}
+
+.container{max-width:1200px;margin:0 auto;padding:0 20px 60px}
+
+/* TABS */
+.tab-bar{display:flex;align-items:flex-end;gap:0;border-bottom:2px solid var(--navy2);flex-wrap:wrap;margin-bottom:0}
+.tab-btn{padding:9px 20px;font-size:12px;font-family:var(--sans);font-weight:500;border:1px solid var(--border);border-bottom:none;background:var(--bg);color:var(--muted);cursor:pointer;border-radius:3px 3px 0 0;margin-right:3px;margin-bottom:-2px;transition:background .1s;white-space:nowrap}
+.tab-btn.active{background:var(--bg2);color:var(--navy);font-weight:700;border-color:var(--navy2);border-bottom:2px solid var(--bg2);z-index:1;position:relative}
+.tab-btn:hover:not(.active){background:#e4ecf4}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-panels{background:var(--bg2);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;margin-bottom:16px;padding:22px 24px}
+
+/* SECTION HEADS */
+.sec-head{padding:8px 14px;font-size:10.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;display:flex;align-items:center;gap:8px;border-radius:3px 3px 0 0}
+.sh-blue{background:var(--navy2);color:#fff}
+.sh-teal{background:var(--teal);color:#fff}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-blue{background:var(--blue2)}
+.dot-teal{background:#5de0d0}
+.sec-body{border:1px solid var(--border);border-top:none;border-radius:0 0 3px 3px;padding:14px 16px;background:#fff;margin-bottom:14px}
+.sec-body-teal{border-color:#a7d9d4}
+
+/* INPUTS */
+.frow{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px}
+.frow:last-child{margin-bottom:0}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+input[type=number],select{padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-size:13px;font-family:var(--sans);color:var(--text);background:#fff;transition:border-color .1s}
+input[type=number]{width:106px}
+input:focus,select:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(36,113,201,.12)}
+
+/* METRIC CARDS */
+.mcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px;margin-bottom:12px}
+.mcard{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:9px 11px;border-left:3px solid var(--border)}
+.mcard.c-amber{border-left-color:var(--amber)}
+.mcard.c-blue{border-left-color:var(--blue2)}
+.mcard.c-teal{border-left-color:var(--teal2)}
+.mlbl{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:2px}
+.mval{font-size:18px;font-weight:600;font-family:var(--mono);color:var(--navy);line-height:1.1}
+.munit{font-size:10px;color:var(--muted2);margin-top:1px;font-family:var(--mono)}
+
+/* FORMULA BAR */
+.fbar{display:flex;gap:18px;flex-wrap:wrap;padding:9px 13px;background:var(--navy);border-radius:3px;font-family:var(--mono);font-size:10px;color:#6db3f5;margin-bottom:12px;line-height:1.6}
+.fbar .eq{color:#fde68a}
+.fbar .sep{color:#334d66}
+
+/* CHART */
+.chart-wrap{position:relative;height:270px}
+
+/* CHECKS */
+.check-table{border:1px solid var(--border);border-radius:3px;overflow:hidden;margin-top:0}
+.check-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;gap:10px}
+.check-row:last-child{border-bottom:none}
+.check-row:nth-child(even){background:#f8fafc}
+.chk-lbl{font-weight:500;color:var(--text);flex:1;min-width:200px}
+.chk-det{font-family:var(--mono);font-size:10.5px;color:var(--muted);flex:1;text-align:right;padding-right:12px}
+.badge{font-size:10px;padding:2px 8px;border-radius:2px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.b-ok{background:#dcfce7;color:#166534}
+.b-warn{background:#fef3c7;color:#92400e}
+.b-err{background:#fee2e2;color:#991b1b}
+
+/* REF TABLE */
+.rtab{width:100%;border-collapse:collapse;font-size:12px}
+.rtab th{background:var(--navy2);color:#fff;padding:7px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.rtab td{padding:7px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.rtab tr:last-child td{border-bottom:none}
+.rtab tr:nth-child(even) td{background:#f8fafc}
+.mono{font-family:var(--mono)}
+
+/* TWO-COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:900px){.two-col,.three-col{grid-template-columns:1fr}}
+
+/* FOOTER */
+footer{max-width:1200px;margin:0 auto;padding:16px 24px 36px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)}
+.footer-left{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.footer-left strong{color:var(--blue)}
+.footer-right{font-family:var(--mono);font-size:11px;color:var(--muted2)}
+
+@media(max-width:640px){
+  .header-inner,.container,.breadcrumb,footer{padding-left:14px;padding-right:14px}
+  .header-tag{display:none}
+  .mcards{grid-template-columns:1fr 1fr}
+  input[type=number]{width:90px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>HS Model Parameter Calculator</h1>
+      <div class="header-sub">Hardening Soil Standard &amp; SmallStrain · Obrzud &amp; Truty (2018)</div>
+    </div>
+    <div class="header-tag">FE Modeling · Internal Use</div>
+  </div>
+</div>
+
+<div class="breadcrumb">
+  <a href="index.html">← Geotech Tools</a> &nbsp;/&nbsp; HS Model Parameter Calculator
+</div>
+
+<div class="container">
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('params',this)">Parameters</button>
+  <button class="tab-btn" onclick="switchTab('sscurve',this)">Stress-Strain Curve</button>
+  <button class="tab-btn" onclick="switchTab('stiffred',this)">Stiffness Reduction</button>
+  <button class="tab-btn" onclick="switchTab('checks',this)">Quality Checks</button>
+  <button class="tab-btn" onclick="switchTab('ref',this)">Quick Reference</button>
+</div>
+<div class="tab-panels">
+
+<!-- ═══════════════ TAB 1: PARAMETERS ═══════════════ -->
+<div class="tab-panel active" id="tab-params">
+  <div class="two-col">
+
+    <!-- LEFT: INPUTS -->
+    <div>
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:12px">
+        <div class="field">
+          <label>Soil Type</label>
+          <select id="soilType" oninput="applyDefaults()">
+            <option value="granular">Granular (Sand / Gravel)</option>
+            <option value="cohesive">Cohesive (Clay / Silt)</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:18px">All inputs editable — defaults applied on soil type change</div>
+      </div>
+
+      <div class="sec-head sh-blue"><span class="dot dot-blue"></span>Strength &amp; Dilatancy</div>
+      <div class="sec-body">
+        <div class="frow">
+          <div class="field">
+            <label>φ' (°) friction angle</label>
+            <input type="number" id="phi" value="30" min="5" max="55" step="0.5" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>c' (ksf) cohesion</label>
+            <input type="number" id="cv" value="0" min="0" max="10" step="0.05" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>ψ (°) dilatancy</label>
+            <input type="number" id="psi" value="5" min="0" max="30" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="field">
+            <label>R_f failure ratio</label>
+            <input type="number" id="rf" value="0.9" min="0.5" max="1.0" step="0.05" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>OCR</label>
+            <input type="number" id="ocr" value="1.0" min="1" max="20" step="0.5" oninput="calc()">
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-head sh-blue"><span class="dot dot-blue"></span>Stiffness Parameters (reference values)</div>
+      <div class="sec-body">
+        <div class="frow">
+          <div class="field">
+            <label>E₅₀ ref (ksf)</label>
+            <input type="number" id="e50" value="630" min="2" step="10" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>E_ur ref (ksf)</label>
+            <input type="number" id="eur" value="1880" min="2" step="10" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>E_oed ref (ksf)</label>
+            <input type="number" id="eoed" value="630" min="2" step="10" oninput="calc()">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="field">
+            <label>σ_ref (ksf)</label>
+            <input type="number" id="sref" value="2.1" min="0.1" step="0.5" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>m stiffness exponent</label>
+            <input type="number" id="mv" value="0.5" min="0" max="1.2" step="0.05" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>ν_ur Poisson (UR)</label>
+            <input type="number" id="nur" value="0.2" min="0.1" max="0.35" step="0.01" oninput="calc()">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="field">
+            <label>σ₃ current (ksf)</label>
+            <input type="number" id="sig3" value="2.1" min="0" step="0.5" oninput="sync3();calc()">
+          </div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono);align-self:flex-end;padding-bottom:8px">Used to compute<br>E at current stress state</div>
+        </div>
+      </div>
+
+      <div class="sec-head sh-teal"><span class="dot dot-teal"></span>HS-SmallStrain — Small Strain Stiffness</div>
+      <div class="sec-body sec-body-teal">
+        <div class="frow">
+          <div class="field">
+            <label>V_s (ft/s) shear wave vel.</label>
+            <input type="number" id="vs" value="655" min="165" max="6560" step="25" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>γ (pcf) unit weight</label>
+            <input type="number" id="rho" value="112" min="87" max="156" step="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>γ₀.₇ (×10⁻⁴)</label>
+            <input type="number" id="g07" value="1.0" min="0.05" max="20" step="0.1" oninput="calc()">
+          </div>
+        </div>
+        <div style="font-size:10.5px;color:var(--muted);font-family:var(--mono);margin-top:8px;line-height:1.55">
+          G₀ = γ·V_s²/32174 (ksf) &nbsp;·&nbsp; E₀ = 2(1+ν_ur)·G₀ &nbsp;·&nbsp; γ₀.₇ = strain at G_s/G₀ = 0.722
+        </div>
+      </div>
+    </div><!-- end left -->
+
+    <!-- RIGHT: OUTPUTS -->
+    <div>
+      <div class="sec-head sh-blue"><span class="dot dot-blue"></span>Strength &amp; Earth Pressure Coefficients</div>
+      <div class="sec-body">
+        <div class="mcards" style="grid-template-columns:repeat(3,1fr)">
+          <div class="mcard c-amber"><div class="mlbl">q_f at σ₃</div><div class="mval" id="o-qf">—</div><div class="munit">ksf</div></div>
+          <div class="mcard c-amber"><div class="mlbl">K₀ᴺᶜ (Jaky)</div><div class="mval" id="o-k0nc">—</div></div>
+          <div class="mcard c-amber"><div class="mlbl">K₀ (w/ OCR)</div><div class="mval" id="o-k0">—</div></div>
+          <div class="mcard c-amber"><div class="mlbl">K_p passive</div><div class="mval" id="o-kp">—</div></div>
+          <div class="mcard c-amber"><div class="mlbl">K_a active</div><div class="mval" id="o-ka">—</div></div>
+          <div class="mcard c-amber"><div class="mlbl">φ'_cs (Rowe)</div><div class="mval" id="o-phics">—</div><div class="munit">°</div></div>
+        </div>
+        <div class="fbar">
+          <span>K₀ᴺᶜ = 1−sinφ'</span>
+          <span class="sep">·</span>
+          <span class="eq">K₀ = K₀ᴺᶜ · OCR^sinφ'</span>
+          <span class="sep">·</span>
+          <span>q_f = [2sinφ/(1−sinφ)]·(σ₃+c·cotφ)</span>
+        </div>
+      </div>
+
+      <div class="sec-head sh-blue"><span class="dot dot-blue"></span>Stress-Dependent Stiffness at σ₃</div>
+      <div class="sec-body">
+        <div class="mcards" style="grid-template-columns:repeat(3,1fr)">
+          <div class="mcard c-blue"><div class="mlbl">E₅₀ at σ₃</div><div class="mval" id="o-e50s">—</div><div class="munit">ksf</div></div>
+          <div class="mcard c-blue"><div class="mlbl">E_ur at σ₃</div><div class="mval" id="o-eurs">—</div><div class="munit">ksf</div></div>
+          <div class="mcard c-blue"><div class="mlbl">E_oed at σ₃</div><div class="mval" id="o-eoeds">—</div><div class="munit">ksf</div></div>
+          <div class="mcard c-blue"><div class="mlbl">E_ur/E₅₀</div><div class="mval" id="o-eur50">—</div></div>
+          <div class="mcard c-blue"><div class="mlbl">E_oed/E₅₀</div><div class="mval" id="o-eoed50">—</div></div>
+          <div class="mcard c-blue"><div class="mlbl">Scaling factor</div><div class="mval" id="o-scale">—</div></div>
+        </div>
+        <div class="fbar">
+          <span class="eq">E(σ₃) = E_ref · [(σ₃+c·cotφ) / (σ_ref+c·cotφ)]^m</span>
+        </div>
+      </div>
+
+      <div class="sec-head sh-teal"><span class="dot dot-teal"></span>Small Strain Stiffness (HS-SmallStrain)</div>
+      <div class="sec-body sec-body-teal">
+        <div class="mcards" style="grid-template-columns:repeat(4,1fr)">
+          <div class="mcard c-teal"><div class="mlbl">G₀ (max shear)</div><div class="mval" id="o-g0">—</div><div class="munit">ksf</div></div>
+          <div class="mcard c-teal"><div class="mlbl">E₀ (max)</div><div class="mval" id="o-e0">—</div><div class="munit">ksf</div></div>
+          <div class="mcard c-teal"><div class="mlbl">G_ur</div><div class="mval" id="o-gur">—</div><div class="munit">ksf</div></div>
+          <div class="mcard c-teal"><div class="mlbl">E₀/E₅₀</div><div class="mval" id="o-e0e50">—</div></div>
+        </div>
+        <div class="fbar">
+          <span>G₀ = γ·V_s²/32174</span>
+          <span class="sep">·</span>
+          <span class="eq">E₀ = 2(1+ν_ur)·G₀</span>
+          <span class="sep">·</span>
+          <span>G_ur = E_ur/[2(1+ν_ur)]</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Hierarchy check: <span id="o-hier" style="font-family:var(--mono);font-weight:600">—</span></div>
+      </div>
+
+      <div class="sec-head sh-blue" style="margin-top:14px"><span class="dot dot-blue"></span>Initial State</div>
+      <div class="sec-body">
+        <div class="mcards" style="grid-template-columns:repeat(3,1fr)">
+          <div class="mcard c-amber"><div class="mlbl">KNC₀ = K₀ at OCR=1</div><div class="mval" id="o-knc0">—</div></div>
+          <div class="mcard c-amber"><div class="mlbl">σ_vc precons. (ksf)</div><div class="mval" id="o-svc">—</div></div>
+          <div class="mcard c-amber"><div class="mlbl">σ₃ (current, ksf)</div><div class="mval" id="o-sig3disp">—</div></div>
+        </div>
+        <div style="font-size:10.5px;color:var(--muted);font-family:var(--mono);margin-top:6px">
+          Set KSR₀ = KNC₀ for natural K₀-consolidated deposits.&nbsp; σ_vc = OCR · σ₃ (approximate, σ₃ ≈ σ'_v0 here)
+        </div>
+      </div>
+    </div><!-- end right -->
+  </div>
+</div><!-- end tab-params -->
+
+<!-- ═══════════════ TAB 2: STRESS-STRAIN ═══════════════ -->
+<div class="tab-panel" id="tab-sscurve">
+  <div class="fbar" style="margin-bottom:14px">
+    <span>Kondner hyperbolic model</span>
+    <span class="sep">·</span>
+    <span class="eq">q = ε₁ / [1/(2·E₅₀) + ε₁·R_f/q_f]</span>
+    <span class="sep">·</span>
+    <span>q_a = q_f / R_f (asymptote)</span>
+    <span class="sep">·</span>
+    <span>E_i ≈ 2·E₅₀/(2−R_f) (initial tangent)</span>
+  </div>
+  <div style="display:flex;gap:14px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap">
+    <div class="field">
+      <label>Confining stress σ₃ for curve (ksf)</label>
+      <input type="number" id="ss-sig3" value="2.1" min="0" step="0.5" oninput="sync3from2();drawSSChart()">
+    </div>
+    <div class="field">
+      <label>Max ε₁ displayed (%)</label>
+      <input type="number" id="ss-emax" value="12" min="2" max="30" step="1" oninput="drawSSChart()">
+    </div>
+    <div class="field">
+      <label>Additional σ₃ (ksf) — compare</label>
+      <input type="number" id="ss-sig3b" value="4.2" min="0" step="0.5" oninput="drawSSChart()">
+    </div>
+  </div>
+  <div class="two-col" style="align-items:start">
+    <div>
+      <div class="chart-wrap">
+        <canvas id="ssChart" role="img" aria-label="Hyperbolic deviatoric stress q versus axial strain e1 for two confining pressures"></canvas>
+      </div>
+    </div>
+    <div>
+      <div class="sec-head sh-blue"><span class="dot dot-blue"></span>Key Values at Primary σ₃</div>
+      <div class="sec-body" style="margin-bottom:10px">
+        <table class="rtab" style="margin-top:0">
+          <thead><tr><th>Parameter</th><th>Value</th><th>Unit</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">q_f</td><td class="mono" id="ss-qf">—</td><td>ksf</td></tr>
+            <tr><td class="mono">q_a (asymptote)</td><td class="mono" id="ss-qa">—</td><td>ksf</td></tr>
+            <tr><td class="mono">E₅₀ at σ₃</td><td class="mono" id="ss-e50">—</td><td>ksf</td></tr>
+            <tr><td class="mono">E_ur at σ₃</td><td class="mono" id="ss-eur">—</td><td>ksf</td></tr>
+            <tr><td class="mono">Initial tangent E_i</td><td class="mono" id="ss-ei">—</td><td>ksf</td></tr>
+            <tr><td class="mono">R_f</td><td class="mono" id="ss-rf">—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="font-size:10.5px;color:var(--muted);font-family:var(--mono);line-height:1.55;border-left:3px solid var(--border);padding-left:10px">
+        Note: E_i = 2·E₅₀/(2−R_f) is the initial tangent stiffness of the hyperbola. E₅₀ corresponds to the secant modulus at 50% of q_f. Both are evaluated at the selected σ₃ via the power-law stress dependency.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 3: STIFFNESS REDUCTION ═══════════════ -->
+<div class="tab-panel" id="tab-stiffred">
+  <div class="fbar" style="margin-bottom:14px">
+    <span>Hardin-Drnevich (modified, a = 0.385)</span>
+    <span class="sep">·</span>
+    <span class="eq">G_s/G₀ = 1/(1 + 0.385·γ/γ₀.₇)</span>
+    <span class="sep">·</span>
+    <span>lower cut-off: G_s ≥ G_ur = E_ur/[2(1+ν_ur)]</span>
+    <span class="sep">·</span>
+    <span class="eq">γ_c = (γ₀.₇/0.385)·[√(G₀/G_ur)−1]</span>
+  </div>
+  <div class="two-col" style="align-items:start">
+    <div>
+      <div class="chart-wrap">
+        <canvas id="srChart" role="img" aria-label="Stiffness reduction curve Gs over G0 versus log shear strain, showing Hardin-Drnevich model with Gur cut-off"></canvas>
+      </div>
+    </div>
+    <div>
+      <div class="sec-head sh-teal"><span class="dot dot-teal"></span>Small Strain Key Values</div>
+      <div class="sec-body sec-body-teal" style="margin-bottom:10px">
+        <table class="rtab" style="margin-top:0">
+          <thead><tr><th>Parameter</th><th>Value</th><th>Unit</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">G₀ (= γ·V_s²/32174)</td><td class="mono" id="sr-g0">—</td><td>ksf</td></tr>
+            <tr><td class="mono">E₀ (= 2(1+ν_ur)·G₀)</td><td class="mono" id="sr-e0">—</td><td>ksf</td></tr>
+            <tr><td class="mono">G_ur (= E_ur/[2(1+ν_ur)])</td><td class="mono" id="sr-gur">—</td><td>ksf</td></tr>
+            <tr><td class="mono">G_ur / G₀</td><td class="mono" id="sr-rg">—</td><td>—</td></tr>
+            <tr><td class="mono">γ₀.₇ (input)</td><td class="mono" id="sr-g07">—</td><td>—</td></tr>
+            <tr><td class="mono">γ_c (elastic cut-off)</td><td class="mono" id="sr-gc">—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="font-size:10.5px;color:var(--muted);font-family:var(--mono);line-height:1.55;border-left:3px solid #a7d9d4;padding-left:10px">
+        The red dashed line marks G_s/G₀ = 0.722 (defining γ₀.₇). The amber dashed line is the G_ur/G₀ elastic cut-off — below γ_c, Hardin-Drnevich is replaced by constant G_ur in the model.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 4: QUALITY CHECKS ═══════════════ -->
+<div class="tab-panel" id="tab-checks">
+  <div class="fbar" style="margin-bottom:16px">
+    <span>Parameter validity checks</span>
+    <span class="sep">·</span>
+    <span class="eq">based on Obrzud &amp; Truty (2018) Tables 2.3 and 2.4</span>
+  </div>
+  <div id="checksDiv"></div>
+</div>
+
+<!-- ═══════════════ TAB 5: QUICK REFERENCE ═══════════════ -->
+<div class="tab-panel" id="tab-ref">
+  <div class="two-col" style="margin-bottom:16px">
+    <div>
+      <div class="sec-head sh-blue"><span class="dot dot-blue"></span>Typical Ranges — Coarse (Granular) Soils</div>
+      <div class="sec-body" style="padding:0">
+        <table class="rtab">
+          <thead><tr><th>Parameter</th><th>Typical Range</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">φ' (°)</td><td>25–50</td><td>Higher for dense angular gravels</td></tr>
+            <tr><td class="mono">c' (ksf)</td><td>0–0.1</td><td>Effectively 0 for clean sands</td></tr>
+            <tr><td class="mono">ψ (°)</td><td>0–15</td><td>Dense sands; zero at critical state</td></tr>
+            <tr><td class="mono">m</td><td>0.3–0.7</td><td>≈0.5 (Janbu, 1963)</td></tr>
+            <tr><td class="mono">R_f</td><td>0.75–1.0</td><td>Default 0.9</td></tr>
+            <tr><td class="mono">ν_ur</td><td>0.15–0.25</td><td>Typical 0.2</td></tr>
+            <tr><td class="mono">E_ur/E₅₀</td><td>3–5</td><td>Minimum > 2</td></tr>
+            <tr><td class="mono">E₀/E₅₀</td><td>6–14</td><td>Allowed range 3.6–30</td></tr>
+            <tr><td class="mono">γ₀.₇ (−)</td><td>7×10⁻⁵–4×10⁻⁴</td><td>Stress &amp; OCR dependent</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="sec-head sh-blue"><span class="dot dot-blue"></span>Typical Ranges — Fine (Cohesive) Soils</div>
+      <div class="sec-body" style="padding:0">
+        <table class="rtab">
+          <thead><tr><th>Parameter</th><th>Typical Range</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">φ' (°)</td><td>18–42</td><td>Decreases with plasticity (PI)</td></tr>
+            <tr><td class="mono">c' (ksf)</td><td>0–1.0+</td><td>Effective intercept</td></tr>
+            <tr><td class="mono">ψ (°)</td><td>0–5</td><td>≈0 for NC clays</td></tr>
+            <tr><td class="mono">m</td><td>0.5–1.0</td><td>Kempfert: 0.38–0.84 (lacustrine)</td></tr>
+            <tr><td class="mono">R_f</td><td>0.75–1.0</td><td>Default 0.9</td></tr>
+            <tr><td class="mono">ν_ur</td><td>0.15–0.25</td><td>Typical 0.2</td></tr>
+            <tr><td class="mono">E_ur/E₅₀</td><td>3–5</td><td>Minimum > 2</td></tr>
+            <tr><td class="mono">E₀/E₅₀</td><td>6–14</td><td>Allowed range 3.6–30</td></tr>
+            <tr><td class="mono">γ₀.₇ (−)</td><td>>9×10⁻⁵</td><td>Increases with PI</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-head sh-blue"><span class="dot dot-blue"></span>Key Formulas — Obrzud &amp; Truty (2018)</div>
+  <div class="sec-body" style="padding:0">
+    <table class="rtab">
+      <thead><tr><th>Quantity</th><th>Formula</th><th>Eq. Ref.</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Deviatoric stress at failure</td><td class="mono">q_f = [2sinφ/(1−sinφ)] · (σ₃+c·cotφ)</td><td>2.3</td><td>Mohr-Coulomb criterion</td></tr>
+        <tr><td>Asymptotic deviatoric stress</td><td class="mono">q_a = q_f / R_f</td><td>2.2</td><td>R_f default = 0.9</td></tr>
+        <tr><td>Stress-dependent stiffness</td><td class="mono">E(σ₃) = E_ref · [(σ₃+c·cotφ)/(σ_ref+c·cotφ)]^m</td><td>2.4–2.5</td><td>Applies to E₅₀, E_ur, E₀</td></tr>
+        <tr><td>Hyperbolic stress-strain</td><td class="mono">q = ε₁ / [1/(2E₅₀) + ε₁·R_f/q_f]</td><td>2.10</td><td>Drained triaxial</td></tr>
+        <tr><td>K₀ (normally consolidated)</td><td class="mono">K₀ᴺᶜ = 1 − sinφ'</td><td>2.28</td><td>Jaky (1944)</td></tr>
+        <tr><td>K₀ (overconsolidated)</td><td class="mono">K₀ = K₀ᴺᶜ · OCR^sinφ' ≤ K_p</td><td>2.27</td><td>Mayne &amp; Kulhawy (1982)</td></tr>
+        <tr><td>Passive earth pressure coeff.</td><td class="mono">K_p = (1+sinφ) / (1−sinφ)</td><td>2.29</td><td>Upper bound for K₀</td></tr>
+        <tr><td>Active earth pressure coeff.</td><td class="mono">K_a = (1−sinφ) / (1+sinφ)</td><td>—</td><td>Rankine</td></tr>
+        <tr><td>Critical state friction angle</td><td class="mono">sinφ'_cs = (sinφ'−sinψ) / (1−sinφ'·sinψ)</td><td>2.19</td><td>Rowe's dilatancy</td></tr>
+        <tr><td>Small strain shear modulus</td><td class="mono">G₀ = γ[pcf] · V_s²[ft/s²] / 32174 (ksf)</td><td>3.8</td><td>V_s from SCPT / SDMT</td></tr>
+        <tr><td>Max Young's modulus</td><td class="mono">E₀ = 2(1+ν_ur) · G₀</td><td>3.10</td><td>HS-SmallStrain input</td></tr>
+        <tr><td>Stiffness reduction (loading)</td><td class="mono">G_s/G₀ = 1 / (1 + 0.385·γ/γ₀.₇)</td><td>2.30a</td><td>a = 0.385 (modified Hardin-Drnevich)</td></tr>
+        <tr><td>Stiffness cut-off strain</td><td class="mono">γ_c = (γ₀.₇/0.385) · [√(G₀/G_ur) − 1]</td><td>2.35</td><td>Below γ_c: G_s = G_ur</td></tr>
+        <tr><td>Oedometric modulus from Cc</td><td class="mono">E_oed = 2.3(1+e_ref)/Cc · σ_ref_oed</td><td>3.5</td><td>Primary loading curve</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:14px">
+    <div class="sec-head sh-blue"><span class="dot dot-blue"></span>Parameter Identification Sequence (Sec. 3.1.3)</div>
+    <div class="sec-body">
+      <ol style="font-size:12px;line-height:2;color:var(--text);padding-left:18px;font-family:var(--mono)">
+        <li>Identify φ' and c' (stress paths from CICD tests at three σ₃ values)</li>
+        <li>Identify ψ (from ε_v − ε₁ curve slope at failure)</li>
+        <li>Identify R_f and E₅₀ at each confining pressure σ₃</li>
+        <li>Identify E_ur at each σ₃ (assign ν_ur ≈ 0.15–0.20)</li>
+        <li>Fit power-law for m using ln(E₅₀) vs ln[(σ₃+c·cotφ)/(σ_ref+c·cotφ)]</li>
+        <li>Choose σ_ref ≈ in-situ confining stress; evaluate E₀_ref, E_ur_ref, E₅₀_ref</li>
+        <li>Double-check: E₀ &gt; E_ur &gt; E₅₀ &nbsp;·&nbsp; E_ur/E₅₀ &gt; 2 &nbsp;·&nbsp; 3.6 &lt; E₀/E₅₀ &lt; 30</li>
+        <li>Evaluate K₀ᴺᶜ and E_oed_ref at σ_ref_oed (primary loading curve) to compute M and H</li>
+        <li>Determine OCR profile (constant OCR or q_POP for variable profile)</li>
+        <li>Set KSR₀ = K₀ᴺᶜ for natural K₀-consolidated soils; compute K₀ with Eq. 2.27</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+</div><!-- tab-panels -->
+</div><!-- container -->
+
+<footer>
+  <div class="footer-left"><strong>Geotech Tools</strong> · Internal Use Only</div>
+  <div class="footer-right">internal use only</div>
+</footer>
+
+<script src="vendor/chart.umd.js"></script><!-- P1-4: vendored (was cdnjs) -->
+<script>
+/* ──────────────────────────── HELPERS ──────────────────────────── */
+const $ = id => document.getElementById(id);
+const toR = d => d * Math.PI / 180;
+const toD = r => r * 180 / Math.PI;
+const f3 = v => (!isFinite(v)||isNaN(v)) ? '—' : v.toFixed(3);
+const f2 = v => (!isFinite(v)||isNaN(v)) ? '—' : v.toFixed(2);
+const f1 = v => (!isFinite(v)||isNaN(v)) ? '—' : v.toFixed(1);
+const fksf = v => {
+  if (!isFinite(v)||isNaN(v)) return '—';
+  if (v >= 1000) return (v/1000).toFixed(2)+'k';
+  if (v >= 10)   return v.toFixed(0);
+  if (v >= 1)    return v.toFixed(1);
+  return v.toFixed(2);
+};
+const fexp = v => {
+  if (!isFinite(v)||isNaN(v)||v<=0) return '—';
+  const e = Math.floor(Math.log10(v));
+  const m = v / Math.pow(10,e);
+  if (Math.abs(m-1)<0.001) return '10'+supStr(e);
+  return m.toFixed(2)+'×10'+supStr(e);
+};
+const SUPS = ['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
+function supStr(n){
+  const neg = n<0; const s = String(Math.abs(n));
+  return (neg?'⁻':'')+s.split('').map(c=>SUPS[+c]).join('');
+}
+
+/* ──────────────────────────── INPUTS ──────────────────────────── */
+function inp() {
+  return {
+    phi:  +$('phi').value,
+    c:    +$('cv').value,
+    psi:  +$('psi').value,
+    rf:   +$('rf').value,
+    ocr:  +$('ocr').value,
+    e50:  +$('e50').value,
+    eur:  +$('eur').value,
+    eoed: +$('eoed').value,
+    sref: +$('sref').value,
+    m:    +$('mv').value,
+    nur:  +$('nur').value,
+    sig3: +$('sig3').value,
+    vs:   +$('vs').value,
+    rho:  +$('rho').value,
+    g07:  +$('g07').value * 1e-4
+  };
+}
+
+/* power-law stress-dependent stiffness */
+function Edep(Eref, phi, c, sig3, sref, m) {
+  if (phi < 0.5) return Eref;
+  const phiR = toR(phi);
+  const cot = Math.cos(phiR) / Math.sin(phiR);
+  const num = Math.max(sig3 + c * cot, 1);
+  const den = Math.max(sref + c * cot, 1);
+  return Eref * Math.pow(num / den, m);
+}
+
+/* ──────────────────────────── DEFAULTS BY SOIL TYPE ──────────────────────────── */
+function applyDefaults() {
+  const t = $('soilType').value;
+  if (t === 'granular') {
+    $('phi').value = 32; $('cv').value = 0; $('psi').value = 5;
+    $('rf').value = 0.9; $('ocr').value = 1;
+    $('e50').value = 730; $('eur').value = 2190; $('eoed').value = 730;
+    $('sref').value = 2.1; $('mv').value = 0.5; $('nur').value = 0.2;
+    $('sig3').value = 2.1; $('ss-sig3').value = 2.1;
+    $('vs').value = 722; $('rho').value = 112; $('g07').value = 1.0;
+  } else {
+    $('phi').value = 24; $('cv').value = 0.10; $('psi').value = 0;
+    $('rf').value = 0.9; $('ocr').value = 1.5;
+    $('e50').value = 167; $('eur').value = 501; $('eoed').value = 167;
+    $('sref').value = 2.1; $('mv').value = 0.7; $('nur').value = 0.2;
+    $('sig3').value = 2.1; $('ss-sig3').value = 2.1;
+    $('vs').value = 394; $('rho').value = 106; $('g07').value = 2.0;
+  }
+  calc();
+}
+
+/* ──────────────────────────── MAIN CALC ──────────────────────────── */
+function calc() {
+  const p = inp();
+  const phiR = toR(p.phi), psiR = toR(p.psi);
+  const sinP = Math.sin(phiR), cosP = Math.cos(phiR);
+  const sinPsi = Math.sin(psiR);
+  const cot = p.phi > 0.5 ? cosP / sinP : 0;
+
+  /* Strength */
+  const qf = p.phi > 0.5
+    ? (2 * sinP / (1 - sinP)) * (p.sig3 + p.c * cot)
+    : 2 * p.c;
+  const k0nc = 1 - sinP;
+  const kp   = (1 + sinP) / (1 - sinP);
+  const ka   = (1 - sinP) / (1 + sinP);
+  const k0   = Math.min(k0nc * Math.pow(Math.max(p.ocr,1), sinP), kp);
+  const sinPcs = (sinP - sinPsi) / (1 - sinP * sinPsi);
+  const phics  = toD(Math.asin(Math.max(-1, Math.min(1, sinPcs))));
+
+  /* Stiffness at σ₃ */
+  const e50s  = Edep(p.e50,  p.phi, p.c, p.sig3, p.sref, p.m);
+  const eurs  = Edep(p.eur,  p.phi, p.c, p.sig3, p.sref, p.m);
+  const eoeds = Edep(p.eoed, p.phi, p.c, p.sig3, p.sref, p.m);
+  const sScale = e50s > 0 ? e50s / p.e50 : 1;
+
+  /* Small strain */
+  const G0  = p.rho * p.vs * p.vs / 32174; // ksf: γ[pcf]·Vs²[ft/s²] / (g·1000) = /32174
+  const E0  = 2 * (1 + p.nur) * G0;
+  const Gur = p.eur / (2 * (1 + p.nur));
+
+  /* Preconsolidation (approx) */
+  const svc = p.sig3 * p.ocr;
+
+  /* ── Update Parameters tab outputs ── */
+  $('o-qf').textContent    = f1(qf);
+  $('o-k0nc').textContent  = f3(k0nc);
+  $('o-k0').textContent    = f3(k0);
+  $('o-kp').textContent    = f2(kp);
+  $('o-ka').textContent    = f2(ka);
+  $('o-phics').textContent = f1(phics);
+
+  $('o-e50s').textContent  = fksf(e50s);
+  $('o-eurs').textContent  = fksf(eurs);
+  $('o-eoeds').textContent = fksf(eoeds);
+  $('o-eur50').textContent = e50s > 0 ? (eurs/e50s).toFixed(2)  : '—';
+  $('o-eoed50').textContent= e50s > 0 ? (eoeds/e50s).toFixed(2) : '—';
+  $('o-scale').textContent = sScale.toFixed(3);
+
+  $('o-g0').textContent    = fksf(G0);
+  $('o-e0').textContent    = fksf(E0);
+  $('o-gur').textContent   = fksf(Gur);
+  $('o-e0e50').textContent = p.e50 > 0 ? (E0/p.e50).toFixed(1) : '—';
+
+  $('o-knc0').textContent  = f3(k0nc);
+  $('o-svc').textContent   = f1(svc);
+  $('o-sig3disp').textContent = f1(p.sig3);
+
+  /* hierarchy */
+  const hierOk = E0 > p.eur && p.eur > p.e50;
+  const hierEl = $('o-hier');
+  hierEl.textContent = hierOk ? 'E₀ > E_ur > E₅₀ ✓' : 'E₀ > E_ur > E₅₀ ✗ — check inputs';
+  hierEl.style.color = hierOk ? 'var(--green)' : 'var(--red)';
+
+  /* ── Update Stress-Strain tab side table ── */
+  const ss3 = +$('ss-sig3').value;
+  const ss_e50s = Edep(p.e50, p.phi, p.c, ss3, p.sref, p.m);
+  const ss_eurs = Edep(p.eur, p.phi, p.c, ss3, p.sref, p.m);
+  const ss_qf   = p.phi > 0.5
+    ? (2*sinP/(1-sinP)) * (ss3 + p.c*cot)
+    : 2*p.c;
+  $('ss-qf').textContent  = fksf(ss_qf);
+  $('ss-qa').textContent  = fksf(ss_qf / p.rf);
+  $('ss-e50').textContent = fksf(ss_e50s);
+  $('ss-eur').textContent = fksf(ss_eurs);
+  $('ss-ei').textContent  = fksf(2*ss_e50s/(2-p.rf));
+  $('ss-rf').textContent  = p.rf.toFixed(2);
+
+  /* ── Update Stiffness Reduction tab ── */
+  $('sr-g0').textContent  = fksf(G0);
+  $('sr-e0').textContent  = fksf(E0);
+  $('sr-gur').textContent = fksf(Gur);
+  $('sr-rg').textContent  = G0 > 0 ? f3(Gur/G0) : '—';
+  $('sr-g07').textContent = fexp(p.g07);
+  const gc = (G0 > 0 && G0 > Gur) ? (p.g07 / 0.385) * (Math.sqrt(G0/Gur) - 1) : 0;
+  $('sr-gc').textContent  = (gc > 0) ? fexp(gc) : '—';
+
+  /* ── Quality checks ── */
+  drawChecks(p, {qf, k0nc, k0, kp, ka, phics, e50s, eurs, eoeds, G0, E0, Gur});
+
+  /* ── Charts ── */
+  drawSSChart();
+  drawSRChart(p, {G0, Gur});
+}
+
+/* ──────────────────────────── QUALITY CHECKS ──────────────────────────── */
+function drawChecks(p, r) {
+  const r50 = p.e50 > 0 ? p.eur / p.e50 : 0;
+  const r0  = p.e50 > 0 ? r.E0 / p.e50  : 0;
+
+  const checks = [
+    {
+      lbl: 'E₀ > E_ur > E₅₀ — required hierarchy',
+      ok:   r.E0 > p.eur && p.eur > p.e50,
+      warn: r.E0 > p.e50,
+      det:  `E₀=${fksf(r.E0)}  E_ur=${fksf(p.eur)}  E₅₀=${fksf(p.e50)} ksf`
+    },
+    {
+      lbl: 'E_ur / E₅₀ ≥ 3 (minimum > 2)',
+      ok:   r50 >= 3,
+      warn: r50 >= 2,
+      det:  `ratio = ${r50.toFixed(2)} | typical 3–5`
+    },
+    {
+      lbl: 'E_oed / E₅₀ ≈ 1 (± 30%)',
+      ok:   p.eoed/p.e50 >= 0.7 && p.eoed/p.e50 <= 1.5,
+      warn: p.eoed/p.e50 >= 0.5 && p.eoed/p.e50 <= 2.0,
+      det:  `ratio = ${p.e50>0?(p.eoed/p.e50).toFixed(2):'—'} | E_oed ≈ E₅₀ for most soils`
+    },
+    {
+      lbl: '3.6 < E₀/E₅₀ < 30',
+      ok:   r0 >= 3.6 && r0 <= 30,
+      warn: r0 >= 2.0 && r0 <= 40,
+      det:  `ratio = ${r0.toFixed(1)} | typical 6–14`
+    },
+    {
+      lbl: 'Stiffness exponent m',
+      ok:   p.m >= 0.3 && p.m <= 1.0,
+      warn: p.m >= 0.1 && p.m <= 1.2,
+      det:  `m = ${p.m} | sands ≈0.5 · clays 0.5–1.0`
+    },
+    {
+      lbl: 'Failure ratio R_f',
+      ok:   p.rf >= 0.75 && p.rf <= 1.0,
+      warn: p.rf >= 0.50,
+      det:  `R_f = ${p.rf} | default 0.9 · range 0.75–1.0`
+    },
+    {
+      lbl: 'Unloading-reloading Poisson ν_ur',
+      ok:   p.nur >= 0.15 && p.nur <= 0.25,
+      warn: p.nur >= 0.10 && p.nur <= 0.35,
+      det:  `ν_ur = ${p.nur} | typical 0.15–0.25`
+    },
+    {
+      lbl: 'K₀ ≤ K_p (passive limit)',
+      ok:   r.k0 < r.kp * 0.98,
+      warn: r.k0 <= r.kp,
+      det:  `K₀ = ${r.k0.toFixed(3)} · K_p = ${r.kp.toFixed(2)}`
+    },
+    {
+      lbl: 'OCR ≥ 1.0',
+      ok:   p.ocr >= 1.0,
+      warn: false,
+      det:  `OCR = ${p.ocr}`
+    }
+  ];
+
+  const html = `
+    <div class="check-table">
+      <div style="background:var(--navy2);color:#fff;padding:8px 14px;font-size:10.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;display:flex;gap:8px;align-items:center">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--blue2);flex-shrink:0;display:inline-block"></span>
+        Parameter Quality Checks
+      </div>
+      ${checks.map(c => {
+        const cls = c.ok ? 'b-ok' : c.warn ? 'b-warn' : 'b-err';
+        const lbl = c.ok ? '✓ OK' : c.warn ? '⚠ Review' : '✗ Check';
+        return `<div class="check-row">
+          <span class="chk-lbl">${c.lbl}</span>
+          <span class="chk-det">${c.det}</span>
+          <span class="badge ${cls}">${lbl}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  $('checksDiv').innerHTML = html;
+}
+
+/* ──────────────────────────── CHARTS ──────────────────────────── */
+let ssInst = null, srInst = null;
+
+function drawSSChart() {
+  const p = inp();
+  const phiR = toR(p.phi);
+  const sinP = Math.sin(phiR);
+  const cot  = p.phi > 0.5 ? Math.cos(phiR)/sinP : 0;
+
+  const sig3a = +$('ss-sig3').value;
+  const sig3b = +$('ss-sig3b').value;
+  const emax  = parseFloat($('ss-emax').value || 12);
+
+  function curveData(sig3) {
+    const qf   = p.phi > 0.5
+      ? (2*sinP/(1-sinP))*(sig3 + p.c*cot)
+      : 2*p.c;
+    const e50s = Edep(p.e50, p.phi, p.c, sig3, p.sref, p.m);
+    const pts  = [];
+    for (let i=0; i<=80; i++) {
+      const e1 = (i/80) * (emax/100);
+      const q  = e1 / (1/(2*e50s) + e1*p.rf/qf);
+      pts.push(+(Math.min(q, qf*0.9998)).toFixed(2));
+    }
+    return pts;
+  }
+
+  const labels = [];
+  for (let i=0; i<=80; i++) labels.push(((i/80)*(emax)).toFixed(3));
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: `σ₃ = ${sig3a} ksf`,
+        data: curveData(sig3a),
+        borderColor:'#1d5fa8', backgroundColor:'rgba(29,95,168,0.07)',
+        borderWidth:2, fill:true, tension:0.3, pointRadius:0
+      },
+      {
+        label: `σ₃ = ${sig3b} ksf`,
+        data: curveData(sig3b),
+        borderColor:'#d97706', borderDash:[6,3],
+        borderWidth:1.8, fill:false, tension:0.3, pointRadius:0
+      }
+    ]
+  };
+
+  const opts = {
+    responsive:true, maintainAspectRatio:false, animation:{duration:100},
+    plugins:{
+      legend:{display:true, labels:{font:{size:11}, boxWidth:14}},
+      tooltip:{callbacks:{label:ctx=>`q = ${ctx.parsed.y.toFixed(2)} ksf`}}
+    },
+    scales:{
+      x:{title:{display:true,text:'Axial strain ε₁ (%)',font:{size:11}},
+         ticks:{maxTicksLimit:7,font:{size:10}}},
+      y:{title:{display:true,text:'Deviatoric stress q (ksf)',font:{size:11}},
+         ticks:{font:{size:10}}}
+    }
+  };
+
+  if (ssInst) { ssInst.data=data; ssInst.options=opts; ssInst.update(); }
+  else ssInst = new Chart($('ssChart'), {type:'line', data, options:opts});
+}
+
+function drawSRChart(p, r) {
+  if (!p) { p = inp(); const G0=p.rho*p.vs*p.vs/32174; r={G0, Gur:p.eur/(2*(1+p.nur))}; }
+
+  const a   = 0.385;
+  const g07 = p.g07;
+  const G0  = r.G0, Gur = r.Gur;
+  const N   = 100;
+  const logMin = -7, logMax = -1;
+
+  const labels=[], dsMain=[], dsGur=[], ds72=[];
+  for (let i=0; i<=N; i++) {
+    const lg = logMin + i*(logMax-logMin)/N;
+    const g  = Math.pow(10, lg);
+    const raw = 1/(1 + a*g/g07);
+    const ratio = G0>0 ? Math.max(Gur/G0, raw) : raw;
+    labels.push(lg.toFixed(4));
+    dsMain.push(+ratio.toFixed(6));
+    dsGur.push(+(G0>0?Gur/G0:0).toFixed(6));
+    ds72.push(0.722);
+  }
+
+  /* tick labels at integer log values */
+  const tickMap = {};
+  for (let i=logMin; i<=logMax; i++) tickMap[i.toFixed(4)] = '10'+supStr(i);
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label:'G_s/G₀',
+        data:dsMain,
+        borderColor:'#0d9488', borderWidth:2,
+        fill:false, tension:0.15, pointRadius:0
+      },
+      {
+        label:'G_ur/G₀ (cut-off)',
+        data:dsGur,
+        borderColor:'#d97706', borderWidth:1.5, borderDash:[5,4],
+        fill:false, pointRadius:0
+      },
+      {
+        label:'G_s/G₀ = 0.722 (γ₀.₇)',
+        data:ds72,
+        borderColor:'#be123c', borderWidth:1, borderDash:[3,3],
+        fill:false, pointRadius:0
+      }
+    ]
+  };
+
+  const opts = {
+    responsive:true, maintainAspectRatio:false, animation:{duration:100},
+    plugins:{
+      legend:{display:true, labels:{font:{size:11}, boxWidth:14}},
+      tooltip:{callbacks:{
+        title: ctx => {
+          const lg = parseFloat(ctx[0].label);
+          return 'γ ≈ '+Math.pow(10,lg).toExponential(2);
+        },
+        label: ctx => `G_s/G₀ = ${ctx.parsed.y.toFixed(4)}`
+      }}
+    },
+    scales:{
+      x:{
+        title:{display:true, text:'Shear strain γ (log scale)', font:{size:11}},
+        ticks:{
+          font:{size:10},
+          maxTicksLimit:10,
+          callback(val) {
+            const lbl = this.getLabelForValue(val);
+            if (!lbl) return '';
+            const n = parseFloat(lbl);
+            const rnd = Math.round(n);
+            if (Math.abs(n-rnd)<0.05) return '10'+supStr(rnd);
+            return '';
+          }
+        }
+      },
+      y:{
+        title:{display:true, text:'G_s / G₀', font:{size:11}},
+        min:0, max:1,
+        ticks:{font:{size:10}}
+      }
+    }
+  };
+
+  if (srInst) { srInst.data=data; srInst.options=opts; srInst.update(); }
+  else srInst = new Chart($('srChart'), {type:'line', data, options:opts});
+}
+
+/* ──────────────────────────── TAB SWITCHING ──────────────────────────── */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  $('tab-'+name).classList.add('active');
+  /* force chart resize after display:block */
+  if (name==='sscurve' && ssInst) ssInst.resize();
+  if (name==='stiffred' && srInst) srInst.resize();
+}
+
+/* ──────────────────────────── SIGMA-3 SYNC ──────────────────────────── */
+function sync3()       { $('ss-sig3').value = $('sig3').value; }
+function sync3from2()  { $('sig3').value = $('ss-sig3').value; }
+
+$('ss-sig3').addEventListener('input', function() { sync3from2(); calc(); });
+
+/* ──────────────────────────── INIT ──────────────────────────── */
+calc();
+</script>
+<script>
+// P1-3: every tool registers the service worker so the whole suite
+// gets pre-cached for offline use no matter which page is opened first.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('Geotech Tools: service worker registered'))
+    .catch(e => console.warn('Geotech Tools: SW registration failed', e));
+}
+</script>
+</body>
+</html>

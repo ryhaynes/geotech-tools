@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retaining Wall Stability</title>
+<link rel="manifest" href="manifest.json">
+<link href="fonts/fonts.css" rel="stylesheet">
+<style>
+:root {
+  --navy:#0c1f35;--navy2:#152d4a;--blue:#1d5fa8;--blue2:#2471c9;
+  --steel:#4a7daa;--green:#166534;--red:#991b1b;--orange:#c2410c;
+  --bg:#f0f4f8;--bg2:#ffffff;--border:#c8d6e5;--text:#1a2b3c;--muted:#5a738a;
+  --mono:'IBM Plex Mono','Courier New',monospace;
+  --sans:'IBM Plex Sans','Segoe UI',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--text);line-height:1.5}
+
+.header{background:var(--navy);color:#fff;border-bottom:3px solid var(--blue2)}
+.breadcrumb{padding:6px 24px;font-size:11px;font-family:var(--mono);color:var(--muted);background:#fff;border-bottom:1px solid var(--border)}.breadcrumb a{color:var(--blue2);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
+.header-inner{max-width:1280px;margin:0 auto;padding:15px 24px 12px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.header h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.header h1 span{color:#6db3f5}
+.header-sub{font-size:10.5px;color:#7a9fc0;margin-top:3px;font-family:var(--mono)}
+.hdr-actions{display:flex;gap:7px;align-items:center;flex-shrink:0}
+.hdr-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:3px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#c8ddf0;cursor:pointer;transition:background .15s;white-space:nowrap}
+.hdr-btn:hover{background:rgba(255,255,255,.15)}
+.hdr-btn.save{border-color:#4ade80aa;color:#4ade80}.hdr-btn.save:hover{background:rgba(74,222,128,.12)}
+.hdr-btn.print{border-color:#93c5fdaa;color:#93c5fd}.hdr-btn.print:hover{background:rgba(147,197,253,.1)}
+
+.container{max-width:1280px;margin:0 auto;padding:20px 20px 60px}
+
+/* PROJECT CARD */
+.proj-card{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+.proj-head{background:var(--navy2);color:#fff;padding:7px 16px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.proj-row{display:flex;gap:0;border-bottom:1px solid var(--border)}.proj-row:last-child{border-bottom:none}
+.proj-cell{display:flex;align-items:center;gap:10px;padding:9px 16px;flex:1;min-width:0}.proj-cell:not(:first-child){border-left:1px solid var(--border)}
+.proj-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.proj-input{border:none;border-bottom:1px solid var(--border);background:transparent;font-family:var(--sans);font-size:13px;color:var(--text);padding:1px 4px;flex:1;min-width:0;outline:none}
+.proj-input:focus{border-bottom-color:var(--blue2)}.proj-input::placeholder{color:#b0c0d0;font-style:italic}
+
+/* PHASE */
+.phase{background:var(--bg2);border:1px solid var(--border);border-radius:3px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+.phase-head{display:flex;align-items:center;gap:12px;padding:11px 20px;background:var(--navy2);color:#fff}
+.phase-num{font-family:var(--mono);font-size:17px;font-weight:600;color:#6db3f5;line-height:1;flex-shrink:0}
+.phase-title{font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.phase-sub{font-family:var(--mono);font-size:10px;color:#7a9fc0;margin-top:1px}
+.phase-ref{font-family:var(--mono);font-size:10px;color:#5a8ab0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:2px 7px;border-radius:2px;margin-left:auto;white-space:nowrap;flex-shrink:0}
+.phase-body{padding:20px 22px}
+
+/* CARD */
+.card{background:#f7f9fc;border:1px solid var(--border);border-radius:3px;margin-bottom:14px;overflow:hidden}
+.card:last-child{margin-bottom:0}
+.card-head{background:var(--navy);color:#fff;padding:7px 14px;font-size:10.5px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--blue2);flex-shrink:0}
+.card-body{padding:16px 18px}
+
+/* GEO LAYOUT: inputs + SVG side by side */
+.geo-grid{display:grid;grid-template-columns:1fr 400px;gap:16px;align-items:start}
+@media(max-width:960px){.geo-grid{grid-template-columns:1fr}}
+
+/* FORM */
+.field-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.field-row:last-child{margin-bottom:0}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.field label em{font-style:italic;text-transform:none;letter-spacing:0;font-weight:400}
+select,input[type=number],input[type=text]{padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-size:13px;font-family:var(--sans);color:var(--text);background:#fff}
+select:focus,input:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(36,113,201,.12)}
+input[type=number]{width:106px}
+input::placeholder{color:#b0c4d8}
+
+/* TOGGLE */
+.method-toggle{display:flex;gap:0;border:1px solid var(--border);border-radius:3px;overflow:hidden;width:fit-content}
+.method-btn{padding:7px 18px;font-size:12px;font-family:var(--sans);font-weight:500;background:#fff;color:var(--muted);border:none;border-right:1px solid var(--border);cursor:pointer;transition:background .1s}
+.method-btn:last-child{border-right:none}
+.method-btn.active{background:var(--navy2);color:#fff;font-weight:600}
+.method-btn:hover:not(.active){background:#eaf2fc}
+
+/* CHECKBOX */
+.check-label{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text);cursor:pointer;line-height:1.5}
+.check-label input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue2);cursor:pointer;flex-shrink:0;margin-top:2px}
+.tip{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:var(--border);color:var(--muted);font-size:9px;font-weight:700;cursor:help;margin-left:3px;vertical-align:middle;font-family:var(--sans);font-style:normal}
+
+/* NOTE / INFO / WARN */
+.note-box{font-size:11.5px;color:var(--muted);background:#f4f8fc;border-left:3px solid var(--steel);padding:8px 12px;margin-bottom:14px;line-height:1.6}
+.note-box:last-child{margin-bottom:0}.note-box strong{color:var(--text)}
+.info-box{font-size:11.5px;color:#1e3a5f;background:#eef5ff;border-left:3px solid var(--blue);padding:8px 12px;margin-bottom:14px;line-height:1.6}
+.info-box:last-child{margin-bottom:0}
+.warn-box{font-size:11.5px;color:#7c2d12;background:#fff8f0;border-left:3px solid var(--orange);padding:8px 12px;margin-bottom:12px;line-height:1.6}
+
+/* CALC BLOCK */
+.calc-block{background:#f0f5fb;border:1px solid #c8d9ed;border-left:3px solid var(--blue2);border-radius:3px;padding:12px 16px;margin-bottom:12px;font-family:var(--mono);font-size:11.5px;line-height:1.8;overflow-x:auto}
+.calc-block:last-child{margin-bottom:0}
+.calc-ref{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-family:var(--sans);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #d0dcea}
+.calc-line{color:var(--navy);margin-bottom:1px}
+.calc-line.sub{padding-left:16px;color:#2a5a9a}
+.calc-line.result{font-weight:700;font-size:13px;border-top:1px solid #c0d0e4;padding-top:8px;margin-top:8px;color:var(--navy)}
+
+/* FORCE TABLE */
+.force-tbl{border-collapse:collapse;font-size:11.5px;width:100%;margin-bottom:0}
+.force-tbl th{background:var(--navy2);color:#fff;padding:6px 10px;border:1px solid #2a4a6a;font-size:10px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;text-align:center;white-space:nowrap}
+.force-tbl th.left{text-align:left}
+.force-tbl td{padding:6px 10px;border:1px solid #d8e4ee;text-align:center;font-family:var(--mono);font-size:11.5px;vertical-align:middle}
+.force-tbl td.left{text-align:left;font-family:var(--sans)}
+.force-tbl .sum-row td{font-weight:700;background:#e8f0fa;border-top:2px solid var(--blue2)}
+.force-tbl .label-row td{background:#f0f5fb;font-style:italic;font-family:var(--sans);text-align:left;font-size:10.5px;color:var(--muted);padding:4px 10px;border-top:2px solid #c8d9ed}
+
+/* STATUS */
+.status-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:800px){.status-grid{grid-template-columns:1fr}}
+.status-card{border-radius:3px;padding:16px 18px;border:2px solid}
+.status-card.ok{background:#f0fdf4;border-color:#86efac}
+.status-card.ng{background:#fff5f5;border-color:#fca5a5}
+.status-badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.status-badge.ok{color:var(--green)}.status-badge.ng{color:var(--red)}
+.status-icon{font-size:14px}
+.status-label{font-size:11.5px;font-weight:600;color:var(--navy);margin-bottom:10px}
+.status-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:4px;font-family:var(--mono);gap:8px}
+.status-row span:last-child{font-weight:600;color:var(--text)}
+.status-dcr{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:10px}
+.status-dcr.ok{color:var(--green)}.status-dcr.ng{color:var(--red)}
+
+/* PILLS */
+.result-row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 2px}
+.pill{background:#f0f6ff;border:1px solid #c0d8f0;border-radius:3px;padding:10px 15px;min-width:120px}
+.pill-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.pill-value{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--navy);margin:3px 0 2px;letter-spacing:-.5px}
+.pill-sub{font-size:10px;color:var(--muted)}
+.pill.big{background:var(--navy2);border-color:var(--navy2)}
+.pill.big .pill-label{color:#7a9fc0}.pill.big .pill-value{color:#fff;font-size:24px}.pill.big .pill-sub{color:#7a9fc0}
+.pill.ok{background:#f0fdf4;border-color:#86efac}.pill.ok .pill-value{color:var(--green)}
+.pill.ng{background:#fff5f5;border-color:#fca5a5}.pill.ng .pill-value{color:var(--red)}
+
+/* SVG CARD */
+.svg-card{background:#f7f9fc;border:1px solid var(--border);border-radius:3px;overflow:hidden;position:sticky;top:16px}
+.svg-card-head{background:var(--navy);color:#fff;padding:7px 14px;font-size:10.5px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.svg-wrap{padding:12px;background:#fff}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.25);width:400px;overflow:hidden}
+.modal-head{background:var(--navy2);color:#fff;padding:14px 20px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;color:#7a9fc0;cursor:pointer;font-size:20px;line-height:1;padding:0}.modal-close:hover{color:#fff}
+.modal-body{padding:20px}
+.modal-prompt{font-size:12px;color:var(--muted);margin-bottom:14px}
+.modal-check-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:3px;margin-bottom:6px;cursor:pointer;transition:background .12s;user-select:none}
+.modal-check-row:hover{background:#f7f9fc}
+.modal-check-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue2);cursor:pointer;flex-shrink:0}
+.modal-check-row span{font-size:13px;font-weight:600;color:var(--text)}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-ok{flex:1;padding:9px;background:var(--navy2);color:#fff;border:none;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)}.modal-ok:hover{background:var(--navy)}
+.modal-cancel{flex:1;padding:9px;background:#f0f4f8;color:var(--muted);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)}.modal-cancel:hover{background:#e2e8f0;color:var(--text)}
+.no-print{display:none!important}
+
+@media print {
+  body{background:#fff}
+  .breadcrumb,.hdr-actions{display:none!important}
+  .header{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .phase-head,.card-head,.proj-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .status-card.ok,.status-card.ng{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .geo-grid{grid-template-columns:1fr}
+  .svg-card{position:static}
+  .modal-overlay{display:none!important}
+  .calc-block{break-inside:avoid}
+  .container{padding:12px 16px 20px}
+}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="printModal">
+  <div class="modal">
+    <div class="modal-head">Print / Export PDF <button class="modal-close" onclick="closePrintModal()">&#x2715;</button></div>
+    <div class="modal-body">
+      <p class="modal-prompt">Select the sections you&rsquo;d like to include:</p>
+      <label class="modal-check-row"><input type="checkbox" id="pProjInfo" checked><span>&#8281; Project Information</span></label>
+      <label class="modal-check-row"><input type="checkbox" id="pInputs" checked><span>&#8281; Input Sections (1&ndash;4)</span></label>
+      <label class="modal-check-row"><input type="checkbox" id="pResults" checked><span>&#8281; Results &amp; Calculations</span></label>
+      <div class="modal-actions">
+        <button class="modal-ok" onclick="doPrint()">OK &mdash; Print / Export</button>
+        <button class="modal-cancel" onclick="closePrintModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="breadcrumb">
+  <a href="index.html">&#8592; Geotech Tools</a> &nbsp;/&nbsp; Retaining Wall External Stability
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>Cantilever Retaining Wall <span>External Stability</span></h1>
+      <div class="header-sub">AASHTO LRFD 9th Ed. &sect;11.6.3 &middot; Eccentricity &middot; Sliding &middot; Bearing &middot; Strength I</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="hdr-btn save" onclick="saveJSON()">&#8595; Save JSON</button>
+      <button class="hdr-btn" onclick="document.getElementById('loadInput').click()">&#8593; Load JSON</button>
+      <button class="hdr-btn print" onclick="openPrintModal()">&#8281; Print / PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- PROJECT INFO -->
+<div class="proj-card">
+  <div class="proj-head">Project Information</div>
+  <div class="proj-row">
+    <div class="proj-cell"><span class="proj-label">Project</span><input class="proj-input" id="pi-proj" type="text" placeholder="Project name or number" oninput="autosave()"></div>
+    <div class="proj-cell"><span class="proj-label">Wall ID / Location</span><input class="proj-input" id="pi-loc" type="text" placeholder="Wall designation or station" oninput="autosave()"></div>
+  </div>
+  <div class="proj-row">
+    <div class="proj-cell"><span class="proj-label">Engineer</span><input class="proj-input" id="pi-engr" type="text" placeholder="Initials" oninput="autosave()"></div>
+    <div class="proj-cell"><span class="proj-label">Date</span><input class="proj-input" id="pi-date" type="text" placeholder="MM/DD/YYYY" oninput="autosave()"></div>
+    <div class="proj-cell"><span class="proj-label">Notes</span><input class="proj-input" id="pi-notes" type="text" placeholder="Optional" oninput="autosave()"></div>
+  </div>
+</div>
+
+<!-- 1. GEOMETRY + SVG -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">1</span>
+    <div>
+      <div class="phase-title">Wall Geometry</div>
+      <div class="phase-sub">Footing, stem, embedment, and optional shear key &mdash; per unit length of wall</div>
+    </div>
+    <div class="phase-ref">&sect;11.6.3.2</div>
+  </div>
+  <div class="phase-body">
+    <div class="geo-grid">
+
+      <!-- LEFT: input cards -->
+      <div>
+        <div class="card">
+          <div class="card-head"><span class="dot"></span>Footing Dimensions</div>
+          <div class="card-body">
+            <div class="field-row">
+              <div class="field">
+                <label>B<sub>toe</sub> &mdash; Toe Width <em>(ft)</em> <span class="tip" title="Width of footing in front of stem face">?</span></label>
+                <input type="number" id="inp-Btoe" min="0" step="0.25" placeholder="" oninput="compute()">
+              </div>
+              <div class="field">
+                <label>T<sub>f</sub> &mdash; Footing Thickness <em>(ft)</em></label>
+                <input type="number" id="inp-Tf" min="0.1" step="0.25" placeholder="" oninput="compute()">
+              </div>
+              <div class="field">
+                <label>B<sub>heel</sub> &mdash; Heel Width <em>(ft)</em> <span class="tip" title="Width of footing behind stem; backfill sits above this">?</span></label>
+                <input type="number" id="inp-Bheel" min="0" step="0.25" placeholder="" oninput="compute()">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>D<sub>emb</sub> &mdash; Embedment Depth <em>(ft)</em> <span class="tip" title="Depth from front grade to bottom of footing; drives passive resistance and overburden for bearing">?</span></label>
+                <input type="number" id="inp-Demb" min="0" step="0.25" placeholder="" oninput="compute()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="dot"></span>Stem Dimensions</div>
+          <div class="card-body">
+            <div class="field-row">
+              <div class="field">
+                <label>H<sub>s</sub> &mdash; Stem Height <em>(ft)</em> <span class="tip" title="From top of footing to top of stem; does not include footing thickness">?</span></label>
+                <input type="number" id="inp-Hs" min="0.1" step="0.5" placeholder="" oninput="compute()">
+              </div>
+              <div class="field">
+                <label>T<sub>s</sub> &mdash; Stem Thickness <em>(ft)</em> <span class="tip" title="Uniform stem thickness; use average for tapered stems">?</span></label>
+                <input type="number" id="inp-Ts" min="0.1" step="0.25" placeholder="" oninput="compute()">
+              </div>
+            </div>
+            <div class="note-box">
+              Total wall height H = H<sub>s</sub> + T<sub>f</sub>. Base width B = B<sub>toe</sub> + T<sub>s</sub> + B<sub>heel</sub>.
+              For tapered stems, enter the average thickness for weight calculations.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="dot"></span>Shear Key (Optional)</div>
+          <div class="card-body">
+            <div class="field-row" style="margin-bottom:10px">
+              <label class="check-label">
+                <input type="checkbox" id="cb-key" onchange="toggleKey()">
+                Include shear key below footing
+              </label>
+            </div>
+            <div id="key-opts" style="display:none">
+              <div class="field-row">
+                <div class="field">
+                  <label>D<sub>key</sub> &mdash; Key Depth <em>(ft)</em> <span class="tip" title="Additional depth below footing base; increases passive resistance zone by (Demb + Dkey)">?</span></label>
+                  <input type="number" id="inp-Dkey" min="0.1" step="0.25" placeholder="" oninput="compute()">
+                </div>
+                <div class="field">
+                  <label>W<sub>key</sub> &mdash; Key Width <em>(ft)</em> <span class="tip" title="Width of shear key; shown in schematic only — does not affect stability calculation">?</span></label>
+                  <input type="number" id="inp-Wkey" min="0.1" step="0.25" placeholder="" oninput="compute()">
+                </div>
+              </div>
+              <div class="note-box">
+                Shear key increases passive resistance: P<sub>p</sub> uses effective embedment depth D<sub>emb</sub> + D<sub>key</sub>.
+                Passive resistance shall be neglected if soils in front may become soft or disturbed per &sect;11.6.3.5.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /left inputs -->
+
+      <!-- RIGHT: SVG schematic -->
+      <div class="svg-card">
+        <div class="svg-card-head"><span class="dot"></span>Cross-Section Schematic &mdash; Per Unit Length</div>
+        <div class="svg-wrap">
+          <svg id="wall-svg" viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;min-height:300px"></svg>
+        </div>
+      </div>
+
+    </div><!-- /geo-grid -->
+  </div>
+</div>
+
+<!-- 2. SOIL & MATERIALS -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">2</span>
+    <div>
+      <div class="phase-title">Soil &amp; Material Properties</div>
+      <div class="phase-sub">Backfill, foundation soil, and concrete unit weight</div>
+    </div>
+    <div class="phase-ref">&sect;3.11.5.3, &sect;10.6.3</div>
+  </div>
+  <div class="phase-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Backfill (Retained Soil)</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>&phi;<sub>b</sub> &mdash; Friction Angle <em>(&deg;)</em></label>
+              <input type="number" id="inp-phib" min="0" max="45" step="0.5" placeholder="" oninput="compute()">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>&gamma;<sub>b</sub> &mdash; Unit Weight <em>(pcf)</em></label>
+              <input type="number" id="inp-gamb" min="0" step="1" placeholder="" oninput="compute()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Foundation Soil</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>&phi;<sub>f</sub> &mdash; Friction Angle <em>(&deg;)</em></label>
+              <input type="number" id="inp-phif" min="0" max="45" step="0.5" placeholder="" oninput="compute()">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>&gamma;<sub>f</sub> &mdash; Unit Weight <em>(pcf)</em></label>
+              <input type="number" id="inp-gamf" min="0" step="1" placeholder="" oninput="compute()">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field" style="flex:1">
+              <label>c<sub>f</sub> &mdash; Cohesion <em>(ksf)</em> <span class="tip" title="Effective cohesion; enter 0 for granular soils. Used in bearing resistance qn.">?</span></label>
+              <input type="number" id="inp-cf" min="0" step="0.01" placeholder="0" oninput="compute()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Concrete &amp; Footing Type</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>&gamma;<sub>c</sub> &mdash; Concrete Unit Weight <em>(pcf)</em></label>
+              <input type="number" id="inp-gamc" min="0" step="1" placeholder="150" oninput="compute()">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field" style="flex:1">
+              <label>Footing Construction <span class="tip" title="Affects friction coefficient C per Eq. 10.6.3.4-2. CIP concrete cast against soil: C=1.0. Precast: C=0.8.">?</span></label>
+              <select id="sel-footing" onchange="compute()" style="width:100%">
+                <option value="1.0">Cast-in-place concrete on soil (C = 1.0)</option>
+                <option value="0.8">Precast concrete (C = 0.8)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 3. EARTH PRESSURE & SURCHARGE -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">3</span>
+    <div>
+      <div class="phase-title">Earth Pressure &amp; Surcharge</div>
+      <div class="phase-sub">Coulomb K<sub>a</sub> with user-defined &delta; and backslope &beta;</div>
+    </div>
+    <div class="phase-ref">Eq. 3.11.5.3-1</div>
+  </div>
+  <div class="phase-body">
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Coulomb Active Earth Pressure Parameters</div>
+      <div class="card-body">
+        <div class="info-box">
+          For a <strong>vertical stem back face</strong> (&theta; = 90&deg;), Eq. 3.11.5.3-1 reduces to the standard Coulomb formula
+          with K<sub>a</sub> = cos&sup2;(&phi;<sub>b</sub>) / [cos(&delta;) &times; (1 + &radic;(sin(&phi;<sub>b</sub>+&delta;)sin(&phi;<sub>b</sub>&minus;&beta;) /
+          (cos(&delta;)cos(&beta;))))&sup2;].
+          For &delta; = 0 and &beta; = 0, this reduces to the Rankine K<sub>a</sub>.
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>&delta; &mdash; Wall Friction Angle <em>(&deg;)</em> <span class="tip" title="Friction angle between backfill and back of stem / virtual plane. Typical: &delta; = 0.67&phi;b for soil-concrete; &delta; = &phi;b for soil-soil (long-heel cantilever). Per &sect;C3.11.5.3.">?</span></label>
+            <input type="number" id="inp-delta" min="0" max="45" step="0.5" placeholder="" oninput="compute()">
+          </div>
+          <div class="field">
+            <label>&beta; &mdash; Backslope Angle <em>(&deg;)</em> <span class="tip" title="Angle of retained soil surface from horizontal. Enter 0 for level backfill. Must be less than &phi;b.">?</span></label>
+            <input type="number" id="inp-beta" min="0" max="35" step="0.5" placeholder="0" oninput="compute()">
+          </div>
+        </div>
+        <div id="ka-display" class="calc-block" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Uniform Surcharge (Optional)</div>
+      <div class="card-body">
+        <div class="field-row" style="margin-bottom:10px">
+          <label class="check-label">
+            <input type="checkbox" id="cb-surcharge" onchange="toggleSurcharge()">
+            Apply uniform surcharge on backfill &mdash; ES per Table 3.4.1-2 (&gamma;<sub>ES</sub> = 1.50 / 0.75)
+          </label>
+        </div>
+        <div id="surcharge-opts" style="display:none">
+          <div class="field-row">
+            <div class="field">
+              <label>q<sub>s</sub> &mdash; Uniform Surcharge <em>(ksf)</em></label>
+              <input type="number" id="inp-qs" min="0" step="0.01" placeholder="" oninput="compute()">
+            </div>
+          </div>
+          <div class="note-box">
+            Per &sect;C11.5.6: surcharge load is included over the heel for bearing resistance check only.
+            For eccentricity and sliding, surcharge is applied on the driving side only (additional horizontal thrust),
+            not over the heel as a stabilizing vertical force.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. ANALYSIS OPTIONS -->
+<div class="phase">
+  <div class="phase-head">
+    <span class="phase-num">4</span>
+    <div>
+      <div class="phase-title">Analysis Options &amp; Resistance Factors</div>
+      <div class="phase-sub">Passive resistance, &phi;<sub>b</sub> and &phi;<sub>&tau;</sub> per Tables 10.5.5.2.2-1 and 11.5.7-1</div>
+    </div>
+    <div class="phase-ref">&sect;10.5.5.2.2</div>
+  </div>
+  <div class="phase-body">
+
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Passive Resistance in Front of Toe &mdash; &sect;11.6.3.5</div>
+      <div class="card-body">
+        <div class="field-row" style="margin-bottom:10px">
+          <label class="check-label">
+            <input type="checkbox" id="cb-passive" onchange="compute()" checked>
+            Include Rankine passive resistance (K<sub>p</sub> = tan&sup2;(45 + &phi;<sub>f</sub>/2))
+          </label>
+        </div>
+        <div class="note-box">
+          &sect;11.6.3.5: Passive resistance shall be neglected unless the footing base extends below the depth of scour,
+          freeze&ndash;thaw, or other disturbances. Factored passive resistance: &phi;<sub>ep</sub> &times; R<sub>ep</sub>
+          where &phi;<sub>ep</sub> = 0.50 (Table 10.5.5.2.2-1).
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Sliding Resistance Factor &phi;<sub>&tau;</sub> &mdash; Table 10.5.5.2.2-1</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field" style="flex:1">
+              <label>Select Condition</label>
+              <select id="sel-phitau-method" onchange="setPhiTau()" style="width:100%">
+                <option value="0.80">CIP concrete on sand &rarr; &phi;<sub>&tau;</sub> = 0.80</option>
+                <option value="0.85">CIP or precast concrete on clay &rarr; &phi;<sub>&tau;</sub> = 0.85</option>
+                <option value="0.90">Precast concrete on sand or soil-on-soil &rarr; &phi;<sub>&tau;</sub> = 0.90</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>&phi;<sub>&tau;</sub></label>
+              <input type="number" id="inp-phitau" min="0.01" max="1" step="0.01" value="0.80" style="width:80px;font-weight:700;font-size:15px" oninput="compute()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Bearing Resistance Factor &phi;<sub>b</sub> &mdash; Table 10.5.5.2.2-1</div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field" style="flex:1">
+              <label>Select Method / Soil</label>
+              <select id="sel-phib-method" onchange="setPhiB()" style="width:100%">
+                <option value="0.50">Theoretical (Munfakh) &mdash; Clay &rarr; &phi;<sub>b</sub> = 0.50</option>
+                <option value="0.50">Theoretical (Munfakh) &mdash; Sand, CPT &rarr; &phi;<sub>b</sub> = 0.50</option>
+                <option value="0.45" selected>Theoretical (Munfakh) &mdash; Sand, SPT &rarr; &phi;<sub>b</sub> = 0.45</option>
+                <option value="0.45">Semi-empirical (Meyerhof, 1957) &rarr; &phi;<sub>b</sub> = 0.45</option>
+                <option value="0.55">Plate load test &rarr; &phi;<sub>b</sub> = 0.55</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>&phi;<sub>b</sub></label>
+              <input type="number" id="inp-phib-val" min="0.01" max="1" step="0.01" value="0.45" style="width:80px;font-weight:700;font-size:15px" oninput="compute()">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="phase" id="results-phase" style="display:none">
+  <div class="phase-head">
+    <span class="phase-num">&#10003;</span>
+    <div>
+      <div class="phase-title">External Stability Results &mdash; Strength I</div>
+      <div class="phase-sub" id="results-sub">Eccentricity &middot; Sliding &middot; Bearing Resistance</div>
+    </div>
+    <div class="phase-ref">&sect;11.6.3</div>
+  </div>
+  <div class="phase-body" id="results-body"></div>
+</div>
+
+</div><!-- /container -->
+<input type="file" id="loadInput" accept=".json" style="display:none" onchange="loadJSON(event)">
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// BEARING CAPACITY FACTOR TABLES  (Table 10.6.3.1.2a-1, strip footing)
+// ══════════════════════════════════════════════════════════════════════════════
+const NC=[5.14,5.4,5.6,5.9,6.2,6.5,6.8,7.2,7.5,7.9,8.4,8.8,9.3,9.8,10.4,11.0,11.6,12.3,13.1,13.9,14.8,15.8,16.9,18.1,19.3,20.7,22.3,23.9,25.8,27.9,30.1,32.7,35.5,38.6,42.2,46.1,50.6,55.6,61.4,67.9,75.3,83.9,93.7,105.1,118.4,133.9];
+const NQ=[1.0,1.1,1.2,1.3,1.4,1.6,1.7,1.9,2.1,2.3,2.5,2.7,3.0,3.3,3.6,3.9,4.3,4.8,5.3,5.8,6.4,7.1,7.8,8.7,9.6,10.7,11.9,13.2,14.7,16.4,18.4,20.6,23.2,26.1,29.4,33.3,37.8,42.9,48.9,56.0,64.2,73.9,85.4,99.0,115.3,134.9];
+const NG=[0.0,0.1,0.2,0.2,0.3,0.5,0.6,0.7,0.9,1.0,1.2,1.4,1.7,2.0,2.3,2.7,3.1,3.5,4.1,4.7,5.4,6.2,7.1,8.2,9.4,10.9,12.5,14.5,16.7,19.3,22.4,26.0,30.2,35.2,41.1,48.0,56.3,66.2,78.0,92.3,109.4,130.2,155.6,186.5,224.6,271.8];
+function getBCF(phi){
+  phi=Math.max(0,Math.min(45,phi));
+  const lo=Math.floor(phi),hi=Math.min(45,Math.ceil(phi)),t=phi-lo;
+  return{Nc:NC[lo]+t*(NC[hi]-NC[lo]),Nq:NQ[lo]+t*(NQ[hi]-NQ[lo]),Ng:NG[lo]+t*(NG[hi]-NG[lo])};
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// COULOMB Ka  (Eq. 3.11.5.3-1, vertical wall θ = 90°)
+// ══════════════════════════════════════════════════════════════════════════════
+function computeKa(phi_deg, delta_deg, beta_deg) {
+  const phi=phi_deg*Math.PI/180, d=delta_deg*Math.PI/180, b=beta_deg*Math.PI/180;
+  // For θ=90°: Ka = cos²(φ) / [cos(δ)×(1+√Λ)²]  where Λ=sin(φ+δ)sin(φ-β)/(cos(δ)cos(β))
+  const cosPhi=Math.cos(phi), cosD=Math.cos(d), cosB=Math.cos(b);
+  if(cosD<=0||cosB<=0) return NaN;
+  const Lambda=Math.sin(phi+d)*Math.sin(phi-b)/(cosD*cosB);
+  if(Lambda<0) return NaN; // β > φ — invalid
+  const inner=1+Math.sqrt(Lambda);
+  return cosPhi*cosPhi/(cosD*inner*inner);
+}
+
+// Rankine passive
+function computeKp(phi_deg){
+  const a=Math.PI/4+phi_deg*Math.PI/360;
+  return Math.tan(a)*Math.tan(a);
+}
+
+// GWT correction (same logic as spread footing, for bearing)
+function getGWT(Dw,Df,Bp){
+  const upper=Df+1.5*Bp;
+  if(Dw<=0)return{Cwq:0.5,Cwg:0.5};
+  if(Df<=0){if(Dw>=upper)return{Cwq:1,Cwg:1};const t=Dw/upper;return{Cwq:0.5+0.5*t,Cwg:0.5+0.5*t};}
+  if(Dw<=Df)return{Cwq:0.5+0.5*(Dw/Df),Cwg:0.5};
+  if(Dw>=upper)return{Cwq:1,Cwg:1};
+  return{Cwq:1,Cwg:0.5+0.5*((Dw-Df)/(1.5*Bp))};
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FORMAT HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+const f1=n=>(isNaN(n)||!isFinite(n))?'—':n.toFixed(1);
+const f2=n=>(isNaN(n)||!isFinite(n))?'—':n.toFixed(2);
+const f3=n=>(isNaN(n)||!isFinite(n))?'—':n.toFixed(3);
+const f4=n=>(isNaN(n)||!isFinite(n))?'—':n.toFixed(4);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TOGGLE HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+function toggleKey(){document.getElementById('key-opts').style.display=document.getElementById('cb-key').checked?'':'none';compute();}
+function toggleSurcharge(){document.getElementById('surcharge-opts').style.display=document.getElementById('cb-surcharge').checked?'':'none';compute();}
+function setPhiTau(){document.getElementById('inp-phitau').value=document.getElementById('sel-phitau-method').value;compute();}
+function setPhiB(){document.getElementById('inp-phib-val').value=document.getElementById('sel-phib-method').value;compute();}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FIELD & STATE HELPERS  (Build Spec §4.1–4.3, §6A.6)
+// ══════════════════════════════════════════════════════════════════════════════
+function numField(id, def) {
+  const raw = document.getElementById(id).value.trim();
+  if (raw === '') return def;
+  const v = parseFloat(raw);
+  return Number.isFinite(v) ? v : def;
+}
+function gv(id)      { const e = document.getElementById(id); return e ? e.value : ''; }
+function sv(id, val) { const e = document.getElementById(id); if (!e) return; if (['INPUT','TEXTAREA','SELECT'].includes(e.tagName)) e.value = (val == null) ? '' : val; else e.innerHTML = (val == null) ? '' : val; }
+function esc(s)      { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtN(n, d)  { return (n == null || isNaN(n)) ? '\u2014\u2014' : n.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d}); }
+
+let isDirty = false;
+function markDirty() { isDirty = true; }
+window.addEventListener('beforeunload', e => { if (isDirty) { e.preventDefault(); e.returnValue = ''; } });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// READ INPUT
+// ══════════════════════════════════════════════════════════════════════════════
+function g(id)       { return numField(id, NaN); }
+function gOr(id,def) { return numField(id, def); }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MAIN COMPUTE
+// ══════════════════════════════════════════════════════════════════════════════
+function compute(){
+  autosave();
+  renderSVG(); // always update SVG
+
+  const Hs=g('inp-Hs'), Ts=g('inp-Ts'), Btoe=g('inp-Btoe'), Bheel=g('inp-Bheel');
+  const Tf=g('inp-Tf'), Demb=g('inp-Demb');
+  const phi_b=g('inp-phib'), gam_b=(gOr('inp-gamb',0))/1000; // kcf
+  const phi_f=g('inp-phif'), gam_f=(gOr('inp-gamf',0))/1000;
+  const cf=gOr('inp-cf',0);
+  const gam_c=(gOr('inp-gamc',150))/1000;
+  const delta=gOr('inp-delta',0), beta_deg=gOr('inp-beta',0);
+  const useKey=document.getElementById('cb-key').checked;
+  const Dkey=useKey?gOr('inp-Dkey',0):0;
+  const useSurch=document.getElementById('cb-surcharge').checked;
+  const qs=useSurch?gOr('inp-qs',0):0;
+  const usePassive=document.getElementById('cb-passive').checked;
+  const phiTau=gOr('inp-phitau',0.80);
+  const phiB=gOr('inp-phib-val',0.45);
+  const C=parseFloat(document.getElementById('sel-footing').value);
+
+  // Basic validation
+  if([Hs,Ts,Btoe,Bheel,Tf,Demb,phi_b,phi_f].some(isNaN)){hideResults();return;}
+  if(gam_b===0||gam_f===0){hideResults();return;}
+
+  // Derived geometry
+  const B = Btoe + Ts + Bheel;   // total base width
+  const H = Hs + Tf;              // total wall height
+
+  // ── COULOMB Ka ─────────────────────────────────────────────────────────────
+  const Ka = computeKa(phi_b, delta, beta_deg);
+  if(isNaN(Ka)){
+    document.getElementById('ka-display').style.display='';
+    document.getElementById('ka-display').innerHTML=
+      '<div class="calc-ref">Eq. 3.11.5.3-1 &mdash; Warning</div>' +
+      '<div class="calc-line" style="color:var(--red)">&#9888; Invalid Ka: check that &beta; &lt; &phi;<sub>b</sub> and &delta; &ge; 0.</div>';
+    hideResults(); return;
+  }
+
+  // Show Ka calc
+  const d_r=delta*Math.PI/180, b_r=beta_deg*Math.PI/180, phi_br=phi_b*Math.PI/180;
+  const Lambda=Math.sin(phi_br+d_r)*Math.sin(phi_br-b_r)/(Math.cos(d_r)*Math.cos(b_r));
+  document.getElementById('ka-display').style.display='';
+  document.getElementById('ka-display').innerHTML=
+    `<div class="calc-ref">Eq. 3.11.5.3-1 (Coulomb, &theta; = 90&deg; vertical wall) &mdash; &phi;<sub>b</sub> = ${phi_b}&deg;, &delta; = ${delta}&deg;, &beta; = ${beta_deg}&deg;</div>` +
+    `<div class="calc-line">&Lambda; = sin(&phi;<sub>b</sub>+&delta;)&middot;sin(&phi;<sub>b</sub>&minus;&beta;) / (cos(&delta;)&middot;cos(&beta;)) = ${f4(Lambda)}</div>` +
+    `<div class="calc-line result">K<sub>a</sub> = cos&sup2;(${phi_b}&deg;) / [cos(${delta}&deg;) &times; (1 + &radic;${f4(Lambda)})&sup2;] = <strong>${f4(Ka)}</strong></div>`;
+
+  // ── PASSIVE Kp ────────────────────────────────────────────────────────────
+  const Kp = computeKp(phi_f);
+  const D_eff = Demb + (useKey ? Dkey : 0); // effective embedment for passive
+  const Pp = usePassive ? 0.5 * Kp * gam_f * D_eff * D_eff : 0; // kips/ft
+  const phi_ep = 0.50; // Table 10.5.5.2.2-1
+
+  // ── NOMINAL FORCES (per ft of wall) ───────────────────────────────────────
+  // Vertical forces and moment arms from TOE (stabilizing = positive)
+  const W1 = gam_c * Ts * Hs;                   // stem weight
+  const W2 = gam_c * B  * Tf;                   // footing weight
+  const V3 = gam_b * Bheel * Hs;                // soil on heel (above footing top)
+  // Pa_v = Pa × sin(δ) — vertical component of earth pressure (downward on back face)
+  const Pa_total = 0.5 * Ka * gam_b * H * H;    // triangular EP resultant
+  const Pa_surcharge = useSurch ? Ka * qs * H : 0; // surcharge EP
+  const Pa_v_nom = (Pa_total + Pa_surcharge) * Math.sin(d_r); // vertical
+  const Pa_h_tri = Pa_total * Math.cos(d_r);    // horiz, triangular
+  const Pa_h_sur = Pa_surcharge * Math.cos(d_r); // horiz, surcharge
+
+  // Moment arms from toe
+  const arm_W1  = Btoe + Ts / 2;        // stem centroid
+  const arm_W2  = B / 2;                // footing centroid
+  const arm_V3  = Btoe + Ts + Bheel/2;  // heel soil centroid
+  const arm_Pa_v= B;                    // Pa_v at heel edge
+
+  // Height of resultant Pa_h above footing base
+  const y_Pa_h = Pa_h_tri > 0 || Pa_h_sur > 0
+    ? (Pa_h_tri*(H/3) + Pa_h_sur*(H/2)) / (Pa_h_tri + Pa_h_sur)
+    : H/3;
+
+  // Surcharge on heel (for bearing load case only per §C11.5.6)
+  const V4_bear = useSurch ? qs * Bheel : 0;
+  const arm_V4  = Btoe + Ts + Bheel/2;
+
+  // ── LOAD FACTOR COMBINATIONS ──────────────────────────────────────────────
+  // From Table 3.4.1-2:
+  //   EH active: max=1.50, min=0.90
+  //   EV (retaining walls): max=1.35, min=1.00
+  //   DC: max=1.25, min=0.90
+  //   ES: max=1.50, min=0.75
+
+  // Helper: factored ΣV (vertical forces) per chosen LFs
+  function sumV(gDC, gEV, gES_v){
+    // gES_v = 0 for eccentric/sliding (surcharge on heel is stabilizing, excluded)
+    return gDC*(W1+W2) + gEV*(V3+Pa_v_nom) + gES_v*V4_bear;
+  }
+
+  // Helper: factored ΣM_stab about toe
+  function sumMstab(gDC, gEV, gES_v){
+    return gDC*(W1*arm_W1 + W2*arm_W2) + gEV*(V3*arm_V3 + Pa_v_nom*arm_Pa_v) + gES_v*(V4_bear*arm_V4);
+  }
+
+  // Helper: factored OT moment about toe
+  function sumMot(gEH, gES_h){
+    return gEH*Pa_h_tri*y_Pa_h + gES_h*Pa_h_sur*y_Pa_h;
+  }
+
+  // ── CHECK 1: ECCENTRICITY  (Strength I, §11.6.3.3) ────────────────────────
+  // Per §C11.5.6: surcharge over heel excluded (would be stabilizing)
+  // Maximize eccentricity: max EH, min EV, min DC
+  const gEH_max=1.50, gES_max=1.50, gEV_min=1.00, gDC_min=0.90;
+  const SV_ecc  = sumV(gDC_min, gEV_min, 0); // no heel surcharge per §C11.5.6
+  const SMS_ecc = sumMstab(gDC_min, gEV_min, 0);
+  const SMO_ecc = sumMot(gEH_max, gES_max);
+  const xR_ecc  = (SMS_ecc - SMO_ecc) / SV_ecc; // resultant from toe
+  const e_ecc   = Math.abs(B/2 - xR_ecc);
+  const eMax    = B/3; // §11.6.3.3 soil: middle 2/3 → e ≤ B/3
+  const eccOK   = e_ecc <= eMax;
+
+  // ── CHECK 2: SLIDING  (Strength I, §11.6.3.6 → §10.6.3.4) ───────────────
+  // Demand: max EH driving; Resistance: min EV/DC for vertical
+  const slide_demand = gEH_max*Pa_h_tri + gES_max*Pa_h_sur; // kips/ft
+  const SV_slide = sumV(gDC_min, gEV_min, 0); // no heel surcharge (stabilizing)
+  const phi_f_r = phi_f * Math.PI/180;
+  const Rtau  = C * SV_slide * Math.tan(phi_f_r);          // Eq. 10.6.3.4-2 (nominal)
+  const Rep   = Pp;                                           // nominal passive
+  const RR_slide = phiTau * Rtau + phi_ep * Rep;             // Eq. 10.6.3.4-1 (factored)
+  const CDR_slide = slide_demand > 0 ? RR_slide / slide_demand : Infinity;
+  const slideOK = CDR_slide >= 1.0;
+
+  // ── CHECK 3: BEARING  (Strength I, §11.6.3.2) ────────────────────────────
+  // Maximize contact pressure: max EH, max EV, max DC, include heel surcharge
+  const gEV_max=1.35, gDC_max=1.25;
+  const SV_bear   = sumV(gDC_max, gEV_max, gES_max);   // include heel surcharge
+  const SMS_bear  = sumMstab(gDC_max, gEV_max, gES_max);
+  const SMO_bear  = sumMot(gEH_max, gES_max);
+  const xR_bear   = (SMS_bear - SMO_bear) / SV_bear;
+  const e_bear    = Math.max(0, B/2 - xR_bear); // eccentricity for bearing (should be ≥ 0)
+  const Bp        = Math.max(0.01, B - 2*e_bear); // effective base width
+
+  // Contact pressure (uniform over B', per unit length, §11.6.3.2 Fig 11.6.3.2-1)
+  const qu = SV_bear / Bp;
+
+  // Bearing capacity — strip footing (sc=sq=sg=1, L→∞), §10.6.3.1.2a-1
+  const {Nc:Nc_f,Nq:Nq_f,Ng:Ng_f} = getBCF(phi_f);
+  // GWT: no GWT input in this tool — assume deep (Cwq=Cwg=1.0); note for user
+  const Cwq=1.0, Cwg=1.0;
+  // Depth correction (dq) — applied for bearing per §10.6.3.1.2a-10 if footing soils competent
+  let dq_bear=1.0;
+  if(phi_f>0 && Bp>0){
+    dq_bear=1+2*Math.tan(phi_f_r)*Math.pow(1-Math.sin(phi_f_r),2)*Math.atan(Demb/Bp);
+    dq_bear=Math.min(dq_bear,1.4);
+  }
+  // Strip shape factors = 1.0 (infinite length)
+  const sc_s=1.0, sq_s=1.0, sg_s=1.0;
+  const Ncm_s=Nc_f*sc_s, Nqm_s=Nq_f*sq_s*dq_bear, Ngm_s=Ng_f*sg_s;
+  const q_coh_s = cf * Ncm_s;
+  const q_ovb_s = gam_f * Demb * Nqm_s * Cwq;
+  const q_wgt_s = 0.5 * gam_f * Bp * Ngm_s * Cwg;
+  const qn = q_coh_s + q_ovb_s + q_wgt_s;
+  const qR = phiB * qn;
+  const CDR_bear = qR / qu;
+  const bearOK = CDR_bear >= 1.0;
+
+  const allOK = eccOK && slideOK && bearOK;
+
+  renderResults({
+    // geometry
+    Hs,Ts,Btoe,Bheel,Tf,Demb,B,H,
+    // soil
+    phi_b,gam_b,phi_f,gam_f,cf,gam_c,
+    delta,beta_deg,
+    // Ka
+    Ka,Lambda,
+    // passive
+    Kp,Pp,D_eff,phi_ep,usePassive,
+    // forces (nominal)
+    W1,W2,V3,Pa_v_nom,V4_bear,
+    Pa_total,Pa_surcharge,Pa_h_tri,Pa_h_sur,y_Pa_h,
+    arm_W1,arm_W2,arm_V3,arm_Pa_v,arm_V4,
+    // surcharge
+    useSurch,qs,
+    // load factors
+    gEH_max,gES_max,gEV_min,gDC_min,gEV_max,gDC_max,
+    // Check 1: eccentricity
+    SV_ecc,SMS_ecc,SMO_ecc,xR_ecc,e_ecc,eMax,eccOK,
+    // Check 2: sliding
+    SV_slide,slide_demand,Rtau,Rep,RR_slide,CDR_slide,slideOK,
+    C,phiTau,phi_ep,
+    // Check 3: bearing
+    SV_bear,SMS_bear,SMO_bear,xR_bear,e_bear,Bp,qu,
+    Nc_f,Nq_f,Ng_f,dq_bear,Ncm_s,Nqm_s,Ngm_s,
+    q_coh_s,q_ovb_s,q_wgt_s,qn,qR,CDR_bear,bearOK,phiB,
+    // overall
+    allOK
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER RESULTS
+// ══════════════════════════════════════════════════════════════════════════════
+function hideResults(){document.getElementById('results-phase').style.display='none';}
+
+function renderResults(r){
+  document.getElementById('results-phase').style.display='';
+  const body=document.getElementById('results-body');
+
+  const eCls=r.eccOK?'ok':'ng', sCls=r.slideOK?'ok':'ng', bCls=r.bearOK?'ok':'ng';
+  const eIco=r.eccOK?'&#10003;':'&#10007;', sIco=r.slideOK?'&#10003;':'&#10007;', bIco=r.bearOK?'&#10003;':'&#10007;';
+
+  body.innerHTML=`
+
+  <!-- ── STATUS SUMMARY ────────────────────────────────────────────────────── -->
+  <div class="status-grid">
+    <div class="status-card ${eCls}">
+      <div class="status-badge ${eCls}"><span class="status-icon">${eIco}</span> Eccentricity &mdash; &sect;11.6.3.3</div>
+      <div class="status-label">Resultant within middle 2/3 of base (soil)</div>
+      <div class="status-row"><span>B</span><span>${f2(r.B)} ft</span></div>
+      <div class="status-row"><span>Resultant from toe (x<sub>R</sub>)</span><span>${f3(r.xR_ecc)} ft</span></div>
+      <div class="status-row"><span>e = |B/2 &minus; x<sub>R</sub>|</span><span>${f3(r.e_ecc)} ft</span></div>
+      <div class="status-row"><span>Limit (B/3)</span><span>${f3(r.eMax)} ft</span></div>
+      <div class="status-dcr ${eCls}">${r.eccOK?'SATISF.':'EXCEEDS'}</div>
+    </div>
+    <div class="status-card ${sCls}">
+      <div class="status-badge ${sCls}"><span class="status-icon">${sIco}</span> Sliding &mdash; &sect;11.6.3.6</div>
+      <div class="status-label">R<sub>R</sub> = &phi;<sub>&tau;</sub>R<sub>&tau;</sub> + &phi;<sub>ep</sub>R<sub>ep</sub> &ge; H<sub>u</sub></div>
+      <div class="status-row"><span>Demand (H<sub>u</sub>)</span><span>${f3(r.slide_demand)} k/ft</span></div>
+      <div class="status-row"><span>&phi;<sub>&tau;</sub>R<sub>&tau;</sub></span><span>${f3(r.phiTau*r.Rtau)} k/ft</span></div>
+      <div class="status-row"><span>&phi;<sub>ep</sub>R<sub>ep</sub></span><span>${f3(r.phi_ep*r.Rep)} k/ft</span></div>
+      <div class="status-row"><span>R<sub>R</sub></span><span>${f3(r.RR_slide)} k/ft</span></div>
+      <div class="status-dcr ${sCls}">CDR = ${f2(r.CDR_slide)}</div>
+    </div>
+    <div class="status-card ${bCls}">
+      <div class="status-badge ${bCls}"><span class="status-icon">${bIco}</span> Bearing &mdash; &sect;11.6.3.2</div>
+      <div class="status-label">q<sub>R</sub> = &phi;<sub>b</sub>&middot;q<sub>n</sub> &ge; q<sub>u</sub> = &Sigma;V / B&prime;</div>
+      <div class="status-row"><span>B&prime; (effective width)</span><span>${f3(r.Bp)} ft</span></div>
+      <div class="status-row"><span>q<sub>u</sub> (contact pressure)</span><span>${f2(r.qu)} ksf</span></div>
+      <div class="status-row"><span>q<sub>n</sub></span><span>${f2(r.qn)} ksf</span></div>
+      <div class="status-row"><span>q<sub>R</sub></span><span>${f2(r.qR)} ksf</span></div>
+      <div class="status-dcr ${bCls}">CDR = ${f2(r.CDR_bear)}</div>
+    </div>
+  </div>
+
+  <!-- ── NOMINAL FORCE SUMMARY TABLE ───────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head"><span class="dot"></span>Nominal Forces &amp; Moments &mdash; per unit length of wall</div>
+    <div class="card-body">
+      <div class="note-box" style="margin-bottom:12px">
+        H = ${f2(r.H)} ft &nbsp; B = ${f2(r.B)} ft &nbsp; K<sub>a</sub> = ${f4(r.Ka)} &nbsp; K<sub>p</sub> = ${f2(r.Kp)} (Rankine) &nbsp; All loads in kips/ft, moments in kip&middot;ft/ft about toe.
+      </div>
+      <table class="force-tbl">
+        <thead>
+          <tr><th class="left">Force Component</th><th>Magnitude (k/ft)</th><th>Arm from Toe (ft)</th><th>Moment (kip&middot;ft/ft)</th></tr>
+        </thead>
+        <tbody>
+          <tr class="label-row"><td colspan="4">Vertical Forces (Stabilizing)</td></tr>
+          <tr><td class="left">W<sub>1</sub> — Stem weight (&gamma;<sub>c</sub>&middot;T<sub>s</sub>&middot;H<sub>s</sub>)</td><td>${f3(r.W1)}</td><td>${f3(r.arm_W1)}</td><td>${f3(r.W1*r.arm_W1)}</td></tr>
+          <tr><td class="left">W<sub>2</sub> — Footing weight (&gamma;<sub>c</sub>&middot;B&middot;T<sub>f</sub>)</td><td>${f3(r.W2)}</td><td>${f3(r.arm_W2)}</td><td>${f3(r.W2*r.arm_W2)}</td></tr>
+          <tr><td class="left">V<sub>3</sub> — Soil on heel (&gamma;<sub>b</sub>&middot;B<sub>heel</sub>&middot;H<sub>s</sub>)</td><td>${f3(r.V3)}</td><td>${f3(r.arm_V3)}</td><td>${f3(r.V3*r.arm_V3)}</td></tr>
+          <tr><td class="left">P<sub>a,v</sub> — Vert. component of EP (P<sub>a</sub>&middot;sin&delta;)</td><td>${f3(r.Pa_v_nom)}</td><td>${f3(r.arm_Pa_v)}</td><td>${f3(r.Pa_v_nom*r.arm_Pa_v)}</td></tr>
+          ${r.useSurch?`<tr><td class="left">V<sub>4</sub> — Surcharge on heel (q<sub>s</sub>&middot;B<sub>heel</sub>) [bearing only]</td><td>${f3(r.V4_bear)}</td><td>${f3(r.arm_V4)}</td><td>${f3(r.V4_bear*r.arm_V4)}</td></tr>`:''}
+          <tr class="label-row"><td colspan="4">Horizontal Forces (Overturning)</td></tr>
+          <tr><td class="left">P<sub>a,h</sub> — Horiz. EP, triangular (0.5&middot;K<sub>a</sub>&middot;&gamma;<sub>b</sub>&middot;H&sup2;&middot;cos&delta;) &nbsp; @ y = H/3</td><td>${f3(r.Pa_h_tri)}</td><td>${f3(r.y_Pa_h)} (height)</td><td>${f3(r.Pa_h_tri*r.y_Pa_h)}</td></tr>
+          ${r.useSurch?`<tr><td class="left">P<sub>a,h,ES</sub> — Horiz. EP, surcharge (K<sub>a</sub>&middot;q<sub>s</sub>&middot;H&middot;cos&delta;) &nbsp; @ y = H/2</td><td>${f3(r.Pa_h_sur)}</td><td>${f3(r.H/2)} (height)</td><td>${f3(r.Pa_h_sur*r.y_Pa_h)}</td></tr>`:''}
+          <tr class="label-row"><td colspan="4">Passive Resistance</td></tr>
+          <tr><td class="left">P<sub>p</sub> — Rankine passive (0.5&middot;K<sub>p</sub>&middot;&gamma;<sub>f</sub>&middot;D<sub>eff</sub>&sup2;)${r.useKey?' [key: D<sub>eff</sub>=D<sub>emb</sub>+D<sub>key</sub>]':''}</td><td>${r.usePassive?f3(r.Pp):'—'}</td><td>&mdash;</td><td>&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── ECCENTRICITY DETAIL ──────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head"><span class="dot"></span>Eccentricity Check &mdash; Strength I &mdash; &sect;11.6.3.3</div>
+    <div class="card-body">
+      <div class="calc-block">
+        <div class="calc-ref">§11.6.3.3 — Resultant within middle two-thirds of base width (soil) &mdash; Strength I load factors per Table 3.4.1-2</div>
+        <div class="calc-line">Load factors: &gamma;<sub>EH</sub> = ${r.gEH_max}, &gamma;<sub>ES</sub> = ${r.gES_max} (max, driving) &nbsp;|&nbsp; &gamma;<sub>EV</sub> = ${r.gEV_min}, &gamma;<sub>DC</sub> = ${r.gDC_min} (min, stabilizing)</div>
+        <div class="calc-line">Surcharge over heel: <strong>excluded</strong> per §C11.5.6 (surcharge on heel is stabilizing for eccentricity)</div>
+        <div class="calc-line sub">&Sigma;V<sub>u</sub> = ${r.gDC_min}(W<sub>1</sub>+W<sub>2</sub>) + ${r.gEV_min}(V<sub>3</sub>+P<sub>a,v</sub>) = ${r.gDC_min}(${f3(r.W1+r.W2)}) + ${r.gEV_min}(${f3(r.V3+r.Pa_v_nom)}) = <strong>${f3(r.SV_ecc)} k/ft</strong></div>
+        <div class="calc-line sub">&Sigma;M<sub>stab,u</sub> = ${r.gDC_min}(${f3(r.W1*r.arm_W1+r.W2*r.arm_W2)}) + ${r.gEV_min}(${f3(r.V3*r.arm_V3+r.Pa_v_nom*r.arm_Pa_v)}) = <strong>${f3(r.SMS_ecc)} k&middot;ft/ft</strong></div>
+        <div class="calc-line sub">&Sigma;M<sub>OT,u</sub> = ${r.gEH_max}&middot;P<sub>a,h,tri</sub>&middot;y<sub>Pa</sub>${r.useSurch?' + '+r.gES_max+'&middot;P<sub>a,h,ES</sub>&middot;y<sub>Pa</sub>':''} = <strong>${f3(r.SMO_ecc)} k&middot;ft/ft</strong></div>
+        <div class="calc-line result">x<sub>R</sub> = (&Sigma;M<sub>stab</sub> &minus; &Sigma;M<sub>OT</sub>) / &Sigma;V = (${f3(r.SMS_ecc)} &minus; ${f3(r.SMO_ecc)}) / ${f3(r.SV_ecc)} = <strong>${f3(r.xR_ecc)} ft from toe</strong></div>
+        <div class="calc-line result">e = |B/2 &minus; x<sub>R</sub>| = |${f3(r.B/2)} &minus; ${f3(r.xR_ecc)}| = <strong>${f3(r.e_ecc)} ft</strong> &nbsp; [Limit B/3 = ${f3(r.eMax)} ft] &nbsp; ${r.eccOK?'&#10003; OK':'<span style="color:var(--red)">&#9888; EXCEEDS</span>'}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDING DETAIL ───────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head"><span class="dot"></span>Sliding Check &mdash; Strength I &mdash; &sect;11.6.3.6 &rarr; &sect;10.6.3.4</div>
+    <div class="card-body">
+      <div class="calc-block">
+        <div class="calc-ref">Eq. 10.6.3.4-1: R<sub>R</sub> = &phi;<sub>&tau;</sub>R<sub>&tau;</sub> + &phi;<sub>ep</sub>R<sub>ep</sub> &ge; &Sigma;H<sub>u</sub> (factored horizontal demand)</div>
+        <div class="calc-line">Load factors: &gamma;<sub>EH</sub> = ${r.gEH_max} (max, driving) &nbsp;|&nbsp; &gamma;<sub>EV</sub> = ${r.gEV_min}, &gamma;<sub>DC</sub> = ${r.gDC_min} (min, controls vertical for resistance)</div>
+        <div class="calc-line">Surcharge over heel: <strong>excluded</strong> from &Sigma;V per §C11.5.6 (stabilizing)</div>
+        <div class="calc-line sub">Factored demand: &Sigma;H<sub>u</sub> = ${r.gEH_max}&middot;${f3(r.Pa_h_tri)}${r.useSurch?' + '+r.gES_max+'&middot;'+f3(r.Pa_h_sur):''} = <strong>${f3(r.slide_demand)} k/ft</strong></div>
+        <div class="calc-line sub">&Sigma;V<sub>u</sub> (for resistance) = ${r.gDC_min}(${f3(r.W1+r.W2)}) + ${r.gEV_min}(${f3(r.V3+r.Pa_v_nom)}) = <strong>${f3(r.SV_slide)} k/ft</strong></div>
+        <div class="calc-line">R<sub>&tau;</sub> = C &times; &Sigma;V<sub>u</sub> &times; tan(&phi;<sub>f</sub>) = ${r.C} &times; ${f3(r.SV_slide)} &times; tan(${r.phi_f}&deg;) = <strong>${f3(r.Rtau)} k/ft</strong> &nbsp; (Eq. 10.6.3.4-2, C=${r.C} ${r.C===1.0?'CIP':'precast'})</div>
+        <div class="calc-line">R<sub>ep</sub> = 0.5&middot;K<sub>p</sub>&middot;&gamma;<sub>f</sub>&middot;D<sub>eff</sub>&sup2; = 0.5&times;${f2(r.Kp)}&times;${f4(r.gam_f)}&times;${f2(r.D_eff)}&sup2; = <strong>${r.usePassive?f3(r.Pp)+'  k/ft':'0 (excluded)'}</strong>${r.useKey?' [D<sub>eff</sub>=D<sub>emb</sub>+D<sub>key</sub>='+(r.Demb+0)+'+'+(r.D_eff-r.Demb)+'='+r.D_eff+' ft]':''}</div>
+        <div class="calc-line result">R<sub>R</sub> = &phi;<sub>&tau;</sub>&middot;R<sub>&tau;</sub> + &phi;<sub>ep</sub>&middot;R<sub>ep</sub> = ${r.phiTau}&times;${f3(r.Rtau)} + ${r.phi_ep}&times;${f3(r.Rep)} = <strong>${f3(r.RR_slide)} k/ft</strong></div>
+        <div class="calc-line result">CDR = R<sub>R</sub> / &Sigma;H<sub>u</sub> = ${f3(r.RR_slide)} / ${f3(r.slide_demand)} = <strong>${f2(r.CDR_slide)}</strong> &nbsp; ${r.slideOK?'&#10003; OK':'<span style="color:var(--red)">&#9888; INADEQUATE</span>'}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BEARING DETAIL ────────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head"><span class="dot"></span>Bearing Resistance Check &mdash; Strength I &mdash; &sect;11.6.3.2 &rarr; &sect;10.6.3.1</div>
+    <div class="card-body">
+      <div class="calc-block">
+        <div class="calc-ref">§11.6.3.2, Eq. 11.6.3.2-1 — Uniform pressure over effective area B&prime; (soil foundation); strip footing (L→&infin;, s<sub>c</sub>=s<sub>q</sub>=s<sub>&gamma;</sub>=1.0)</div>
+        <div class="calc-line">Load factors: &gamma;<sub>EH</sub>=1.50, &gamma;<sub>ES</sub>=1.50, &gamma;<sub>EV</sub>=${r.gEV_max}, &gamma;<sub>DC</sub>=${r.gDC_max} (max all for bearing per Fig. C11.5.6-1)</div>
+        <div class="calc-line">Surcharge over heel: <strong>included</strong> for bearing resistance check per §C11.5.6</div>
+        <div class="calc-line sub">&Sigma;V<sub>u</sub> = ${r.gDC_max}(${f3(r.W1+r.W2)}) + ${r.gEV_max}(${f3(r.V3+r.Pa_v_nom)})${r.useSurch?' + '+r.gES_max+'('+f3(r.V4_bear)+'[surcharge])':''} = <strong>${f3(r.SV_bear)} k/ft</strong></div>
+        <div class="calc-line sub">x<sub>R</sub> = (${f3(r.SMS_bear)} &minus; ${f3(r.SMO_bear)}) / ${f3(r.SV_bear)} = <strong>${f3(r.xR_bear)} ft from toe</strong></div>
+        <div class="calc-line sub">e = B/2 &minus; x<sub>R</sub> = ${f3(r.B/2)} &minus; ${f3(r.xR_bear)} = <strong>${f3(r.e_bear)} ft</strong></div>
+        <div class="calc-line result">B&prime; = B &minus; 2e = ${f2(r.B)} &minus; 2(${f3(r.e_bear)}) = <strong>${f3(r.Bp)} ft</strong></div>
+        <div class="calc-line result">q<sub>u</sub> = &Sigma;V<sub>u</sub> / B&prime; = ${f3(r.SV_bear)} / ${f3(r.Bp)} = <strong>${f2(r.qu)} ksf</strong></div>
+      </div>
+      <div class="calc-block">
+        <div class="calc-ref">Eq. 10.6.3.1.2a-1 — Strip footing bearing resistance (&phi;<sub>f</sub>=${r.phi_f}&deg;, c<sub>f</sub>=${r.cf} ksf, D<sub>emb</sub>=${r.Demb} ft, &gamma;<sub>f</sub>=${f4(r.gam_f)} kcf)</div>
+        <div class="calc-line">N<sub>c</sub> = ${f2(r.Nc_f)}, N<sub>q</sub> = ${f2(r.Nq_f)}, N<sub>&gamma;</sub> = ${f2(r.Ng_f)} (Table 10.6.3.1.2a-1)</div>
+        <div class="calc-line">d<sub>q</sub> = ${f3(r.dq_bear)} (Eq. 10.6.3.1.2a-10; D<sub>emb</sub>/B&prime; = ${f3(r.Demb/r.Bp)})</div>
+        <div class="calc-line sub">Cohesion: c<sub>f</sub>&middot;N<sub>c</sub> = ${r.cf}&times;${f2(r.Nc_f)} = <strong>${f3(r.q_coh_s)} ksf</strong></div>
+        <div class="calc-line sub">Overburden: &gamma;<sub>f</sub>&middot;D<sub>emb</sub>&middot;N<sub>q</sub>&middot;d<sub>q</sub> = ${f4(r.gam_f)}&times;${r.Demb}&times;${f2(r.Nq_f)}&times;${f3(r.dq_bear)} = <strong>${f3(r.q_ovb_s)} ksf</strong></div>
+        <div class="calc-line sub">Self-weight: 0.5&middot;&gamma;<sub>f</sub>&middot;B&prime;&middot;N<sub>&gamma;</sub> = 0.5&times;${f4(r.gam_f)}&times;${f3(r.Bp)}&times;${f2(r.Ng_f)} = <strong>${f3(r.q_wgt_s)} ksf</strong></div>
+        <div class="calc-line result">q<sub>n</sub> = ${f3(r.q_coh_s)} + ${f3(r.q_ovb_s)} + ${f3(r.q_wgt_s)} = <strong>${f2(r.qn)} ksf</strong></div>
+        <div class="calc-line result">q<sub>R</sub> = &phi;<sub>b</sub>&middot;q<sub>n</sub> = ${r.phiB}&times;${f2(r.qn)} = <strong>${f2(r.qR)} ksf</strong></div>
+        <div class="calc-line result">CDR = q<sub>R</sub>/q<sub>u</sub> = ${f2(r.qR)}/${f2(r.qu)} = <strong>${f2(r.CDR_bear)}</strong> &nbsp; ${r.bearOK?'&#10003; OK':'<span style="color:var(--red)">&#9888; INADEQUATE</span>'}</div>
+      </div>
+      <div class="note-box">
+        GWT not included in this analysis &mdash; C<sub>wq</sub> = C<sub>w&gamma;</sub> = 1.0 assumed (GWT well below bearing influence zone).
+        If GWT is within D<sub>emb</sub> + 1.5B&prime; of the footing base, reanalyze using the Spread Footing Bearing Resistance tool with GWT depth.
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SVG SCHEMATIC
+// ══════════════════════════════════════════════════════════════════════════════
+function renderSVG(){
+  const Hs   = parseFloat(document.getElementById('inp-Hs').value)   || 12;
+  const Ts   = parseFloat(document.getElementById('inp-Ts').value)   || 1.5;
+  const Btoe = parseFloat(document.getElementById('inp-Btoe').value) || 2;
+  const Bheel= parseFloat(document.getElementById('inp-Bheel').value)|| 5;
+  const Tf   = parseFloat(document.getElementById('inp-Tf').value)   || 2;
+  const Demb = parseFloat(document.getElementById('inp-Demb').value) || 2;
+  const useKey= document.getElementById('cb-key').checked;
+  const Dkey = useKey?(parseFloat(document.getElementById('inp-Dkey').value)||1.5):0;
+  const Wkey = useKey?(parseFloat(document.getElementById('inp-Wkey').value)||1.0):0;
+  const beta = parseFloat(document.getElementById('inp-beta').value) || 0;
+
+  const H = Hs + Tf;
+  const B = Btoe + Ts + Bheel;
+
+  // SVG viewport 400×360; drawing area with margins
+  const SX=400, SY=360;
+  const ML=64, MR=24, MT=28, MB=32;
+  const dW=SX-ML-MR, dH=SY-MT-MB;
+
+  // Physical extents to show:
+  // x: from -(front extension) to B + (backfill extension)
+  const fExt=Math.max(1.2, Demb*0.4+0.5); // space in front
+  const bExt=Math.max(1.5, Bheel*0.3+1);  // backfill shown behind heel
+  const totX=fExt+B+bExt;
+  // y: from -(Demb + key) below footing to H + 1.5 above top
+  const yAbove=1.8;
+  const totY=Demb+Dkey+H+yAbove;
+  const sc=Math.min(dW/totX, dH/totY, 28);
+
+  // Transform: physical(x,y) where x=0 = toe of footing, y=0 = top of footing base
+  // Physical y: 0 at bottom of footing, + upward
+  const px=x=>ML+(fExt+x)*sc;
+  const py=y=>SY-MB-(Demb+Dkey+y)*sc;
+  const len=n=>n*sc;
+
+  // Color palette
+  const cConcrete='#6b7b8d', cConcreteStroke='#3a4a5a';
+  const cSoilFill='#c8b07a', cSoilStroke='#9a7c40';
+  const cFoundation='#b8a468';
+  const cSky='#e8f4fb', cWater='#bde0f4';
+
+  let s='';
+
+  // Background sky
+  s+=`<rect x="0" y="0" width="${SX}" height="${SY}" fill="${cSky}"/>`;
+
+  // Foundation soil (below footing base, full width)
+  s+=`<rect x="${px(-fExt)}" y="${py(0)}" width="${len(fExt+B+bExt+0.5)}" height="${len(Demb+Dkey+0.5)}" fill="${cFoundation}" fill-opacity="0.65"/>`;
+
+  // Backfill behind wall (above footing top, behind stem)
+  // x: from back of stem to bExt beyond heel
+  // y: from footing top (0+Tf above footing bottom = Tf) to top of stem (H)
+  const backFillX=Btoe+Ts;
+  const backFillW=Bheel+bExt;
+  const backFillH=Hs; // from footing top to stem top
+  s+=`<rect x="${px(backFillX)}" y="${py(Tf+backFillH)}" width="${len(backFillW)}" height="${len(backFillH)}" fill="${cSoilFill}" fill-opacity="0.75"/>`;
+
+  // Backslope surface (if beta > 0)
+  if(beta>0){
+    const tanBeta=Math.tan(beta*Math.PI/180);
+    const backslope_rise=bExt*tanBeta;
+    s+=`<polyline points="${px(backFillX)},${py(Tf+backFillH)} ${px(backFillX+bExt)},${py(Tf+backFillH+backslope_rise)}" fill="none" stroke="${cSoilStroke}" stroke-width="2"/>`;
+    // Fill the sloped soil
+    s+=`<polygon points="${px(backFillX)},${py(Tf+backFillH)} ${px(backFillX+bExt)},${py(Tf+backFillH+backslope_rise)} ${px(backFillX+bExt)},${py(Tf+backFillH)} " fill="${cSoilFill}" fill-opacity="0.5"/>`;
+  }
+
+  // Soil over toe (between front grade and top of footing toe)
+  if(Demb>Tf){
+    // soil from front grade down to footing top in front zone
+    s+=`<rect x="${px(-fExt)}" y="${py(Tf)}" width="${len(fExt)}" height="${len(Demb-Tf)}" fill="${cFoundation}" fill-opacity="0.45"/>`;
+  }
+
+  // Front grade line
+  const frontGradeY=py(Demb);
+  s+=`<line x1="${px(-fExt)}" y1="${frontGradeY}" x2="${px(0)}" y2="${frontGradeY}" stroke="#5a4a2a" stroke-width="2"/>`;
+
+  // Footing slab
+  s+=`<rect x="${px(0)}" y="${py(Tf)}" width="${len(B)}" height="${len(Tf)}" fill="${cConcrete}" stroke="${cConcreteStroke}" stroke-width="1.5"/>`;
+
+  // Shear key
+  if(useKey&&Dkey>0){
+    const kx=px(Btoe+Ts/2-Wkey/2);
+    const kw=len(Wkey);
+    const ky=py(0);
+    const kh=len(Dkey);
+    s+=`<rect x="${kx}" y="${ky}" width="${kw}" height="${kh}" fill="${cConcrete}" stroke="${cConcreteStroke}" stroke-width="1.5"/>`;
+  }
+
+  // Stem
+  s+=`<rect x="${px(Btoe)}" y="${py(Tf+Hs)}" width="${len(Ts)}" height="${len(Hs)}" fill="${cConcrete}" stroke="${cConcreteStroke}" stroke-width="1.5"/>`;
+
+  // Earth pressure arrow (horizontal)
+  const arrowY=py(H/3);
+  const arrowX1=px(-fExt*0.35);
+  const arrowX2=px(0)-4;
+  s+=`<defs><marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#c2410c"/></marker></defs>`;
+  s+=`<line x1="${arrowX1}" y1="${arrowY}" x2="${arrowX2}" y2="${arrowY}" stroke="#c2410c" stroke-width="2" marker-end="url(#arr)"/>`;
+  s+=`<text x="${arrowX1-4}" y="${arrowY+4}" font-size="9" fill="#c2410c" text-anchor="end" font-family="monospace">Pa</text>`;
+
+  // ── DIMENSION ANNOTATIONS ──────────────────────────────────────────────────
+  const dimClr='#1d5fa8', dimFnt='font-size="9" font-family="monospace" fill="'+dimClr+'" text-anchor="middle"';
+  const tickH=4;
+
+  // Helper: horizontal dim line
+  function hdim(x1,x2,y,label){
+    const cy=y-12;
+    s+=`<line x1="${x1}" y1="${cy}" x2="${x2}" y2="${cy}" stroke="${dimClr}" stroke-width="0.8"/>`;
+    s+=`<line x1="${x1}" y1="${cy-tickH}" x2="${x1}" y2="${cy+tickH}" stroke="${dimClr}" stroke-width="0.8"/>`;
+    s+=`<line x1="${x2}" y1="${cy-tickH}" x2="${x2}" y2="${cy+tickH}" stroke="${dimClr}" stroke-width="0.8"/>`;
+    s+=`<text x="${(x1+x2)/2}" y="${cy-4}" ${dimFnt}>${label}</text>`;
+  }
+  // Helper: vertical dim line (left side)
+  function vdim(x,y1,y2,label){
+    const cx=x-10;
+    s+=`<line x1="${cx}" y1="${y1}" x2="${cx}" y2="${y2}" stroke="${dimClr}" stroke-width="0.8"/>`;
+    s+=`<line x1="${cx-tickH}" y1="${y1}" x2="${cx+tickH}" y2="${y1}" stroke="${dimClr}" stroke-width="0.8"/>`;
+    s+=`<line x1="${cx-tickH}" y1="${y2}" x2="${cx+tickH}" y2="${y2}" stroke="${dimClr}" stroke-width="0.8"/>`;
+    s+=`<text x="${cx-6}" y="${(y1+y2)/2+3}" font-size="9" font-family="monospace" fill="${dimClr}" text-anchor="end">${label}</text>`;
+  }
+
+  // Horizontal dims along bottom of drawing
+  const dimBaseY = SY - MB + 14;
+  hdim(px(0), px(Btoe), dimBaseY, `Btoe`);
+  hdim(px(Btoe), px(Btoe+Ts), dimBaseY, `Ts`);
+  hdim(px(Btoe+Ts), px(B), dimBaseY, `Bheel`);
+
+  // Vertical dims on left
+  vdim(px(0), py(H+yAbove*0.3), py(Tf+Hs), `Hs=${f1(Hs)}ft`);
+  vdim(px(0), py(Tf+Hs), py(Tf), `Tf`);
+  vdim(px(0)-26, py(Tf), py(0), `Df=${f1(Demb)}ft`);
+  if(useKey&&Dkey>0) vdim(px(0)-40, py(0), py(-Dkey), `Dkey`);
+
+  // H label (total height) on right
+  s+=`<line x1="${px(B)+14}" y1="${py(H)}" x2="${px(B)+14}" y2="${py(0)}" stroke="${dimClr}" stroke-width="0.8"/>`;
+  s+=`<line x1="${px(B)+10}" y1="${py(H)}" x2="${px(B)+18}" y2="${py(H)}" stroke="${dimClr}" stroke-width="0.8"/>`;
+  s+=`<line x1="${px(B)+10}" y1="${py(0)}" x2="${px(B)+18}" y2="${py(0)}" stroke="${dimClr}" stroke-width="0.8"/>`;
+  s+=`<text x="${px(B)+22}" y="${(py(H)+py(0))/2+3}" font-size="9" font-family="monospace" fill="${dimClr}">H=${f1(H)}ft</text>`;
+
+  // Front grade label
+  s+=`<text x="${px(-fExt*0.5)}" y="${frontGradeY-5}" font-size="8" font-family="sans-serif" fill="#5a4a2a" text-anchor="middle">Front grade</text>`;
+
+  // Beta label if nonzero
+  if(beta>0){
+    s+=`<text x="${px(backFillX+bExt*0.5)}" y="${py(Tf+backFillH)-8}" font-size="9" font-family="monospace" fill="${cSoilStroke}" text-anchor="middle">&beta;=${beta}&deg;</text>`;
+  }
+
+  document.getElementById('wall-svg').innerHTML=s;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AUTOSAVE / JSON
+// ══════════════════════════════════════════════════════════════════════════════
+const LS_KEY='rwStability_v1';
+function autosave(){
+  markDirty();
+  const data={_mode:'rw'};
+  document.querySelectorAll('[id^="inp-"],[id^="pi-"],[id^="sel-"],[id^="cb-"]').forEach(el=>{
+    data[el.id]=el.type==='checkbox'?el.checked:el.value;
+  });
+  try{localStorage.setItem(LS_KEY,JSON.stringify(data));}catch(e){}
+}
+function loadAutosave(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw)return;
+    const data=JSON.parse(raw);
+    Object.entries(data).forEach(([k,v])=>{
+      if(k.startsWith('_'))return;
+      const el=document.getElementById(k);
+      if(!el)return;
+      if(el.type==='checkbox')el.checked=v;
+      else el.value=v;
+    });
+    if(data['cb-key'])document.getElementById('key-opts').style.display='';
+    if(data['cb-surcharge'])document.getElementById('surcharge-opts').style.display='';
+    compute();
+  }catch(e){}
+}
+function saveJSON(){
+  const data={_tool:'rw-stability-v1',_saved:new Date().toISOString(),schemaVersion:1};
+  document.querySelectorAll('[id^="inp-"],[id^="pi-"],[id^="sel-"],[id^="cb-"]').forEach(el=>{
+    data[el.id]=el.type==='checkbox'?el.checked:el.value;
+  });
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`rw-stability-${(document.getElementById('pi-proj').value||'calc').replace(/\s+/g,'-')}.json`;
+  a.click();
+  isDirty = false;
+}
+function loadJSON(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      const fv=data.schemaVersion||0;
+      if(fv>1){alert('This file was saved by a newer version of this tool and cannot be loaded.');return;}
+      Object.entries(data).forEach(([k,v])=>{
+        if(k.startsWith('_')||k==='schemaVersion')return;
+        const el=document.getElementById(k);if(!el)return;
+        if(el.type==='checkbox')el.checked=v;else el.value=v;
+      });
+      if(data['cb-key'])document.getElementById('key-opts').style.display='';
+      if(data['cb-surcharge'])document.getElementById('surcharge-opts').style.display='';
+      compute();
+      isDirty=false;
+    }catch(err){alert('Load failed: '+err.message);}
+  };
+  reader.readAsText(file);event.target.value='';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════════════
+renderSVG(); // draw default schematic immediately
+loadAutosave();
+</script>
+</body>
+</html>
