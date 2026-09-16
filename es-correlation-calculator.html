@@ -25,7 +25,7 @@
   .breadcrumb{padding:6px 24px;font-size:11px;font-family:var(--mono);color:var(--muted);background:#fff;border-bottom:1px solid var(--border)}.breadcrumb a{color:var(--blue2);text-decoration:none}.breadcrumb a:hover{text-decoration:underline}
   .header-inner{max-width:1320px;margin:0 auto;padding:18px 24px 14px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
   .header h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
-  .header h1 span{color:#6db3f5}
+  .header h1 span{color:#008768}
   .header-sub{font-size:10.5px;color:#7a9fc0;margin-top:3px;font-family:var(--mono)}
   .header-tag{font-family:var(--mono);font-size:10px;color:#5a8ab0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:3px 8px;border-radius:2px;white-space:nowrap}
 
@@ -60,7 +60,7 @@
   /* ── NOTES ── */
   .note-box{font-size:11.5px;color:var(--muted);background:#f4f8fc;border-left:3px solid var(--steel);padding:8px 12px;margin-bottom:14px;line-height:1.6}
   .note-box strong{color:var(--text)}
-  .formula-bar{display:flex;gap:16px;flex-wrap:wrap;padding:10px 14px;background:var(--navy);border-radius:3px;font-family:var(--mono);font-size:10.5px;color:#6db3f5}
+  .formula-bar{display:flex;gap:16px;flex-wrap:wrap;padding:10px 14px;background:var(--navy);border-radius:3px;font-family:var(--mono);font-size:10.5px;color:#008768}
   .formula-bar span{white-space:nowrap}
   .formula-bar em{color:#a0c8f0;font-style:normal}
   .tbl-note{font-size:10.5px;color:var(--muted);margin-top:10px;padding:6px 10px;background:#f5f7fa;border-left:2px solid var(--border);line-height:1.6}
@@ -124,7 +124,7 @@
   .ca-beg   {background:var(--gg2);color:var(--gg);font-weight:600}
   .ca-usace {background:var(--gu2);color:var(--gu);font-weight:600}
   .cell-dim{color:#b8cad4;font-weight:400}.cell-na{color:#ccd8e0;font-weight:400}
-  .cell-range{background:var(--navy);color:#6db3f5;font-weight:700;font-size:10px;text-align:center!important;white-space:normal!important;line-height:1.5;min-width:72px}
+  .cell-range{background:var(--navy);color:#008768;font-weight:700;font-size:10px;text-align:center!important;white-space:normal!important;line-height:1.5;min-width:72px}
   .row-sum td{background:#f0f4f8;font-style:italic;font-size:10.5px;font-family:var(--mono)}
   .row-sum td.left{font-style:normal;font-weight:700;font-family:var(--sans);font-size:11px}
 
@@ -895,7 +895,7 @@ function buildResTable(rows, vis) {
   let h = '<table class="res-tbl"><thead><tr>';
   fixH.forEach(f => h+=`<th rowspan="3" class="${f.cls}" style="min-width:${f.w}px;background:#dce8f4;color:var(--navy)">${f.l}</th>`);
   groups.forEach(({g,span}) => h+=`<th colspan="${span}" class="${GRP[g].gh}">${GRP[g].label}</th>`);
-  h+=`<th rowspan="3" style="background:var(--navy);color:#6db3f5;min-width:72px">App.<br>Range (ksf)</th></tr><tr>`;
+  h+=`<th rowspan="3" style="background:var(--navy);color:#008768;min-width:72px">App.<br>Range (ksf)</th></tr><tr>`;
   vis.forEach(c => h+=`<th class="${GRP[c.g].sh}" style="min-width:56px;font-size:9px;line-height:1.3" title="${c.id}: ${c.short}&#10;${c.note}">${c.id}<br><span style="font-weight:400;font-size:8px">${c.note}</span></th>`);
   h+='</tr><tr>';
   vis.forEach(c => h+=`<th class="${GRP[c.g].sh}" style="font-size:8px;font-weight:500;font-style:italic;padding:2px 3px">${c.ntype}</th>`);
